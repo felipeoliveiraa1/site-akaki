@@ -1,0 +1,46 @@
+---
+const shots = [
+  { img: '/assets/clinic-04.webp', alt: 'Recepção da Akaki com balcão de ônix dourado iluminado', w: 1000, h: 667 },
+  { img: '/assets/clinic-01.webp', alt: 'Corredor de madeira da clínica Akaki', w: 1000, h: 750 },
+  { img: '/assets/clinic-05.webp', alt: 'Sala de atendimento com parede viva', w: 1000, h: 667 },
+  { img: '/assets/clinic-03.webp', alt: 'Ambiente biofílico com madeira e vidro', w: 1000, h: 750 },
+  { img: '/assets/clinic-07.webp', alt: 'Detalhe da clínica Akaki', w: 1000, h: 667 },
+  { img: '/assets/clinic-06.webp', alt: 'Sala moderna da clínica Akaki', w: 1000, h: 750 },
+];
+---
+<section id="clinic-gallery" class="section gal band-cream-deep cv-auto">
+  <div class="container">
+    <header class="gal__head">
+      <p class="eyebrow reveal">A Clínica</p>
+      <h2 class="h2 reveal" style="--d:80ms">Luxo silencioso que <em>respira</em>.</h2>
+      <p class="lead muted reveal" style="--d:160ms">Paredes vivas. Madeira. Ônix dourado iluminado. Cada detalhe pensado para acalmar.</p>
+    </header>
+
+    <div class="gal__grid">
+      {shots.map((s, idx) => (
+        <figure class={`gal__item reveal ${idx === 0 ? 'gal__item--lead' : ''}`} style={`--d:${idx * 70}ms`}>
+          <img src={s.img} alt={s.alt} width={s.w} height={s.h} loading="lazy" decoding="async" />
+        </figure>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .gal { position: relative; }
+  .gal__head { max-width: 34ch; margin-bottom: clamp(36px, 5vh, 60px); }
+  .gal__head .h2 { margin: 16px 0 18px; }
+
+  .gal__grid { columns: 3; column-gap: clamp(14px, 1.6vw, 22px); }
+  .gal__item {
+    break-inside: avoid; margin: 0 0 clamp(14px, 1.6vw, 22px);
+    overflow: hidden; border-radius: 20px;
+    box-shadow: 0 22px 50px -34px rgba(24,39,60,0.55);
+  }
+  .gal__item img { width: 100%; height: auto; display: block; transition: transform 800ms var(--silk), filter 800ms var(--silk); }
+  .gal__item--lead { border-radius: 120px 28px 120px 28px; }
+  @media (hover: hover) { .gal__item:hover img { transform: scale(1.05); } }
+
+  @media (max-width: 900px) { .gal__grid { columns: 2; } }
+  @media (max-width: 560px) { .gal__grid { columns: 1; max-width: 460px; margin-inline: auto; } .gal__item--lead { border-radius: 80px 22px 80px 22px; } }
+</style>

@@ -1,0 +1,433 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { services, google } from '../data/services.js';
+
+export function getStaticPaths() {
+  return services.map((s) => ({ params: { slug: s.slug }, props: { service: s } }));
+}
+const { service: s } = Astro.props;
+const WPP = 'https://api.whatsapp.com/send?phone=5511947024607';
+const pageTitle = `${s.name} · Akaki Odontologia`;
+const pageDesc = s.hero.sub;
+
+const ICONS = {
+  cut: '<circle cx="6.5" cy="7" r="2.2"/><circle cx="6.5" cy="17" r="2.2"/><path d="M8.4 8.1l11 7.9M8.4 15.9l11-7.9"/>',
+  clock: '<circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12l3.4 2"/>',
+  bite: '<path d="M12 7.2c1.4-2 4.8-2.6 6 .4 1.1 2.9-.8 8-2.9 9.7-1 .8-2.2.8-3.1 0-2.1-1.7-4-6.8-2.9-9.7 1.2-3 4.5-2.4 5.9-.4z"/><path d="M12 7.2c-.1-2 .6-3.6 2.2-4.6"/>',
+  smile: '<circle cx="12" cy="12" r="8.4"/><path d="M8.4 14c1 1.4 2.2 2 3.6 2s2.6-.6 3.6-2"/><circle cx="9.2" cy="10" r="0.7" fill="currentColor" stroke="none"/><circle cx="14.8" cy="10" r="0.7" fill="currentColor" stroke="none"/>',
+  shield: '<path d="M12 3l7 3v5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="M9 12l2 2 4-4.2"/>',
+  heart: '<path d="M12 20s-7-4.3-7-9.3a4 4 0 0 1 7-2.6 4 4 0 0 1 7 2.6c0 5-7 9.3-7 9.3z"/>',
+  ring: '<circle cx="12" cy="12" r="7.6"/><circle cx="12" cy="12" r="3"/>',
+  grid: '<rect x="4" y="4" width="6.8" height="6.8" rx="1.6"/><rect x="13.2" y="4" width="6.8" height="6.8" rx="1.6"/><rect x="4" y="13.2" width="6.8" height="6.8" rx="1.6"/><rect x="13.2" y="13.2" width="6.8" height="6.8" rx="1.6"/>',
+  crown: '<path d="M4 8.5l4 3 4-6 4 6 4-3-1.6 10.5H5.6z"/>',
+  sparkle: '<path d="M12 3l2.1 5.4 5.4 2.1-5.4 2.1L12 18l-2.1-5.4L4.5 10.5l5.4-2.1z"/>',
+  tech: '<rect x="3.5" y="5" width="17" height="11" rx="2"/><path d="M9 20h6M12 16v4"/>',
+  child: '<circle cx="12" cy="7.5" r="3"/><path d="M5.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/>',
+};
+const badges = ['CRO-SP 45717', 'EPAO CRO-SP 031012', 'Cirurgia Guiada', 'Atendimento humanizado'];
+const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
+---
+<Layout title={pageTitle} description={pageDesc}>
+  <Header />
+  <main class="lp" data-slug={s.slug} data-service={s.name}>
+
+    <!-- HERO -->
+    <section class="lp-hero">
+      <div class="lp-hero__bg" aria-hidden="true"><img src={s.hero.image} alt="" width="1000" height="750" fetchpriority="high" decoding="async" /></div>
+      <div class="lp-hero__veil" aria-hidden="true"></div>
+      <div class="container lp-hero__grid">
+        <div class="lp-hero__text">
+          <p class="eyebrow">{s.hero.eyebrow}</p>
+          <h1 class="display lp-hero__h1" set:html={s.hero.h1}></h1>
+          <p class="lead lp-hero__sub">{s.hero.sub}</p>
+          <p class="lp-urgency"><span class="lp-urgency__dot"></span>{s.hero.urgency}</p>
+          <a class="btn btn--gold lp-hero__cta" data-wpp={`servico-${s.slug}-hero`} href={WPP} target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true" set:html={arrow} /> Agendar minha consulta
+          </a>
+        </div>
+
+        <form class="lp-form" id="lp-form">
+          <p class="lp-form__title">Agende sua consulta</p>
+          <input class="lp-form__in" type="text" name="nome" placeholder="Seu nome" autocomplete="name" required />
+          <input class="lp-form__in" type="tel" name="telefone" placeholder="Telefone / WhatsApp" autocomplete="tel" required />
+          <button class="btn btn--gold lp-form__btn" type="submit">Quero agendar minha consulta</button>
+          <p class="lp-form__note">Nossa equipe entra em contato para confirmar sua data e tirar suas dúvidas.</p>
+        </form>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="lp-stats arc-top">
+      <div class="container lp-stats__grid">
+        {s.stats.map((st, i) => (
+          <div class={`lp-stat reveal ${i ? 'lp-stat--div' : ''}`} style={`--d:${i * 70}ms`}>
+            <span class="lp-stat__n">{st.n}</span><span class="lp-stat__l">{st.l}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- DIFERENCIAIS -->
+    <section class="section lp-dif">
+      <div class="container">
+        <header class="lp-head">
+          <p class="eyebrow eyebrow--center reveal">{s.difEyebrow}</p>
+          <h2 class="h2 reveal" style="--d:80ms">{s.difTitle}</h2>
+        </header>
+        <div class="lp-dif__grid">
+          {s.diferenciais.map((d, i) => (
+            <article class="lp-card reveal" style={`--d:${i * 90}ms`}>
+              <span class="lp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={ICONS[d.icon] || ICONS.smile} /></span>
+              <h3 class="lp-card__t">{d.t}</h3>
+              <p class="lp-card__d">{d.d}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ESPECIALISTA -->
+    <section class="section lp-spec band-cream-deep">
+      <div class="container lp-spec__grid">
+        <figure class="lp-spec__media reveal">
+          <div class="frame-arc"><img src="/assets/dr-akaki.webp" alt="Dr. Luiz Akaki, especialista da Akaki Odontologia" width="640" height="664" loading="lazy" decoding="async" /></div>
+        </figure>
+        <div class="lp-spec__text">
+          <p class="eyebrow reveal">Conheça o especialista</p>
+          <h2 class="h2 reveal" style="--d:80ms">Dr. Luiz <em>Akaki</em></h2>
+          <p class="lp-spec__role reveal" style="--d:140ms">CRO-SP 45717 · Especialista em Odontologia</p>
+          <p class="lead lp-spec__bio reveal" style="--d:200ms">Com mais de 15 anos de experiência, o Dr. Luiz Akaki foi pioneiro em trazer técnicas de ponta da Alemanha e dos EUA para o Brasil. Atendimento humanizado, tecnologia de referência e resultados previsíveis.</p>
+          <div class="lp-spec__badges reveal" style="--d:260ms">{badges.map((b) => <span class="lp-badge">{b}</span>)}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEPOIMENTOS -->
+    <section class="section lp-revs">
+      <div class="container">
+        <header class="lp-head">
+          <p class="eyebrow eyebrow--center reveal">Resultados</p>
+          <h2 class="h2 reveal" style="--d:80ms">O que nossos pacientes <em>dizem</em></h2>
+        </header>
+        <div class="lp-google reveal">
+          <span class="lp-google__g">G</span>
+          <span class="lp-google__r">{google.rating}</span>
+          <span class="lp-google__stars" aria-hidden="true">★★★★★</span>
+          <span class="lp-google__c">Baseado em {google.count} avaliações no Google</span>
+        </div>
+        <div class="lp-revs__grid">
+          {s.testimonials.map((t, i) => (
+            <figure class="lp-rev reveal" style={`--d:${i * 90}ms`}>
+              <span class="lp-rev__stars" aria-hidden="true">★★★★★</span>
+              <blockquote class="lp-rev__q">“{t.q}”</blockquote>
+              <figcaption class="lp-rev__by"><span class="lp-rev__av" aria-hidden="true">{t.n.slice(0,1)}</span><span><span class="lp-rev__n">{t.n}</span><span class="lp-rev__l">{t.loc}</span></span></figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- CASOS -->
+    <section class="section--tight lp-cases">
+      <div class="container">
+        <p class="eyebrow eyebrow--center reveal">Casos clínicos</p>
+        <div class="lp-cases__grid">
+          {s.cases.map((c, i) => (
+            <figure class="lp-case reveal" style={`--d:${i * 80}ms`}>
+              <div class="lp-case__ba"><span class="lp-case__antes">Antes</span><span class="lp-case__depois">Depois</span></div>
+              <figcaption class="lp-case__cap"><span class="lp-case__t">{c.t}</span><span class="lp-case__d">{c.d}</span></figcaption>
+            </figure>
+          ))}
+        </div>
+        <p class="lp-cases__note reveal">Imagens ilustrativas — casos reais apresentados na consulta de avaliação.</p>
+      </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section class="section lp-steps band-dark arc-top">
+      <div class="container">
+        <header class="lp-head">
+          <p class="eyebrow eyebrow--center reveal">{s.stepsEyebrow}</p>
+          <h2 class="h2 reveal" style="--d:80ms">{s.stepsTitle}</h2>
+          <p class="lead reveal lp-steps__sub" style="--d:140ms">{s.stepsSub}</p>
+        </header>
+        <div class="lp-steps__grid">
+          {s.steps.map((st, i) => (
+            <div class="lp-step reveal" style={`--d:${i * 110}ms`}>
+              <span class="lp-step__n">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="lp-step__t">{st.t}</h3>
+              <p class="lp-step__d">{st.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- TIPOS -->
+    <section class="section lp-types arc-top">
+      <div class="container">
+        <header class="lp-head">
+          <p class="eyebrow eyebrow--center reveal">{s.typesEyebrow}</p>
+          <h2 class="h2 reveal" style="--d:80ms">{s.typesTitle}</h2>
+        </header>
+        <div class="lp-types__grid">
+          {s.types.map((t, i) => (
+            <article class="lp-type reveal" style={`--d:${i * 90}ms`}>
+              <span class="lp-ic lp-ic--ring" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={ICONS[t.icon] || ICONS.ring} /></span>
+              <h3 class="lp-type__t">{t.t}</h3>
+              <p class="lp-type__d">{t.d}</p>
+              <a class="lp-type__cta" data-wpp={`servico-${s.slug}-tipo`} href={WPP} target="_blank" rel="noopener noreferrer">Agendar consulta <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16L16 8"/><path d="M9 8h7v7"/></svg></a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPARATIVO -->
+    <section class="section lp-cmp">
+      <div class="container">
+        <header class="lp-head">
+          <p class="eyebrow eyebrow--center reveal">{s.compare.eyebrow}</p>
+          <h2 class="h2 reveal" style="--d:80ms">{s.compare.title}</h2>
+        </header>
+        <div class="lp-cmp__grid reveal">
+          <div class="lp-cmp__col lp-cmp__col--bad">
+            <div class="lp-cmp__top"><span class="lp-cmp__h">{s.compare.leftTitle}</span><span class="lp-cmp__tag">{s.compare.leftTag}</span></div>
+            <p class="lp-cmp__sub">{s.compare.leftSub}</p>
+            <ul>{s.compare.left.map((it) => (<li><span class="lp-cmp__x" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg></span><span><strong>{it.t}</strong>{it.d}</span></li>))}</ul>
+          </div>
+          <div class="lp-cmp__col lp-cmp__col--good">
+            <div class="lp-cmp__top"><span class="lp-cmp__h">{s.compare.rightTitle}</span><span class="lp-cmp__tag lp-cmp__tag--gold">{s.compare.rightTag}</span></div>
+            <p class="lp-cmp__sub">{s.compare.rightSub}</p>
+            <ul>{s.compare.right.map((it) => (<li><span class="lp-cmp__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span><span><strong>{it.t}</strong>{it.d}</span></li>))}</ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section lp-faq band-cream-deep">
+      <div class="container lp-faq__wrap">
+        <header class="lp-head">
+          <p class="eyebrow eyebrow--center reveal">Dúvidas frequentes</p>
+          <h2 class="h2 reveal" style="--d:80ms">Perguntas frequentes</h2>
+        </header>
+        <div class="lp-faq__list">
+          {s.faq.map((f, i) => (
+            <details class="lp-faq__item reveal" style={`--d:${i * 60}ms`}>
+              <summary>{f.q}<span class="lp-faq__plus" aria-hidden="true"></span></summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="lp-final band-dark arc-top">
+      <div class="container lp-final__inner">
+        <p class="eyebrow eyebrow--center reveal">Próximo passo</p>
+        <h2 class="display lp-final__h reveal" style="--d:80ms">Agende sua consulta de <em>avaliação</em>.</h2>
+        <p class="lead reveal lp-final__sub" style="--d:140ms">Nossa equipe entra em contato para confirmar sua data e tirar suas dúvidas.</p>
+        <div class="lp-final__cta reveal" style="--d:200ms">
+          <a class="btn btn--gold" data-wpp={`servico-${s.slug}-final`} href={WPP} target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true" set:html={arrow} /> Quero agendar minha consulta
+          </a>
+          <a class="btn btn--light" href="/#localizacao">Falar com a clínica</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  /* HERO — cinematic, treated photo + veil */
+  .lp-hero { position: relative; overflow: hidden; background: var(--cinema-black); color: var(--white-text); padding: calc(var(--nav-h) + clamp(40px, 8vh, 92px)) 0 clamp(54px, 9vh, 100px); isolation: isolate; }
+  .lp-hero__bg { position: absolute; inset: 0; z-index: 0; }
+  .lp-hero__bg img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.42) saturate(0.82) blur(3px); transform: scale(1.08); animation: kenburns 24000ms var(--breath) infinite alternate; }
+  .lp-hero__veil { position: absolute; inset: 0; z-index: 1; background: radial-gradient(120% 100% at 25% 35%, rgba(11,14,19,0.3) 0%, rgba(11,14,19,0.72) 70%, rgba(11,14,19,0.88) 100%), linear-gradient(180deg, rgba(11,14,19,0.7) 0%, rgba(11,14,19,0.45) 50%, rgba(11,14,19,0.92) 100%); }
+  .lp-hero__grid { position: relative; z-index: 2; display: grid; grid-template-columns: 1.3fr 0.7fr; gap: clamp(32px, 4.5vw, 72px); align-items: center; }
+  .lp-hero .eyebrow { color: var(--gold-light); }
+  .lp-hero__h1 { color: var(--white-text); font-size: clamp(34px, 5.2vw, 60px); margin: 18px 0 20px; max-width: 16ch; }
+  .lp-hero__h1 em { color: var(--gold-light); font-style: italic; }
+  .lp-hero__sub { color: rgba(245,240,232,0.82); max-width: 50ch; }
+  .lp-urgency { display: inline-flex; align-items: center; gap: 10px; margin: 26px 0 28px; padding: 13px 18px; border: 1px solid rgba(211,164,108,0.4); border-radius: 12px; background: rgba(211,164,108,0.08); font-size: 13px; color: rgba(245,240,232,0.9); }
+  .lp-urgency__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex: 0 0 auto; animation: pulse 2.4s var(--breath) infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(211,164,108,0.5); } 50% { box-shadow: 0 0 0 7px rgba(211,164,108,0); } }
+  .lp-hero__cta svg { width: 16px; height: 16px; }
+
+  .lp-form { background: rgba(11,14,19,0.55); border: 1px solid rgba(211,164,108,0.3); border-radius: 20px; padding: clamp(24px, 2.6vw, 34px); display: flex; flex-direction: column; gap: 13px; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 30px 70px -40px rgba(0,0,0,0.8); }
+  .lp-form__title { font-family: var(--sans); font-weight: 600; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-light); text-align: center; margin-bottom: 4px; }
+  .lp-form__in { width: 100%; padding: 14px 16px; border-radius: 11px; border: 1px solid rgba(244,238,227,0.22); background: rgba(11,14,19,0.4); color: var(--cream); font-family: var(--body); font-size: 14.5px; }
+  .lp-form__in::placeholder { color: rgba(245,240,232,0.45); }
+  .lp-form__btn { width: 100%; justify-content: center; margin-top: 4px; }
+  .lp-form__note { font-size: 11.5px; color: rgba(245,240,232,0.55); text-align: center; line-height: 1.5; }
+
+  /* STATS — cream band, gold serif numbers, hairline dividers */
+  .lp-stats { background: var(--cream); position: relative; z-index: 2; }
+  .lp-stats__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding-block: clamp(34px, 4.6vh, 56px); }
+  .lp-stat { text-align: center; position: relative; }
+  .lp-stat--div::before { content: ""; position: absolute; left: -8px; top: 50%; transform: translateY(-50%); width: 1px; height: 46px; background: rgba(211,164,108,0.4); }
+  .lp-stat__n { display: block; font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(30px, 3.6vw, 50px); color: var(--gold-dark); line-height: 1; letter-spacing: -0.01em; }
+  .lp-stat__l { display: block; font-family: var(--sans); font-weight: 600; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--navy-ghost); margin-top: 10px; }
+
+  .lp-head { text-align: center; max-width: 34ch; margin: 0 auto clamp(38px, 5.4vh, 62px); }
+  .lp-head .h2 { margin-top: 14px; }
+  .lp-head .h2 em { font-style: italic; color: var(--gold-dark); }
+  .lp-head .lead { margin-top: 16px; }
+
+  /* premium translucent cards */
+  .lp-dif { background: var(--cream); }
+  .lp-dif__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 1.8vw, 24px); }
+  .lp-card { background: rgba(255,255,255,0.45); border: 1px solid rgba(24,39,60,0.1); border-radius: 20px; padding: clamp(26px, 2.8vw, 36px); text-align: center; transition: transform 340ms var(--silk), box-shadow 340ms var(--silk), border-color 340ms var(--silk); }
+  .lp-ic { display: inline-grid; place-items: center; width: 50px; height: 50px; color: var(--gold-dark); margin-bottom: 18px; }
+  .lp-ic svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .lp-ic--ring { border: 1.5px solid rgba(211,164,108,0.45); border-radius: 50%; }
+  .lp-card__t { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(18px, 1.9vw, 22px); color: var(--navy); margin-bottom: 10px; letter-spacing: -0.01em; }
+  .lp-card__d { font-family: var(--body); font-size: 13.5px; line-height: 1.62; color: var(--navy-soft); }
+  @media (hover: hover) { .lp-card:hover { transform: translateY(-5px); box-shadow: 0 26px 50px -30px rgba(24,39,60,0.42); border-color: rgba(211,164,108,0.4); } }
+
+  /* ESPECIALISTA — photo + text */
+  .lp-spec__grid { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+  .lp-spec__media .frame-arc { aspect-ratio: 4 / 5; box-shadow: 0 30px 70px -34px rgba(24,39,60,0.5); }
+  .lp-spec__text .h2 { margin: 14px 0 0; }
+  .lp-spec__text .h2 em { font-style: italic; color: var(--gold-dark); }
+  .lp-spec__role { font-family: var(--sans); font-weight: 600; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-dark); margin: 12px 0 16px; }
+  .lp-spec__bio { color: var(--navy-soft); max-width: 52ch; }
+  .lp-spec__badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .lp-badge { font-family: var(--sans); font-weight: 600; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--navy-soft); border: 1px solid rgba(24,39,60,0.18); border-radius: 999px; padding: 6px 12px; }
+
+  /* DEPOIMENTOS */
+  .lp-revs { background: var(--cream); }
+  .lp-google { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto clamp(30px, 4vh, 46px); padding: 13px 22px; width: fit-content; background: rgba(255,255,255,0.6); border: 1px solid rgba(24,39,60,0.1); border-radius: 14px; box-shadow: 0 16px 36px -28px rgba(24,39,60,0.4); }
+  .lp-google__g { font-family: var(--serif); font-weight: 700; font-size: 22px; color: #4285f4; }
+  .lp-google__r { font-family: var(--sans); font-weight: 600; font-size: 18px; color: var(--navy); }
+  .lp-google__stars { color: #d8a23a; letter-spacing: 2px; font-size: 15px; }
+  .lp-google__c { font-size: 12px; color: var(--navy-ghost); }
+  .lp-revs__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 24px); }
+  .lp-rev { background: rgba(255,255,255,0.5); border: 1px solid rgba(24,39,60,0.08); border-radius: 20px; padding: clamp(24px, 2.6vw, 32px); }
+  .lp-rev__stars { color: #d8a23a; letter-spacing: 2px; font-size: 14px; }
+  .lp-rev__q { font-family: var(--serif); font-style: italic; font-variation-settings: 'opsz' 144; font-size: clamp(15px, 1.7vw, 18px); line-height: 1.5; color: var(--navy); margin: 14px 0 18px; }
+  .lp-rev__by { display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(211,164,108,0.28); }
+  .lp-rev__av { width: 38px; height: 38px; border-radius: 50%; background: var(--navy); color: var(--gold-light); display: grid; place-items: center; font-family: var(--sans); font-weight: 600; font-size: 14px; flex: 0 0 auto; }
+  .lp-rev__n { display: block; font-family: var(--sans); font-weight: 600; font-size: 13px; color: var(--navy); }
+  .lp-rev__l { display: block; font-size: 11.5px; color: var(--navy-ghost); }
+
+  /* CASOS */
+  .lp-cases { background: var(--cream); }
+  .lp-cases__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.8vw, 22px); margin-top: clamp(28px, 4vh, 44px); }
+  .lp-case { border-radius: 18px; overflow: hidden; border: 1px solid rgba(24,39,60,0.08); background: rgba(255,255,255,0.5); }
+  .lp-case__ba { display: grid; grid-template-columns: 1fr 1fr; height: 160px; }
+  .lp-case__antes, .lp-case__depois { display: grid; place-items: center; font-family: var(--sans); font-weight: 600; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; }
+  .lp-case__antes { background: var(--cream-shadow); color: var(--navy-ghost); }
+  .lp-case__depois { background: linear-gradient(135deg, var(--navy), var(--cinema-black)); color: var(--gold-light); }
+  .lp-case__cap { display: block; padding: 17px 20px; }
+  .lp-case__t { display: block; font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: 16px; color: var(--navy); }
+  .lp-case__d { display: block; font-size: 12px; color: var(--navy-ghost); margin-top: 3px; }
+  .lp-cases__note { text-align: center; font-size: 11.5px; color: var(--navy-ghost); margin-top: 24px; }
+
+  /* PASSOS */
+  .lp-steps__sub { color: rgba(245,240,232,0.78); }
+  .lp-steps__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(24px, 3vw, 52px); text-align: center; }
+  .lp-step__n { display: inline-grid; place-items: center; width: 60px; height: 60px; border-radius: 50%; border: 1px solid rgba(211,164,108,0.45); color: var(--gold-light); font-family: var(--serif); font-weight: 400; font-size: 20px; margin-bottom: 20px; }
+  .lp-step__t { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(19px, 2vw, 24px); color: var(--white-text); margin-bottom: 10px; }
+  .lp-step__d { font-family: var(--body); font-size: 14px; line-height: 1.6; color: rgba(245,240,232,0.74); max-width: 34ch; margin-inline: auto; }
+
+  /* TIPOS */
+  .lp-types { background: var(--cream); }
+  .lp-types__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 24px); }
+  .lp-type { background: rgba(255,255,255,0.5); border: 1px solid rgba(24,39,60,0.1); border-radius: 20px; padding: clamp(26px, 2.8vw, 38px); text-align: center; transition: transform 340ms var(--silk), box-shadow 340ms var(--silk); }
+  .lp-type__t { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(20px, 2.1vw, 25px); color: var(--navy); margin: 8px 0 10px; }
+  .lp-type__d { font-family: var(--body); font-size: 13.5px; line-height: 1.6; color: var(--navy-soft); margin-bottom: 20px; }
+  .lp-type__cta { display: inline-flex; align-items: center; gap: 8px; font-family: var(--sans); font-weight: 600; font-size: 12px; letter-spacing: 0.04em; color: var(--gold-dark); transition: gap 280ms var(--silk); }
+  .lp-type__cta svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  @media (hover: hover) { .lp-type:hover { transform: translateY(-5px); box-shadow: 0 26px 50px -30px rgba(24,39,60,0.42); } .lp-type:hover .lp-type__cta { gap: 12px; } }
+
+  /* COMPARATIVO */
+  .lp-cmp { background: var(--cream); }
+  .lp-cmp__grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 1.6vw, 20px); max-width: 1000px; margin: 0 auto; }
+  .lp-cmp__col { border-radius: 20px; padding: clamp(26px, 2.8vw, 38px); }
+  .lp-cmp__col--bad { background: rgba(255,255,255,0.5); border: 1px solid rgba(24,39,60,0.1); }
+  .lp-cmp__col--good { background: linear-gradient(155deg, #1d2c3f, var(--navy) 55%, var(--cinema-black)); color: var(--cream); box-shadow: 0 30px 70px -40px rgba(11,14,19,0.6); }
+  .lp-cmp__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .lp-cmp__h { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(16px, 1.7vw, 20px); }
+  .lp-cmp__col--bad .lp-cmp__h { color: var(--navy); }
+  .lp-cmp__col--good .lp-cmp__h { color: var(--gold-light); }
+  .lp-cmp__tag { font-family: var(--sans); font-weight: 600; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; background: rgba(24,39,60,0.08); color: var(--navy-ghost); }
+  .lp-cmp__tag--gold { background: var(--brass); color: var(--cinema-black); }
+  .lp-cmp__sub { font-size: 12.5px; margin: 6px 0 22px; opacity: 0.7; }
+  .lp-cmp__col ul { list-style: none; display: grid; gap: 17px; }
+  .lp-cmp__col li { display: flex; gap: 12px; }
+  .lp-cmp__col li strong { display: block; font-family: var(--sans); font-weight: 600; font-size: 13.5px; margin-bottom: 3px; }
+  .lp-cmp__col--bad li span:last-child { color: var(--navy-soft); font-size: 12.5px; line-height: 1.5; }
+  .lp-cmp__col--bad li strong { color: var(--navy); }
+  .lp-cmp__col--good li span:last-child { color: rgba(245,240,232,0.78); font-size: 12.5px; line-height: 1.5; }
+  .lp-cmp__col--good li strong { color: var(--white-text); }
+  .lp-cmp__x, .lp-cmp__check { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; margin-top: 1px; }
+  .lp-cmp__x { background: rgba(150,80,60,0.12); color: #b06a52; }
+  .lp-cmp__check { background: rgba(211,164,108,0.2); color: var(--gold-light); }
+  .lp-cmp__x svg, .lp-cmp__check svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* FAQ */
+  .lp-faq__wrap { max-width: 760px; }
+  .lp-faq__item { border-bottom: 1px solid rgba(24,39,60,0.12); }
+  .lp-faq__item summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 4px; font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(16px, 1.7vw, 19px); color: var(--navy); }
+  .lp-faq__item summary::-webkit-details-marker { display: none; }
+  .lp-faq__plus { position: relative; flex: 0 0 auto; width: 18px; height: 18px; }
+  .lp-faq__plus::before, .lp-faq__plus::after { content: ""; position: absolute; background: var(--gold-dark); transition: transform 300ms var(--silk); }
+  .lp-faq__plus::before { left: 0; top: 8px; width: 18px; height: 2px; }
+  .lp-faq__plus::after { left: 8px; top: 0; width: 2px; height: 18px; }
+  .lp-faq__item[open] .lp-faq__plus::after { transform: scaleY(0); }
+  .lp-faq__item p { padding: 0 4px 24px; font-family: var(--body); font-size: 14px; line-height: 1.65; color: var(--navy-soft); max-width: 64ch; }
+
+  /* CTA FINAL */
+  .lp-final { padding-block: clamp(60px, 9vh, 120px); text-align: center; }
+  .lp-final__h { color: var(--white-text); margin-top: 16px; font-size: clamp(30px, 4.4vw, 52px); }
+  .lp-final__h em { font-style: italic; color: var(--gold-light); }
+  .lp-final__sub { color: rgba(245,240,232,0.8); max-width: 48ch; margin: 18px auto 0; }
+  .lp-final__cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 32px; }
+  .lp-final__cta svg { width: 16px; height: 16px; }
+
+  @media (max-width: 980px) {
+    .lp-hero__grid { grid-template-columns: 1fr; }
+    .lp-form { order: -1; }
+    .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-cases__grid, .lp-steps__grid { grid-template-columns: 1fr 1fr; }
+    .lp-spec__grid { grid-template-columns: 1fr; }
+    .lp-spec__media { max-width: 360px; margin-inline: auto; }
+  }
+  @media (max-width: 620px) {
+    .lp-stats__grid { grid-template-columns: 1fr 1fr; gap: 26px 16px; }
+    .lp-stat--div::before { display: none; }
+    .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-cases__grid, .lp-steps__grid, .lp-cmp__grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  const form = document.getElementById('lp-form');
+  if (form) {
+    const main = document.querySelector('.lp');
+    const serviceName = (main && main.getAttribute('data-service')) || 'avaliação';
+    const slug = (main && main.getAttribute('data-slug')) || '';
+    const getCookie = (n) => { const m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)')); return m ? decodeURIComponent(m[2]) : ''; };
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = new FormData(form as HTMLFormElement);
+      const nome = String(data.get('nome') || '').trim();
+      const tel = String(data.get('telefone') || '').trim();
+      let msg = 'Olá! Quero agendar uma avaliação de ' + serviceName + '.';
+      if (nome) msg += '\nNome: ' + nome;
+      if (tel) msg += '\nTelefone: ' + tel;
+      const parts = [];
+      const src = getCookie('utm_source'), med = getCookie('utm_medium'), camp = getCookie('utm_campaign');
+      if (src) parts.push('Fonte: ' + src);
+      if (med) parts.push('Meio: ' + med);
+      if (camp) parts.push('Campanha: ' + camp);
+      parts.push('Anúncio: ' + slug + '-form');
+      msg += ' [' + parts.join(' | ') + ']';
+      window.open('https://api.whatsapp.com/send?phone=5511947024607&text=' + encodeURIComponent(msg), '_blank');
+    });
+  }
+</script>

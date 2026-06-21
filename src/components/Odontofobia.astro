@@ -1,0 +1,47 @@
+---
+---
+<section id="odontofobia" class="section odo arc-top">
+  <span class="odo__glow" aria-hidden="true"></span>
+  <div class="container odo__inner">
+    <p class="eyebrow eyebrow--center reveal">Sem medo</p>
+    <h2 class="h2 odo__title reveal" style="--d:80ms">O medo de dentista tem nome. E tem <em>solução</em>.</h2>
+    <p class="lead odo__body reveal" style="--d:160ms">
+      Odontofobia é o medo de ir ao dentista — e é mais comum do que se imagina. Na Akaki, ele vem
+      em primeiro lugar. Por isso fomos pioneiros em tratamento com sedação consciente: rápido,
+      seguro e sem dor. Todo o tratamento pode ser feito em um único dia, sempre com total
+      segurança, rapidez e qualidade.
+    </p>
+    <p class="odo__anchor reveal" style="--d:240ms"><span class="ember-on">“Você dorme e acorda com um sorriso novo.”</span></p>
+    <a class="btn btn--light odo__cta reveal" style="--d:320ms" href="#day-clinic">
+      Entenda o Day Clinic
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg>
+    </a>
+  </div>
+</section>
+
+<style>
+  .odo {
+    position: relative; overflow: hidden; text-align: center; z-index: 3;
+    background: linear-gradient(180deg, #16212f 0%, var(--cinema-black) 100%);
+    color: var(--white-text);
+  }
+  .odo__glow {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: min(720px, 90vw); height: min(720px, 90vw); border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(211,164,108,0.14) 0%, rgba(211,164,108,0.05) 40%, transparent 68%);
+    animation: odo-breath 5500ms var(--breath) infinite alternate;
+  }
+  @keyframes odo-breath { from { opacity: 0.7; transform: translate(-50%,-50%) scale(0.96); } to { opacity: 1; transform: translate(-50%,-50%) scale(1.04); } }
+  @media (prefers-reduced-motion: reduce) { .odo__glow { animation: none; } }
+  .odo__inner { position: relative; z-index: 1; max-width: 64ch; margin-inline: auto; }
+  .odo__title { color: var(--white-text); margin: 20px auto 24px; max-width: 22ch; }
+  .odo__title em { color: var(--gold-light); }
+  .odo__body { color: rgba(245,240,232,0.78); margin-inline: auto; max-width: 56ch; }
+  .odo__anchor {
+    margin: 34px auto 30px; font-family: var(--serif); font-style: italic; font-weight: 420;
+    font-variation-settings: 'opsz' 144;
+    font-size: clamp(22px, 3.4vw, 34px); line-height: 1.18; letter-spacing: -0.01em;
+    color: var(--gold-light); max-width: 24ch;
+  }
+  .odo__cta svg { width: 16px; height: 16px; }
+</style>

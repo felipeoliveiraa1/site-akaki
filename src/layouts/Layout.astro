@@ -1,0 +1,169 @@
+---
+import '@fontsource-variable/fraunces/standard.css';
+import '@fontsource-variable/fraunces/standard-italic.css';
+import '@fontsource/montserrat/500.css';
+import '@fontsource/montserrat/600.css';
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '../styles/global.css';
+import Wordmark from '../components/Wordmark.astro';
+
+const {
+  title = 'Akaki Odontologia · Clínica pioneira em odontofobia · Jardim América, SP',
+  description = 'Tratamento odontológico com sedação consciente, em menos tempo e sem medo. Você dorme e acorda com um sorriso novo. Day Clinic, implantes, ortodontia e estética no Jardim América, São Paulo.',
+} = Astro.props;
+const ogImage = new URL('/assets/film-poster.webp', Astro.site).href;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0B0E13" />
+    <meta name="color-scheme" content="light" />
+
+    <style is:inline>html { background: #0B0E13; }</style>
+    <script is:inline>document.documentElement.classList.add('js');</script>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" as="image" href="/assets/hero-poster.webp" fetchpriority="high" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="pt_BR" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- UTM por botão (mesma lógica da bio): origem por CTA via data-wpp / data-site -->
+    <script is:inline>
+      (function () {
+        var WPP = '5511947024607';
+        var BASE = 'Olá, gostaria de agendar uma avaliação na Akaki.';
+        var SITE_URL = 'https://akaki.odo.br';
+        var KEYS = ['utm_source','utm_medium','utm_campaign','utm_term','gclid','fbclid'];
+
+        function setCookie(n, v){ try { document.cookie = n + '=' + encodeURIComponent(v) + '; path=/; max-age=2592000; SameSite=Lax'; } catch (e) {} }
+        function getCookie(n){ var m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)')); return m ? decodeURIComponent(m[2]) : ''; }
+        function lsGet(n){ try { return localStorage.getItem(n) || ''; } catch (e) { return ''; } }
+        function lsSet(n, v){ try { localStorage.setItem(n, v); } catch (e) {} }
+
+        try {
+          var p = new URLSearchParams(location.search);
+          KEYS.forEach(function (k){ var v = p.get(k); if (v) { setCookie(k, v); lsSet(k, v); } });
+        } catch (e) {}
+
+        function val(k){
+          var fromUrl = '';
+          try { fromUrl = new URLSearchParams(location.search).get(k) || ''; } catch (e) {}
+          return fromUrl || getCookie(k) || lsGet(k) || '';
+        }
+        function origemParts(content){
+          var s = val('utm_source'), m = val('utm_medium'), c = val('utm_campaign'), t = val('utm_term'), g = val('gclid');
+          var partes = [];
+          if (s) partes.push('Fonte: ' + s);
+          if (m) partes.push('Meio: ' + m);
+          if (c) partes.push('Campanha: ' + c);
+          if (t) partes.push('Termo: ' + t);
+          if (content) partes.push('Anúncio: ' + content);
+          if (g) partes.push('Google Ads: sim');
+          return partes.length ? ' [' + partes.join(' | ') + ']' : '';
+        }
+        function waUrl(content){
+          return 'https://api.whatsapp.com/send?phone=' + WPP + '&text=' + encodeURIComponent(BASE + origemParts(content));
+        }
+        function siteUrl(content){
+          var qs = [];
+          ['utm_source','utm_medium','utm_campaign'].forEach(function (k){ var v = val(k); if (v) qs.push(k + '=' + encodeURIComponent(v)); });
+          if (content) qs.push('utm_content=' + encodeURIComponent(content));
+          return SITE_URL + (qs.length ? '/?' + qs.join('&') : '/');
+        }
+        function apply(){
+          document.querySelectorAll('[data-wpp]').forEach(function (el){ el.setAttribute('href', waUrl(el.getAttribute('data-wpp'))); });
+          document.querySelectorAll('[data-site]').forEach(function (el){ el.setAttribute('href', siteUrl(el.getAttribute('data-site'))); });
+        }
+        if (document.readyState !== 'loading') apply();
+        else document.addEventListener('DOMContentLoaded', apply);
+        document.addEventListener('click', function (e){
+          var el = e.target && e.target.closest ? e.target.closest('[data-wpp],[data-site]') : null;
+          if (el) apply();
+        }, true);
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="splash" id="splash" aria-hidden="true">
+      <div class="splash__inner">
+        <span class="wordmark splash__word"><Wordmark /><span class="wordmark__shine" aria-hidden="true"></span></span>
+        <span class="splash__tag">Odontologia · Jardins — SP</span>
+      </div>
+    </div>
+
+    <slot />
+
+    <a class="wfab" id="wfab" data-wpp="float-whatsapp" href="https://api.whatsapp.com/send?phone=5511947024607" target="_blank" rel="noopener noreferrer" aria-label="Falar no WhatsApp">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.1 19.7L3 29l6.5-1.8A13 13 0 1 0 16 3zm0 23.6a10.6 10.6 0 0 1-5.4-1.5l-.4-.2-3.9 1 1-3.8-.300-.4A10.6 10.6 0 1 1 16 26.6zm5.9-7.9c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.7 8.7 0 0 1-2.6-1.6 9.6 9.6 0 0 1-1.8-2.2c-.2-.3 0-.5.1-.7l.5-.6.3-.5a.6.6 0 0 0 0-.6c0-.2-.7-1.7-1-2.3s-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.6 3.6 0 0 0-1.1 2.7 6.3 6.3 0 0 0 1.3 3.3 14.4 14.4 0 0 0 5.5 4.9c.8.3 1.4.5 1.9.7a4.5 4.5 0 0 0 2 .1c.6-.1 1.9-.8 2.2-1.5s.3-1.4.2-1.5-.3-.2-.6-.4z"/></svg>
+    </a>
+
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <script is:inline>
+      (function () {
+        var s = document.getElementById('splash');
+        if (!s) return;
+        var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var seen = false; try { seen = !!sessionStorage.getItem('akaki_splash_seen'); } catch (e) {}
+        function done () {
+          if (!s) return;
+          s.classList.add('gone');
+          try { sessionStorage.setItem('akaki_splash_seen', '1'); } catch (e) {}
+          setTimeout(function () { s && s.parentNode && s.parentNode.removeChild(s); }, 700);
+        }
+        if (reduce || seen) { s.parentNode && s.parentNode.removeChild(s); return; }
+        requestAnimationFrame(function () { requestAnimationFrame(function () { s.classList.add('play'); }); });
+        var t = setTimeout(done, 1650);
+        ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (e) {
+          window.addEventListener(e, function () { clearTimeout(t); done(); }, { once: true, passive: true });
+        });
+      })();
+    </script>
+
+    <script>
+      // shared on every page: scroll reveals, header solid-on-scroll, mobile menu, wordmark sweep
+      const reduceM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
+      }, { threshold: 0.16, rootMargin: '0px 0px -8% 0px' });
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+      const header = document.getElementById('site-header');
+      const rootEl = document.documentElement;
+      const onScroll = () => { if (header) header.classList.toggle('is-solid', window.scrollY > 40); };
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      const burger = document.getElementById('nav-burger');
+      if (burger) burger.addEventListener('click', () => {
+        const open = rootEl.classList.toggle('nav-open');
+        burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.querySelectorAll('#primary-nav a').forEach((a) => a.addEventListener('click', () => {
+        rootEl.classList.remove('nav-open');
+        if (burger) burger.setAttribute('aria-expanded', 'false');
+      }));
+
+      const shines = document.querySelectorAll('.wordmark__shine');
+      if (!reduceM && shines.length) {
+        const sweep = () => { if (document.hidden) return; shines.forEach((s) => { s.classList.remove('sweep'); void s.offsetWidth; s.classList.add('sweep'); }); };
+        setTimeout(sweep, 2800);
+        setInterval(() => { if (!document.hidden) sweep(); }, 9000);
+      }
+    </script>
+  </body>
+</html>

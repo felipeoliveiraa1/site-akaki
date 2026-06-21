@@ -1,0 +1,60 @@
+---
+---
+<section id="about" class="section about arc-top">
+  <div class="container about__grid">
+    <div class="about__text">
+      <p class="eyebrow reveal">A Casa</p>
+      <h2 class="h2 reveal" style="--d:80ms">Não é uma clínica. É uma <em>casa</em> que cuida de você.</h2>
+      <p class="lead reveal" style="--d:160ms">
+        Paredes vivas, madeira quente, vidro e luz natural. Na Akaki, a odontologia acontece num
+        ambiente projetado para acalmar — porque cuidar do seu medo vem antes de cuidar do seu sorriso.
+        Aqui você é recebido como hóspede de um lugar pensado para o bem-estar, no coração do
+        Jardim&nbsp;América.
+      </p>
+      <p class="about__sign reveal" style="--d:240ms">Pioneiros em odontofobia · São&nbsp;Paulo</p>
+      <a class="about__link reveal" style="--d:300ms" href="#clinic-gallery">
+        Conheça a clínica
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M6 13l6 6 6-6"/></svg>
+      </a>
+    </div>
+
+    <figure class="about__media reveal" style="--d:140ms">
+      <div class="frame-arc breathe-soft">
+        <img src="/assets/clinic-03.webp" alt="Corredor de madeira da clínica Akaki, com parede viva e luz quente"
+             width="1000" height="750" loading="lazy" decoding="async" />
+      </div>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .about { background: var(--cream); z-index: 2; }
+  .about__grid {
+    display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(32px, 5vw, 72px); align-items: center;
+  }
+  .about__text { max-width: 34rem; }
+  .about__text .h2 { margin: 18px 0 22px; }
+  .about__sign {
+    margin-top: 26px; font-family: var(--sans); font-weight: 600; font-size: 11px;
+    letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-dark);
+  }
+  .about__link {
+    display: inline-flex; align-items: center; gap: 9px; margin-top: 22px;
+    font-family: var(--sans); font-weight: 600; font-size: 12.5px; letter-spacing: 0.06em;
+    color: var(--navy); transition: gap 280ms var(--silk), color 280ms var(--silk);
+  }
+  .about__link svg { width: 16px; height: 16px; fill: none; stroke: var(--gold-dark); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .about__link:hover { color: var(--gold-dark); gap: 14px; }
+
+  .about__media { position: relative; }
+  .about__media .frame-arc { aspect-ratio: 4 / 5; box-shadow: 0 30px 70px -30px rgba(24,39,60,0.5); }
+  .breathe-soft img { animation: photo-breath 5500ms var(--breath) infinite alternate; }
+  @keyframes photo-breath { from { filter: brightness(0.98); } to { filter: brightness(1.03); } }
+
+  @media (max-width: 860px) {
+    .about__grid { grid-template-columns: 1fr; gap: 34px; }
+    .about__media { order: -1; }
+    .about__media .frame-arc { aspect-ratio: 16 / 11; }
+  }
+  @media (prefers-reduced-motion: reduce) { .breathe-soft img { animation: none; } }
+</style>

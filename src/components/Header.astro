@@ -1,0 +1,108 @@
+---
+import Wordmark from './Wordmark.astro';
+const nav = [
+  { href: '/#about', label: 'Sobre' },
+  { href: '/sedacao-odontologica', label: 'Sedação Odontológica' },
+  { href: '/implantes', label: 'Implantes' },
+  { href: '/ortodontia', label: 'Ortodontia' },
+  { href: '/estetica', label: 'Estética' },
+  { href: '/odontopediatria', label: 'Odontopediatria' },
+];
+---
+<header class="hdr" id="site-header">
+  <div class="hdr__inner">
+    <a class="hdr__brand" href="/" aria-label="Akaki Odontologia — início">
+      <span class="wordmark hdr__word" aria-hidden="true"><Wordmark /><span class="wordmark__shine" aria-hidden="true"></span></span>
+    </a>
+
+    <nav class="hdr__nav" id="primary-nav" aria-label="Navegação principal">
+      {nav.map((n) => <a href={n.href}>{n.label}</a>)}
+      <div class="hdr__navfoot">
+        <div class="hdr__social">
+          <a href="https://www.instagram.com/akakiodontologia/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.youtube.com/channel/UCyGQUid86fGgsJoGISGSuGQ" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="4"/><path d="M10.5 9.4l5.2 2.6-5.2 2.6z" fill="currentColor" stroke="none"/></svg>
+          </a>
+        </div>
+        <a class="btn btn--gold hdr__cta hdr__cta--mob" href="/#localizacao">Contato</a>
+      </div>
+    </nav>
+
+    <div class="hdr__right">
+      <div class="hdr__social hdr__social--desk">
+        <a href="https://www.instagram.com/akakiodontologia/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://www.youtube.com/channel/UCyGQUid86fGgsJoGISGSuGQ" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="4"/><path d="M10.5 9.4l5.2 2.6-5.2 2.6z" fill="currentColor" stroke="none"/></svg>
+        </a>
+      </div>
+      <a class="btn btn--gold hdr__cta hdr__cta--desk" href="/#localizacao">Contato</a>
+      <button class="hdr__burger" id="nav-burger" aria-label="Abrir menu" aria-expanded="false" aria-controls="primary-nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .hdr { position: fixed; inset: 0 0 auto 0; z-index: 100; height: var(--nav-h);
+    display: flex; align-items: center;
+    transition: background-color 420ms var(--silk), height 420ms var(--silk), box-shadow 420ms var(--silk), backdrop-filter 420ms var(--silk); }
+  .hdr.is-solid { height: 64px; background: rgba(11,14,19,0.78); -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2); box-shadow: inset 0 -1px 0 rgba(211,164,108,0.18); }
+  .hdr__inner { width: 100%; display: flex; align-items: center; gap: 18px; padding-inline: clamp(18px, 3.4vw, 44px); }
+
+  .hdr__brand { display: inline-flex; align-items: center; gap: 11px; flex: 0 0 auto; }
+  .hdr__leaf { width: 26px; height: 30px; display: grid; place-items: center; }
+  .hdr__leaf :global(svg) { width: 100%; height: 100%; overflow: visible; }
+  .hdr__word { width: clamp(88px, 8vw, 108px); color: var(--gold); }
+
+  .hdr__nav { margin-left: auto; display: flex; align-items: center; gap: clamp(12px, 1.3vw, 22px); }
+  .hdr__nav > a {
+    font-family: var(--sans); font-weight: 600; font-size: 11.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: rgba(245,240,232,0.86); white-space: nowrap; position: relative; padding: 6px 0;
+    transition: color 240ms var(--silk);
+  }
+  .hdr__nav > a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: 0; height: 1px; background: var(--gold); transition: right 300ms var(--silk); }
+  .hdr__nav > a:hover { color: var(--gold-light); }
+  .hdr__nav > a:hover::after { right: 0; }
+  .hdr__navfoot { display: none; }
+
+  .hdr__right { display: flex; align-items: center; gap: 14px; flex: 0 0 auto; }
+  .hdr__social { display: flex; align-items: center; gap: 10px; }
+  .hdr__social a { display: grid; place-items: center; width: 30px; height: 30px; color: rgba(245,240,232,0.82); transition: color 220ms, transform 220ms var(--silk); }
+  .hdr__social svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .hdr__social a:hover { color: var(--gold-light); transform: translateY(-2px); }
+  .hdr__cta { padding: 10px 20px; font-size: 11.5px; }
+  .hdr__cta--mob { display: none; }
+
+  .hdr__burger { display: none; background: none; border: 0; width: 44px; height: 44px; cursor: pointer; padding: 10px; }
+  .hdr__burger span { display: block; height: 1.6px; background: var(--cream); border-radius: 2px; margin: 4px 0; transition: transform 320ms var(--silk), opacity 220ms var(--silk); }
+
+  /* tighten between 1180–1320 */
+  @media (max-width: 1320px) { .hdr__nav > a { font-size: 11px; letter-spacing: 0.05em; } .hdr__nav { gap: 14px; } }
+
+  /* mobile / tablet menu */
+  @media (max-width: 1140px) {
+    .hdr__social--desk, .hdr__cta--desk { display: none; }
+    .hdr__burger { display: block; }
+    .hdr__nav {
+      position: fixed; inset: 0 0 auto 0; top: 0; height: 100svh;
+      flex-direction: column; align-items: flex-start; justify-content: center; gap: 18px;
+      padding: 92px clamp(28px, 8vw, 56px) 48px;
+      background: rgba(11,14,19,0.97); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+      transform: translateY(-100%); opacity: 0; pointer-events: none;
+      transition: transform 520ms var(--silk), opacity 360ms var(--silk);
+      overflow-y: auto;
+    }
+    .hdr__nav > a { font-size: 19px; letter-spacing: 0.04em; font-family: var(--serif); text-transform: none; font-weight: 400; }
+    .hdr__navfoot { display: flex; align-items: center; gap: 18px; margin-top: 14px; }
+    .hdr__cta--mob { display: inline-flex; }
+    :global(.nav-open) .hdr__nav { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    :global(.nav-open) .hdr__burger span:nth-child(1) { transform: translateY(5.6px) rotate(45deg); }
+    :global(.nav-open) .hdr__burger span:nth-child(2) { opacity: 0; }
+    :global(.nav-open) .hdr__burger span:nth-child(3) { transform: translateY(-5.6px) rotate(-45deg); }
+  }
+</style>

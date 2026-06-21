@@ -1,0 +1,99 @@
+---
+const cards = [
+  { t: 'Implantes', line: 'Restaure seu sorriso. Pacientes que perderam dentes são poupados dos problemas de uma prótese convencional — com possibilidade de implante dente a dente.', img: '/assets/clinic-06.webp', alt: 'Sala de implantes da clínica Akaki', to: '/implantes', w: 1000, h: 750 },
+  { t: 'Ortodontia', line: 'Dentes alinhados para o seu melhor sorriso. Corrige a posição de dentes e ossos maxilares, prevenindo dores e protegendo a sua saúde.', img: '/assets/t-ortodontia.webp', alt: 'Ortodontia na Akaki', to: '/ortodontia', w: 600, h: 511 },
+  { t: 'Estética', line: 'Para o seu melhor sorriso — devolvendo harmonia, brilho e confiança ao seu dia a dia.', img: '/assets/t-estetica.webp', alt: 'Estética dental na Akaki', to: '/estetica', w: 927, h: 790 },
+  { t: 'Odontopediatria', line: 'Visita ao dentista sempre agradável e feliz. Cuidado especializado para a criança crescer sem medo, de forma lúdica.', img: '/assets/t-odontopediatria.webp', alt: 'Odontopediatria na Akaki', to: '/odontopediatria', w: 800, h: 600 },
+];
+---
+<section id="tratamentos" class="section trat">
+  <div class="container">
+    <header class="trat__head">
+      <p class="eyebrow reveal">Tratamentos</p>
+      <h2 class="h2 reveal" style="--d:80ms">O cuidado completo, <em>num só lugar</em>.</h2>
+    </header>
+
+    <a class="trat__feat reveal" href="/sedacao-odontologica">
+      <div class="trat__feat-media frame-arc">
+        <img src="/assets/t-dayclinic.webp" alt="Day Clinic — tratamento em um único dia com sedação" width="600" height="511" loading="lazy" decoding="async" />
+      </div>
+      <div class="trat__feat-body">
+        <span class="trat__tag">Destaque</span>
+        <h3 class="trat__feat-t">Day Clinic · Sedação</h3>
+        <p class="trat__feat-line">Resolvemos tudo enquanto você dorme. Todo o tratamento em um único dia, sempre com sedação consciente. Você dorme e acorda com um sorriso novo.</p>
+        <span class="trat__more">Ver tratamento <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16L16 8"/><path d="M9 8h7v7"/></svg></span>
+      </div>
+    </a>
+
+    <div class="trat__grid">
+      {cards.map((c, idx) => (
+        <a class="trat__card reveal" style={`--d:${idx * 90}ms`} href={c.to}>
+          <div class="trat__media frame-arc">
+            <img src={c.img} alt={c.alt} width={c.w} height={c.h} loading="lazy" decoding="async" />
+          </div>
+          <div class="trat__body">
+            <h3 class="trat__t">{c.t}</h3>
+            <p class="trat__line">{c.line}</p>
+            <span class="trat__more">Saiba mais <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16L16 8"/><path d="M9 8h7v7"/></svg></span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .trat { background: var(--cream); }
+  .trat__head { max-width: 28ch; margin-bottom: clamp(36px, 5vh, 60px); }
+  .trat__head .h2 { margin-top: 16px; }
+
+  .trat__more {
+    display: inline-flex; align-items: center; gap: 8px; margin-top: 14px;
+    font-family: var(--sans); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; color: var(--gold-dark);
+    transition: gap 280ms var(--silk);
+  }
+  .trat__more svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* featured Day Clinic */
+  .trat__feat {
+    display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 56px); align-items: center;
+    background: rgba(255,255,255,0.45); border: 1px solid rgba(211,164,108,0.28);
+    border-radius: 26px; padding: clamp(18px, 2.4vw, 30px);
+    margin-bottom: clamp(18px, 2.4vw, 28px);
+    box-shadow: 0 20px 54px -30px rgba(24,39,60,0.4);
+    transition: transform 340ms var(--tactile), box-shadow 340ms var(--silk);
+  }
+  .trat__feat-media { aspect-ratio: 16 / 11; }
+  .trat__tag {
+    display: inline-block; font-family: var(--sans); font-weight: 600; font-size: 9.5px;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--cinema-black);
+    background: var(--brass); padding: 5px 12px; border-radius: 999px; margin-bottom: 16px;
+  }
+  .trat__feat-t { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(28px, 3.6vw, 40px); color: var(--navy); letter-spacing: -0.015em; }
+  .trat__feat-line { font-family: var(--body); font-weight: 300; font-size: clamp(15px, 1.6vw, 17px); line-height: 1.62; color: var(--navy-soft); margin-top: 14px; max-width: 42ch; }
+
+  /* grid */
+  .trat__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(18px, 2.4vw, 28px); }
+  .trat__card {
+    display: flex; flex-direction: column;
+    background: rgba(255,255,255,0.4); border: 1px solid rgba(24,39,60,0.1);
+    border-radius: 22px; padding: clamp(16px, 1.8vw, 22px);
+    transition: transform 340ms var(--silk), box-shadow 340ms var(--silk), border-color 340ms var(--silk);
+  }
+  .trat__media { aspect-ratio: 16 / 10; margin-bottom: 18px; }
+  .trat__body { padding: 0 6px 6px; }
+  .trat__t { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(21px, 2.2vw, 25px); color: var(--navy); letter-spacing: -0.01em; }
+  .trat__line { font-family: var(--body); font-weight: 400; font-size: 13.5px; line-height: 1.6; color: var(--navy-soft); margin-top: 8px; }
+
+  @media (hover: hover) {
+    .trat__feat:hover { transform: translateY(-4px); box-shadow: 0 30px 64px -30px rgba(211,164,108,0.5); }
+    .trat__card:hover { transform: translateY(-5px); box-shadow: 0 26px 50px -28px rgba(24,39,60,0.4); border-color: rgba(211,164,108,0.4); }
+    .trat__feat:hover .trat__more, .trat__card:hover .trat__more { gap: 12px; }
+  }
+
+  @media (max-width: 860px) {
+    .trat__feat { grid-template-columns: 1fr; }
+    .trat__feat-media { aspect-ratio: 16 / 10; }
+    .trat__grid { grid-template-columns: 1fr; max-width: 480px; margin-inline: auto; }
+  }
+</style>

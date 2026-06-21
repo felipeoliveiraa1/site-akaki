@@ -1,0 +1,98 @@
+---
+const mapSrc = 'https://www.google.com/maps?q=' + encodeURIComponent('Rua Estados Unidos, 205, Jardim Paulista, São Paulo') + '&output=embed';
+const phones = [
+  { label: 'WhatsApp · (11) 94702-4607', href: 'https://api.whatsapp.com/send?phone=5511947024607', wpp: 'local-canal' },
+  { label: '(11) 3266-7921', href: 'tel:+551132667921' },
+  { label: '(11) 3263-0509', href: 'tel:+551132630509' },
+  { label: '(11) 3284-6002', href: 'tel:+551132846002' },
+];
+---
+<section id="localizacao" class="local">
+  <div class="container local__grid">
+    <div class="local__map reveal">
+      <iframe src={mapSrc} title="Mapa — Akaki Odontologia, Jardim Paulista" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+    </div>
+
+    <div class="local__panel reveal" style="--d:120ms">
+      <span class="leaf-glow" aria-hidden="true"></span>
+      <p class="eyebrow">Visite-nos</p>
+      <h2 class="h2 local__title">No coração dos <em>Jardins</em>.</h2>
+
+      <div class="local__blocks">
+        <div class="local__b">
+          <span class="local__lab">Contato</span>
+          {phones.map((p) => (
+            <a class="local__val" href={p.href} data-wpp={p.wpp} target={p.wpp ? '_blank' : null} rel={p.wpp ? 'noopener noreferrer' : null}>{p.label}</a>
+          ))}
+        </div>
+        <div class="local__b">
+          <span class="local__lab">E-mail</span>
+          <a class="local__val" href="mailto:akakiodonto@gmail.com">akakiodonto@gmail.com</a>
+        </div>
+        <div class="local__b">
+          <span class="local__lab">Endereço</span>
+          <p class="local__val">Rua Estados Unidos, 205 — Jardim&nbsp;Paulista<br />São&nbsp;Paulo – SP · 01427-002</p>
+        </div>
+      </div>
+
+      <div class="local__foot">
+        <div class="local__social">
+          <a href="https://www.instagram.com/akakiodontologia/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.youtube.com/channel/UCyGQUid86fGgsJoGISGSuGQ" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="4"/><path d="M10.5 9.4l5.2 2.6-5.2 2.6z" fill="currentColor" stroke="none"/></svg>
+          </a>
+        </div>
+        <a class="btn btn--gold local__cta" data-wpp="local-agendar" href="https://api.whatsapp.com/send?phone=5511947024607" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg>
+          Agende sua avaliação
+        </a>
+      </div>
+
+      <p class="local__cro">EPAO CRO-SP 13012 · Responsável Técnico: Dr.&nbsp;Luiz&nbsp;Akaki — CRO-SP&nbsp;45717</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .local { background: var(--cream); padding-block: clamp(56px, 8vh, 110px); }
+  .local__grid { display: grid; grid-template-columns: 1.08fr 0.92fr; gap: clamp(16px, 2vw, 26px); align-items: stretch; }
+
+  .local__map { border-radius: 24px; overflow: hidden; box-shadow: 0 30px 70px -40px rgba(24,39,60,0.55); border: 1px solid rgba(24,39,60,0.08); min-height: 420px; }
+  .local__map iframe { width: 100%; height: 100%; min-height: 420px; border: 0; display: block; filter: grayscale(0.18) contrast(1.02); }
+
+  .local__panel {
+    position: relative; overflow: hidden; border-radius: 24px;
+    padding: clamp(30px, 3.4vw, 50px);
+    background: linear-gradient(155deg, #1d2c3f 0%, var(--navy) 45%, var(--cinema-black) 100%);
+    color: var(--cream);
+    box-shadow: 0 30px 70px -40px rgba(11,14,19,0.6);
+    display: flex; flex-direction: column;
+  }
+  .local__panel .eyebrow { color: var(--gold-light); }
+  .leaf-glow { position: absolute; right: -80px; top: -60px; width: 320px; height: 320px; border-radius: 50%; background: radial-gradient(circle, rgba(211,164,108,0.18), transparent 68%); pointer-events: none; }
+  .local__title { color: var(--white-text); margin: 16px 0 28px; }
+  .local__title em { color: var(--gold-light); }
+
+  .local__blocks { display: grid; gap: 22px; }
+  .local__lab { display: block; font-family: var(--sans); font-weight: 600; font-size: 10px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 9px; }
+  .local__val { display: block; font-family: var(--body); font-weight: 400; font-size: 14.5px; line-height: 1.7; color: rgba(245,240,232,0.85); width: fit-content; transition: color 220ms var(--silk); }
+  a.local__val:hover { color: var(--gold-light); }
+
+  .local__foot { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-top: 30px; }
+  .local__social { display: flex; gap: 10px; }
+  .local__social a { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(244,238,227,0.28); color: var(--cream); transition: color 220ms, border-color 220ms, transform 220ms var(--silk); }
+  .local__social svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .local__social a:hover { color: var(--gold-light); border-color: var(--gold); transform: translateY(-2px); }
+  .local__cta svg { width: 16px; height: 16px; }
+
+  .local__cro { margin-top: 26px; padding-top: 18px; border-top: 1px solid rgba(245,240,232,0.12); font-family: var(--body); font-size: 11px; letter-spacing: 0.02em; color: rgba(245,240,232,0.48); }
+
+  @media (max-width: 880px) {
+    .local__grid { grid-template-columns: 1fr; }
+    .local__map { min-height: 320px; order: 2; }
+    .local__map iframe { min-height: 320px; height: 340px; }
+  }
+  @media (max-width: 520px) { .local__foot { flex-direction: column; align-items: flex-start; } .local__cta { width: 100%; justify-content: center; } }
+</style>

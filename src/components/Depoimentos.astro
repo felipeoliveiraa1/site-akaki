@@ -1,0 +1,83 @@
+---
+// NOTA: depoimentos abaixo são PLACEHOLDER (texto a substituir pelos reais da Akaki —
+// o site original usa vídeos/banners de depoimentos, ex.: Natalia Azzan). Nomes genéricos.
+const quotes = [
+  { q: 'Eu tinha pânico de dentista há anos. Na Akaki, dormi e acordei com tudo resolvido — mudou a minha relação com o sorriso.', n: 'Mariana R.', r: 'Paciente' },
+  { q: 'Resolvi em um único dia o que vinha adiando há tempos. Equipe atenciosa e um ambiente que acalma de verdade.', n: 'Carlos A.', r: 'Paciente' },
+  { q: 'A sedação foi tranquila e segura. Saí sem dor e sem medo. Recomendo de olhos fechados.', n: 'Patrícia L.', r: 'Paciente' },
+];
+---
+<section id="depoimentos" class="section depo cv-auto">
+  <div class="container">
+    <header class="depo__head">
+      <p class="eyebrow reveal">Hóspedes</p>
+      <h2 class="h2 reveal" style="--d:80ms">Quem venceu o medo, <em>conta</em>.</h2>
+    </header>
+
+    <div class="depo__row">
+      {quotes.map((c, idx) => (
+        <figure class="depo__card reveal" style={`--d:${idx * 110}ms`}>
+          <span class="depo__quote" aria-hidden="true">”</span>
+          <blockquote class="depo__q">{c.q}</blockquote>
+          <figcaption class="depo__by">
+            <span class="depo__n">{c.n}</span>
+            <span class="depo__r">{c.r}</span>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+
+    <a class="depo__more reveal" style="--d:200ms" href="https://www.instagram.com/akakiodontologia/" target="_blank" rel="noopener noreferrer">
+      Ver mais histórias no Instagram
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16L16 8"/><path d="M9 8h7v7"/></svg>
+    </a>
+  </div>
+</section>
+
+<style>
+  .depo { background: var(--cream); }
+  .depo__head { text-align: center; max-width: 26ch; margin: 0 auto clamp(40px, 6vh, 64px); }
+  .depo__head .h2 { margin-top: 16px; }
+
+  .depo__row { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 26px); }
+  .depo__card {
+    position: relative; background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(24,39,60,0.1); border-radius: 22px;
+    padding: clamp(28px, 3vw, 40px) clamp(24px, 2.6vw, 34px) clamp(24px, 2.6vw, 32px);
+    transition: transform 340ms var(--silk), box-shadow 340ms var(--silk);
+  }
+  .depo__quote {
+    position: absolute; top: 6px; left: 22px; font-family: var(--serif); font-style: italic;
+    font-size: 80px; line-height: 1; color: var(--gold); opacity: 0.5;
+  }
+  .depo__q {
+    position: relative; font-family: var(--serif); font-weight: 400; font-style: italic;
+    font-variation-settings: 'opsz' 144; font-size: clamp(17px, 1.9vw, 20px); line-height: 1.5;
+    color: var(--navy); margin: 26px 0 22px; letter-spacing: -0.005em;
+  }
+  .depo__by { display: flex; flex-direction: column; gap: 2px; padding-top: 16px; border-top: 1px solid rgba(211,164,108,0.3); }
+  .depo__n { font-family: var(--sans); font-weight: 600; font-size: 13px; letter-spacing: 0.04em; color: var(--navy); }
+  .depo__r { font-family: var(--sans); font-weight: 600; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dark); }
+
+  .depo__more {
+    display: inline-flex; align-items: center; gap: 9px; margin: clamp(34px, 5vh, 52px) auto 0;
+    justify-content: center; width: 100%;
+    font-family: var(--sans); font-weight: 600; font-size: 12.5px; letter-spacing: 0.06em; color: var(--gold-dark);
+    transition: gap 280ms var(--silk);
+  }
+  .depo__more svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .depo__more:hover { gap: 13px; }
+
+  @media (hover: hover) { .depo__card:hover { transform: translateY(-5px); box-shadow: 0 26px 52px -30px rgba(24,39,60,0.4); } }
+
+  @media (max-width: 860px) {
+    .depo__row {
+      grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 84%;
+      overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px;
+      margin-inline: calc(clamp(20px, 5vw, 48px) * -1); padding-inline: clamp(20px, 5vw, 48px);
+      scrollbar-width: none;
+    }
+    .depo__row::-webkit-scrollbar { display: none; }
+    .depo__card { scroll-snap-align: center; }
+  }
+</style>

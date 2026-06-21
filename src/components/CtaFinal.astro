@@ -1,0 +1,34 @@
+---
+import Wordmark from './Wordmark.astro';
+---
+<section id="cta-final" class="section cta band-dark arc-top">
+  <div class="container cta__inner">
+    <span class="wordmark cta__word reveal" aria-hidden="true"><Wordmark /><span class="wordmark__shine"></span></span>
+    <p class="eyebrow eyebrow--center reveal" style="--d:80ms">Feche os olhos. Confie.</p>
+    <h2 class="display cta__title reveal" style="--d:160ms">Você dorme e acorda com um <em>sorriso&nbsp;novo</em>.</h2>
+    <p class="lead cta__sub reveal" style="--d:240ms">
+      Tratamento odontológico com sedação consciente, em menos tempo e sem medo.
+      Agende sua avaliação e dê o primeiro passo.
+    </p>
+    <a class="btn btn--gold cta__btn reveal" style="--d:320ms" data-wpp="final-agendar" href="https://api.whatsapp.com/send?phone=5511947024607" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg>
+      Agende sua avaliação
+    </a>
+  </div>
+</section>
+
+<style>
+  .cta { position: relative; text-align: center; z-index: 3; overflow: hidden; }
+  .cta__inner { position: relative; max-width: 40ch; margin-inline: auto; }
+  .cta__word { display: inline-block; width: clamp(180px, 26vw, 280px); margin-bottom: 30px; color: var(--gold); }
+  .cta__title { color: var(--white-text); margin: 18px auto 22px; max-width: 18ch; }
+  .cta__title em { color: var(--gold-light); }
+  .cta__sub { color: rgba(245,240,232,0.8); margin-inline: auto; max-width: 46ch; }
+  .cta__btn { margin-top: 32px; padding: 18px 32px; font-size: 14px; animation: cta-glow 5500ms var(--breath) infinite alternate; }
+  .cta__btn svg { width: 17px; height: 17px; }
+  @keyframes cta-glow {
+    from { box-shadow: 0 12px 36px -14px rgba(211,164,108,0.4); }
+    to   { box-shadow: 0 18px 54px -10px rgba(211,164,108,0.8); }
+  }
+  @media (prefers-reduced-motion: reduce) { .cta__btn { animation: none; } }
+</style>

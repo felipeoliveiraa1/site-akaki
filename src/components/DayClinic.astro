@@ -1,0 +1,85 @@
+---
+---
+<section id="day-clinic" class="dayc" data-scrub>
+  <div class="dayc__sticky">
+    <div class="dayc__bg" aria-hidden="true">
+      <img src="/assets/clinic-04.webp" alt="" width="1000" height="667" loading="lazy" decoding="async" />
+    </div>
+    <div class="dayc__veil" aria-hidden="true"></div>
+
+    <div class="dayc__content container">
+      <p class="dayc__eyebrow">Day Clinic</p>
+      <p class="dayc__counter">1&nbsp;dia · 1&nbsp;sessão · sem&nbsp;medo</p>
+
+      <div class="dayc__stage">
+        <h2 class="dayc__t dayc__t--dark">Resolvemos tudo enquanto você <em>dorme</em>.</h2>
+        <h2 class="dayc__t dayc__t--light">Você dorme e acorda com um <em>sorriso&nbsp;novo</em>.</h2>
+      </div>
+
+      <p class="dayc__body">
+        Se você sofre com o medo de dentista, o Day&nbsp;Clinic é a opção certa. Todo o tratamento
+        é feito em um único dia, sempre com sedação — com total segurança, rapidez e qualidade.
+      </p>
+      <a class="btn btn--gold dayc__cta" data-wpp="dayclinic-agendar" href="https://api.whatsapp.com/send?phone=5511947024607" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg>
+        Agende sua avaliação
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .dayc { position: relative; height: 220vh; background: var(--cinema-black); --p: 0; }
+  .dayc__sticky {
+    position: sticky; top: 0; height: 100svh; overflow: hidden;
+    display: flex; align-items: center; isolation: isolate;
+  }
+  .dayc__bg { position: absolute; inset: 0; z-index: 0; }
+  .dayc__bg img {
+    width: 100%; height: 100%; object-fit: cover; transform: scale(1.04);
+    filter: blur(calc((1 - var(--p)) * 9px)) brightness(calc(0.36 + var(--p) * 0.74)) saturate(calc(0.45 + var(--p) * 0.6));
+  }
+  .dayc__veil {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background:
+      radial-gradient(90% 70% at 50% 60%, transparent 38%, rgba(11,14,19,0.5) 100%),
+      linear-gradient(180deg, rgba(11,14,19,0.55) 0%, rgba(11,14,19,0.2) 40%, rgba(11,14,19,0.72) 100%);
+  }
+  .dayc__content { position: relative; z-index: 2; text-align: center; color: var(--white-text); width: 100%; }
+
+  .dayc__eyebrow {
+    font-family: var(--sans); font-weight: 600; font-size: 11px; letter-spacing: 0.42em;
+    text-transform: uppercase; color: var(--gold-light); margin-bottom: 16px;
+  }
+  .dayc__counter {
+    font-family: var(--sans); font-weight: 600; font-size: clamp(10px, 1.1vw, 12px);
+    letter-spacing: 0.3em; text-transform: uppercase; color: rgba(245,240,232,0.6); margin-bottom: 26px;
+  }
+
+  .dayc__stage { position: relative; display: grid; min-height: clamp(120px, 22vh, 220px); place-items: center; }
+  .dayc__t {
+    grid-area: 1 / 1; margin: 0; max-width: 18ch;
+    font-family: var(--serif); font-weight: 350; font-variation-settings: 'opsz' 144;
+    font-size: clamp(32px, 6.4vw, 72px); line-height: 1.04; letter-spacing: -0.02em;
+    text-shadow: 0 2px 30px rgba(11,14,19,0.6);
+  }
+  .dayc__t em { font-style: italic; font-weight: 420; }
+  .dayc__t--dark { color: rgba(245,240,232,0.9); opacity: calc(1 - var(--p)); }
+  .dayc__t--dark em { color: var(--gold-light); }
+  .dayc__t--light { color: var(--white-text); opacity: var(--p); }
+  .dayc__t--light em { color: var(--gold-light); }
+
+  .dayc__body {
+    font-family: var(--body); font-weight: 300; font-size: clamp(15px, 1.8vw, 18px);
+    line-height: 1.6; color: rgba(245,240,232,0.8); max-width: 52ch; margin: 28px auto 30px;
+  }
+  .dayc__cta svg { width: 16px; height: 16px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dayc { height: auto; }
+    .dayc__sticky { position: relative; height: auto; padding-block: clamp(80px, 14vh, 140px); }
+    .dayc__bg img { filter: brightness(0.95) saturate(0.95); }
+    .dayc__t--dark { display: none; }
+    .dayc__t--light { opacity: 1; }
+  }
+</style>
