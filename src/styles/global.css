@@ -82,12 +82,15 @@ img, video { display: block; max-width: 100%; }
   letter-spacing: 0.36em;
   text-transform: uppercase;
   color: var(--gold-dark);
-  display: inline-flex; align-items: center; gap: 12px;
+  display: block;
 }
-.eyebrow::before {
-  content: ""; width: 26px; height: 1px; background: var(--gold); opacity: 0.8;
+/* the gold dash only on centered eyebrows (where it stays aligned) */
+.eyebrow--center {
+  display: flex; align-items: center; justify-content: center; gap: 12px; text-align: center;
 }
-.eyebrow--center { justify-content: center; }
+.eyebrow--center::before {
+  content: ""; flex: 0 0 auto; width: 26px; height: 1px; background: var(--gold); opacity: 0.8;
+}
 
 .display {
   font-family: var(--serif);
@@ -241,20 +244,18 @@ img, video { display: block; max-width: 100%; }
 .leaf-bg svg { width: 100%; height: 100%; overflow: visible; }
 .leaf-bg .leaf-stroke { stroke: currentColor; stroke-width: 1.4; }
 
-/* ——— organic arc divider between full-width bands ————————— */
+/* ——— subtle rounded-top divider between full-width bands ——— */
 .arc-top {
   position: relative;
-  border-top-left-radius: 52% 88px;
-  border-top-radius: 52% 88px;
-  border-top-right-radius: 52% 88px;
-  margin-top: clamp(-72px, -7vw, -44px);
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+  margin-top: -30px;
 }
 
-/* ——— organic photo frame (leaf-ish asymmetric arc) ——————— */
+/* ——— photo frame — clean refined radius ——————————————— */
 .frame-arc {
   position: relative; overflow: hidden;
-  border-radius: 46% 46% 46% 46% / 12% 12% 12% 12%;
-  border-radius: 120px 28px 120px 28px;
+  border-radius: 22px;
 }
 .frame-arc img { width: 100%; height: 100%; object-fit: cover; transition: transform 800ms var(--silk); }
 @media (hover: hover) { .frame-arc:hover img { transform: scale(1.05); } }

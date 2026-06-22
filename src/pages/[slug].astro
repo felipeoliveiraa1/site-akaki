@@ -79,7 +79,8 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
         <div class="lp-dif__grid">
           {s.diferenciais.map((d, i) => (
             <article class="lp-card reveal" style={`--d:${i * 90}ms`}>
-              <span class="lp-ic" aria-hidden="true"><svg viewBox="0 0 24 24" set:html={ICONS[d.icon] || ICONS.smile} /></span>
+              <span class="lp-card__n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <span class="lp-card__rule" aria-hidden="true"></span>
               <h3 class="lp-card__t">{d.t}</h3>
               <p class="lp-card__d">{d.d}</p>
             </article>
@@ -87,6 +88,27 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
         </div>
       </div>
     </section>
+
+    <!-- DOIS PERFIS (opcional) -->
+    {s.perfis && (
+      <section class="section lp-perfis">
+        <div class="container">
+          <header class="lp-head">
+            <p class="eyebrow eyebrow--center reveal">Para quem é</p>
+            <h2 class="h2 reveal" style="--d:80ms">Dois perfis, uma <em>solução</em>.</h2>
+          </header>
+          <div class="lp-perfis__grid">
+            {s.perfis.map((p, i) => (
+              <article class={`lp-perfil reveal ${i === 0 ? 'lp-perfil--dark' : ''}`} style={`--d:${i * 110}ms`}>
+                <h3 class="lp-perfil__t">{p.title}</h3>
+                <p class="lp-perfil__d">{p.body}</p>
+                <ul class="lp-perfil__list">{p.items.map((it) => <li>{it}</li>)}</ul>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
 
     <!-- ESPECIALISTA -->
     <section class="section lp-spec band-cream-deep">
@@ -97,12 +119,35 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
         <div class="lp-spec__text">
           <p class="eyebrow reveal">Conheça o especialista</p>
           <h2 class="h2 reveal" style="--d:80ms">Dr. Luiz <em>Akaki</em></h2>
-          <p class="lp-spec__role reveal" style="--d:140ms">CRO-SP 45717 · Especialista em Odontologia</p>
-          <p class="lead lp-spec__bio reveal" style="--d:200ms">Com mais de 35 anos de experiência, o Dr. Luiz Akaki foi pioneiro em trazer técnicas de ponta da Alemanha e dos EUA para o Brasil. Atendimento humanizado, tecnologia de referência e resultados previsíveis.</p>
-          <div class="lp-spec__badges reveal" style="--d:260ms">{badges.map((b) => <span class="lp-badge">{b}</span>)}</div>
+          <p class="lp-spec__role reveal" style="--d:140ms">{s.specRole || 'CRO-SP 45717 · Especialista em Odontologia'}</p>
+          <p class="lead lp-spec__bio reveal" style="--d:200ms">{s.specBio || 'Com mais de 35 anos de experiência, o Dr. Luiz Akaki foi pioneiro em trazer técnicas de ponta da Alemanha e dos EUA para o Brasil. Atendimento humanizado, tecnologia de referência e resultados previsíveis.'}</p>
+          {s.specQuote && <p class="lp-spec__quote reveal" style="--d:240ms">“{s.specQuote}”</p>}
+          <div class="lp-spec__badges reveal" style="--d:280ms">{(s.specBadges || badges).map((b) => <span class="lp-badge">{b}</span>)}</div>
         </div>
       </div>
     </section>
+
+    <!-- PROTOCOLO DE SEGURANÇA (opcional) -->
+    {s.protocolo && (
+      <section class="section lp-proto band-dark arc-top">
+        <div class="container">
+          <header class="lp-head">
+            <p class="eyebrow eyebrow--center reveal">Segurança</p>
+            <h2 class="h2 reveal" style="--d:80ms">Protocolo de segurança da <em>sedação</em>.</h2>
+            <p class="lead reveal lp-steps__sub" style="--d:140ms">A sedação odontológica na Akaki segue um protocolo rigoroso em todas as etapas — da avaliação pré-operatória à alta do paciente.</p>
+          </header>
+          <div class="lp-proto__grid">
+            {s.protocolo.map((p, i) => (
+              <div class="lp-proto__item reveal" style={`--d:${i * 100}ms`}>
+                <span class="lp-step__n">{String(i + 1).padStart(2, '0')}</span>
+                <h3 class="lp-proto__t">{p.t}</h3>
+                <p class="lp-proto__d">{p.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
 
     <!-- DEPOIMENTOS -->
     <section class="section lp-revs">
@@ -245,7 +290,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
 
 <style>
   /* HERO — cinematic, treated photo + veil */
-  .lp-hero { position: relative; overflow: hidden; background: var(--cinema-black); color: var(--white-text); padding: calc(var(--nav-h) + clamp(40px, 8vh, 92px)) 0 clamp(54px, 9vh, 100px); isolation: isolate; }
+  .lp-hero { position: relative; overflow: hidden; background: var(--cinema-black); color: var(--white-text); padding: calc(var(--nav-h) + clamp(44px, 8vh, 96px)) 0 clamp(88px, 14vh, 160px); isolation: isolate; }
   .lp-hero__bg { position: absolute; inset: 0; z-index: 0; }
   .lp-hero__bg img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.42) saturate(0.82) blur(3px); transform: scale(1.08); animation: kenburns 24000ms var(--breath) infinite alternate; }
   .lp-hero__veil { position: absolute; inset: 0; z-index: 1; background: radial-gradient(120% 100% at 25% 35%, rgba(11,14,19,0.3) 0%, rgba(11,14,19,0.72) 70%, rgba(11,14,19,0.88) 100%), linear-gradient(180deg, rgba(11,14,19,0.7) 0%, rgba(11,14,19,0.45) 50%, rgba(11,14,19,0.92) 100%); }
@@ -282,13 +327,35 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
   /* premium translucent cards */
   .lp-dif { background: var(--cream); }
   .lp-dif__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 1.8vw, 24px); }
-  .lp-card { background: rgba(255,255,255,0.45); border: 1px solid rgba(24,39,60,0.1); border-radius: 20px; padding: clamp(26px, 2.8vw, 36px); text-align: center; transition: transform 340ms var(--silk), box-shadow 340ms var(--silk), border-color 340ms var(--silk); }
+  .lp-card { background: rgba(255,255,255,0.5); border: 1px solid rgba(24,39,60,0.1); border-radius: 20px; padding: clamp(28px, 2.8vw, 38px); transition: transform 340ms var(--silk), box-shadow 340ms var(--silk), border-color 340ms var(--silk); }
+  .lp-card__n { display: block; font-family: var(--serif); font-style: italic; font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(30px, 3vw, 42px); line-height: 1; color: var(--gold-dark); letter-spacing: -0.02em; }
+  .lp-card__rule { display: block; width: 34px; height: 2px; border-radius: 2px; background: var(--brass); margin: 16px 0 18px; transition: width 420ms var(--silk); }
+  .lp-card__t { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(19px, 2vw, 23px); color: var(--navy); margin-bottom: 10px; letter-spacing: -0.01em; }
+  .lp-card__d { font-family: var(--body); font-size: 13.5px; line-height: 1.62; color: var(--navy-soft); }
+  /* generic line-icon (tipos) */
   .lp-ic { display: inline-grid; place-items: center; width: 50px; height: 50px; color: var(--gold-dark); margin-bottom: 18px; }
   .lp-ic svg { width: 30px; height: 30px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
   .lp-ic--ring { border: 1.5px solid rgba(211,164,108,0.45); border-radius: 50%; }
-  .lp-card__t { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(18px, 1.9vw, 22px); color: var(--navy); margin-bottom: 10px; letter-spacing: -0.01em; }
-  .lp-card__d { font-family: var(--body); font-size: 13.5px; line-height: 1.62; color: var(--navy-soft); }
-  @media (hover: hover) { .lp-card:hover { transform: translateY(-5px); box-shadow: 0 26px 50px -30px rgba(24,39,60,0.42); border-color: rgba(211,164,108,0.4); } }
+  @media (hover: hover) { .lp-card:hover { transform: translateY(-5px); box-shadow: 0 26px 50px -30px rgba(24,39,60,0.42); border-color: rgba(211,164,108,0.4); } .lp-card:hover .lp-card__rule { width: 56px; } }
+
+  /* especialista quote + perfis + protocolo */
+  .lp-spec__quote { font-family: var(--serif); font-style: italic; font-variation-settings: 'opsz' 144; font-size: clamp(15px, 1.7vw, 18px); line-height: 1.5; color: var(--gold-dark); border-left: 2px solid var(--gold); padding-left: 16px; margin: 20px 0 4px; max-width: 50ch; }
+
+  .lp-perfis { background: var(--cream); }
+  .lp-perfis__grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(16px, 2vw, 26px); max-width: 980px; margin: 0 auto; }
+  .lp-perfil { border-radius: 22px; padding: clamp(28px, 3vw, 40px); border: 1px solid rgba(24,39,60,0.1); background: rgba(255,255,255,0.5); }
+  .lp-perfil--dark { background: linear-gradient(155deg, #1d2c3f, var(--navy) 55%, var(--cinema-black)); color: var(--cream); border-color: transparent; box-shadow: 0 30px 70px -40px rgba(11,14,19,0.6); }
+  .lp-perfil__t { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(21px, 2.3vw, 27px); margin-bottom: 12px; }
+  .lp-perfil--dark .lp-perfil__t { color: var(--gold-light); }
+  .lp-perfil__d { font-family: var(--body); font-size: 14px; line-height: 1.6; opacity: 0.9; margin-bottom: 20px; }
+  .lp-perfil__list { list-style: none; display: grid; gap: 11px; }
+  .lp-perfil__list li { position: relative; padding-left: 22px; font-family: var(--body); font-size: 13.5px; line-height: 1.5; }
+  .lp-perfil__list li::before { content: "→"; position: absolute; left: 0; color: var(--gold-dark); }
+  .lp-perfil--dark .lp-perfil__list li::before { color: var(--gold-light); }
+
+  .lp-proto__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(20px, 3vw, 44px); text-align: center; }
+  .lp-proto__t { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(17px, 1.9vw, 21px); color: var(--white-text); margin: 16px 0 8px; }
+  .lp-proto__d { font-family: var(--body); font-size: 13px; line-height: 1.55; color: rgba(245,240,232,0.72); max-width: 28ch; margin-inline: auto; }
 
   /* ESPECIALISTA — photo + text */
   .lp-spec__grid { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
@@ -338,7 +405,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
 
   /* TIPOS */
   .lp-types { background: var(--cream); }
-  .lp-types__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 24px); }
+  .lp-types__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: clamp(16px, 2vw, 24px); }
   .lp-type { background: rgba(255,255,255,0.5); border: 1px solid rgba(24,39,60,0.1); border-radius: 20px; padding: clamp(26px, 2.8vw, 38px); text-align: center; transition: transform 340ms var(--silk), box-shadow 340ms var(--silk); }
   .lp-type__t { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(20px, 2.1vw, 25px); color: var(--navy); margin: 8px 0 10px; }
   .lp-type__d { font-family: var(--body); font-size: 13.5px; line-height: 1.6; color: var(--navy-soft); margin-bottom: 20px; }
@@ -394,14 +461,14 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
   @media (max-width: 980px) {
     .lp-hero__grid { grid-template-columns: 1fr; }
     .lp-form { order: -1; }
-    .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-cases__grid, .lp-steps__grid { grid-template-columns: 1fr 1fr; }
+    .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-cases__grid, .lp-steps__grid, .lp-proto__grid { grid-template-columns: 1fr 1fr; }
     .lp-spec__grid { grid-template-columns: 1fr; }
     .lp-spec__media { max-width: 360px; margin-inline: auto; }
   }
   @media (max-width: 620px) {
     .lp-stats__grid { grid-template-columns: 1fr 1fr; gap: 26px 16px; }
     .lp-stat--div::before { display: none; }
-    .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-cases__grid, .lp-steps__grid, .lp-cmp__grid { grid-template-columns: 1fr; }
+    .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-cases__grid, .lp-steps__grid, .lp-cmp__grid, .lp-proto__grid, .lp-perfis__grid { grid-template-columns: 1fr; }
   }
 </style>
 
