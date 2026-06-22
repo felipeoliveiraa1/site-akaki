@@ -19,9 +19,9 @@ import Wordmark from './Wordmark.astro';
 
 <style>
   .cta { position: relative; text-align: center; z-index: 3; overflow: hidden; }
-  .cta__inner { position: relative; max-width: 40ch; margin-inline: auto; }
+  .cta__inner { position: relative; max-width: 760px; margin-inline: auto; }
   .cta__word { display: inline-block; width: clamp(180px, 26vw, 280px); margin-bottom: 30px; color: var(--gold); }
-  .cta__title { color: var(--white-text); margin: 18px auto 22px; max-width: 18ch; }
+  .cta__title { color: var(--white-text); margin: 18px auto 22px; font-size: clamp(30px, 4.8vw, 50px); line-height: 1.07; }
   .cta__title em { color: var(--gold-light); }
   .cta__sub { color: rgba(245,240,232,0.8); margin-inline: auto; max-width: 46ch; }
   .cta__btn { margin-top: 32px; padding: 18px 32px; font-size: 14px; animation: cta-glow 5500ms var(--breath) infinite alternate; }

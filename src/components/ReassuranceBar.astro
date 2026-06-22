@@ -1,9 +1,9 @@
 ---
 const items = [
-  { t: 'Sedação consciente · Total segurança', icon: '<path d="M12 3l7 3v5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="M9 12l2 2 4-4.2"/>' },
-  { t: 'Equipe multidisciplinar especializada', icon: '<circle cx="8" cy="9.5" r="2.4"/><circle cx="16" cy="9.5" r="2.4"/><path d="M3.5 19c0-2.6 2-4.4 4.5-4.4S12.5 16.4 12.5 19"/><path d="M11.5 19c0-2.6 2-4.4 4.5-4.4S20.5 16.4 20.5 19"/>' },
+  { t: 'Sedação consciente', icon: '<path d="M12 3l7 3v5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/><path d="M9 12l2 2 4-4.2"/>' },
+  { t: 'Equipe especializada', icon: '<circle cx="8" cy="9.5" r="2.4"/><circle cx="16" cy="9.5" r="2.4"/><path d="M3.5 19c0-2.6 2-4.4 4.5-4.4S12.5 16.4 12.5 19"/><path d="M11.5 19c0-2.6 2-4.4 4.5-4.4S20.5 16.4 20.5 19"/>' },
   { t: 'Tecnologia de ponta', icon: '<path d="M12 3l2.1 5.3L19.5 9l-4.2 3.4L16.7 18 12 14.9 7.3 18l1.4-5.6L4.5 9l5.4-.7z"/>' },
-  { t: 'Day Clinic — tudo em 1 dia', icon: '<circle cx="12" cy="12" r="8.2"/><path d="M12 7.4V12l3 2"/>' },
+  { t: 'Day Clinic em 1 dia', icon: '<circle cx="12" cy="12" r="8.2"/><path d="M12 7.4V12l3 2"/>' },
 ];
 ---
 <section class="reassure band-navy" aria-label="Diferenciais de confiança">
@@ -19,30 +19,31 @@ const items = [
 </section>
 
 <style>
-  .reassure { position: relative; padding-block: clamp(22px, 3.4vh, 34px); }
+  .reassure { position: relative; padding: clamp(26px, 4vh, 40px) 0 clamp(52px, 7.5vh, 80px); }
   .reassure__thread { position: absolute; top: 0; left: 50%; transform: translateX(-50%); }
   .reassure__inner {
-    display: flex; align-items: center; justify-content: space-between; gap: clamp(14px, 2.6vw, 38px);
-    flex-wrap: wrap;
+    display: grid; grid-template-columns: repeat(4, max-content);
+    justify-content: center; align-items: center; column-gap: clamp(24px, 4vw, 64px);
   }
-  .reassure__item {
-    display: flex; align-items: center; gap: 12px; flex: 1 1 auto; min-width: 0;
-    position: relative;
+  .reassure__item { display: flex; align-items: center; gap: 11px; position: relative; min-width: 0; }
+  .reassure__item:not(:first-child)::before {
+    content: ""; position: absolute; left: calc(-1 * clamp(12px, 2vw, 32px)); top: 50%; transform: translateY(-50%);
+    width: 1px; height: 24px; background: rgba(211,164,108,0.3);
   }
-  .reassure__item + .reassure__item::before {
-    content: ""; position: absolute; left: clamp(-7px, -1.3vw, -19px); top: 50%; transform: translateY(-50%);
-    width: 1px; height: 26px; background: rgba(211,164,108,0.32);
-  }
-  .reassure__icon { flex: 0 0 auto; width: 26px; height: 26px; color: var(--gold-light); }
+  .reassure__icon { flex: 0 0 auto; width: 24px; height: 24px; color: var(--gold-light); }
   .reassure__icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   .reassure__t {
     font-family: var(--sans); font-weight: 600; font-size: clamp(10.5px, 1.05vw, 12px);
-    letter-spacing: 0.12em; text-transform: uppercase; line-height: 1.4; color: var(--cream);
+    letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.3; color: var(--cream); white-space: nowrap;
   }
 
-  @media (max-width: 760px) {
-    .reassure__inner { gap: 18px 20px; }
-    .reassure__item { flex: 1 1 42%; }
-    .reassure__item + .reassure__item::before { display: none; }
+  /* tablet → 2×2, sem divisórias */
+  @media (max-width: 1040px) {
+    .reassure__inner { grid-template-columns: repeat(2, max-content); justify-content: center; row-gap: 18px; column-gap: clamp(40px, 8vw, 90px); }
+    .reassure__item:not(:first-child)::before { display: none; }
+  }
+  /* mobile → 1 coluna */
+  @media (max-width: 520px) {
+    .reassure__inner { grid-template-columns: 1fr; row-gap: 16px; justify-items: start; }
   }
 </style>
