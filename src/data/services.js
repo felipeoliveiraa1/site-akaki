@@ -14,7 +14,7 @@ export const services = [
       h1: 'Durma durante o implante. Acorde <em>sem dor, sem corte</em>, com o sorriso pronto.',
       sub: 'Sedação odontológica + Cirurgia Guiada Ankylos. Você dorme, nós implantamos com precisão milimétrica alemã. Pós-operatório tranquilo e osseointegração em cerca de 45 dias.',
       urgency: 'Agenda com vagas limitadas. Consultas de avaliação disponíveis para esta semana.',
-      image: '/assets/clinic-06.webp',
+      image: '/assets/t-implantes.webp',
     },
     stats: [
       { n: '+5.000', l: 'Implantes realizados' },
