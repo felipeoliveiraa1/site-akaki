@@ -10,9 +10,9 @@
 //   (H.264 + AAC). A capa é o 1º frame do próprio vídeo (sem thumbnail extra).
 const ORIENTATION = 'portrait'; // 'portrait' = reels 9:16 · 'landscape' = 16:9
 const videos = [
-  // { src: 'https://xxxx.public.blob.vercel-storage.com/depo-natalia.mp4',  n: 'Natália Azzan',  r: 'Paciente' },
-  // { src: 'https://xxxx.public.blob.vercel-storage.com/depo-carlos.mp4',   n: 'Carlos Andrade', r: 'Paciente' },
-  // { src: 'https://xxxx.public.blob.vercel-storage.com/depo-patricia.mp4', n: 'Patrícia Lima',  r: 'Paciente' },
+  { src: '/assets/depoimentos/depo-marcelo-guimaraes.mp4', poster: '/assets/depoimentos/depo-marcelo-guimaraes.jpg', n: 'Marcelo Guimarães', r: 'Paciente' },
+  { src: '/assets/depoimentos/depo-mario-oki.mp4',         poster: '/assets/depoimentos/depo-mario-oki.jpg',         n: 'Mário Oki',         r: 'Empresário' },
+  // { src: '/assets/depoimentos/depo-03.mp4', poster: '/assets/depoimentos/depo-03.jpg', n: 'AGUARDANDO NOME', r: 'Paciente' }, // IMG_8096 — pendente o nome
 ];
 
 // Fallback de texto enquanto os vídeos não sobem (placeholder).
@@ -32,14 +32,15 @@ const hasVideos = videos.length > 0;
     </header>
 
     {hasVideos ? (
-      <div class={`vdepo__row vdepo__row--${ORIENTATION}`}>
+      <div class={`vdepo__row vdepo__row--${ORIENTATION}`} style={`--cols:${Math.min(videos.length, 3)}`}>
         {videos.map((v, idx) => (
           <figure class="vdepo__card reveal" style={`--d:${idx * 110}ms`}>
             <div class="vdepo__media">
               <video
                 class="vdepo__video"
-                src={`${v.src}#t=0.6`}
-                preload="metadata"
+                src={v.src}
+                poster={v.poster}
+                preload="none"
                 playsinline
                 aria-label={`Depoimento de ${v.n}`}
               ></video>
@@ -126,7 +127,7 @@ const hasVideos = videos.length > 0;
 
   /* ——— variante VÍDEO ——— */
   .vdepo__row { display: grid; gap: clamp(16px, 2vw, 26px); }
-  .vdepo__row--portrait { grid-template-columns: repeat(3, 1fr); }
+  .vdepo__row--portrait { grid-template-columns: repeat(var(--cols, 3), minmax(0, 300px)); justify-content: center; }
   .vdepo__row--landscape { grid-template-columns: repeat(2, 1fr); }
   .vdepo__card { display: flex; flex-direction: column; gap: 16px; }
   .vdepo__media {
