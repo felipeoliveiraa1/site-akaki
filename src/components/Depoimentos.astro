@@ -1,11 +1,28 @@
 ---
-// NOTA: depoimentos abaixo são PLACEHOLDER (texto a substituir pelos reais da Akaki —
-// o site original usa vídeos/banners de depoimentos, ex.: Natalia Azzan). Nomes genéricos.
+// "Quem venceu o medo, conta." — depoimentos em VÍDEO (Vercel Blob público).
+//
+// ▸ PARA ATIVAR: cole em `src` a URL pública que a Vercel mostra após o upload
+//   (formato https://<store-id>.public.blob.vercel-storage.com/arquivo.mp4) e o
+//   nome do paciente. Enquanto a lista estiver vazia, a seção mostra os cards de
+//   texto (placeholder) como fallback — nada quebra no ar.
+//
+// ▸ Os vídeos precisam estar num Blob store PÚBLICO (access: public) e em MP4
+//   (H.264 + AAC). A capa é o 1º frame do próprio vídeo (sem thumbnail extra).
+const ORIENTATION = 'portrait'; // 'portrait' = reels 9:16 · 'landscape' = 16:9
+const videos = [
+  // { src: 'https://xxxx.public.blob.vercel-storage.com/depo-natalia.mp4',  n: 'Natália Azzan',  r: 'Paciente' },
+  // { src: 'https://xxxx.public.blob.vercel-storage.com/depo-carlos.mp4',   n: 'Carlos Andrade', r: 'Paciente' },
+  // { src: 'https://xxxx.public.blob.vercel-storage.com/depo-patricia.mp4', n: 'Patrícia Lima',  r: 'Paciente' },
+];
+
+// Fallback de texto enquanto os vídeos não sobem (placeholder).
 const quotes = [
   { q: 'Eu tinha pânico de dentista há anos. Na Akaki, dormi e acordei com tudo resolvido — mudou a minha relação com o sorriso.', n: 'Mariana R.', r: 'Paciente' },
   { q: 'Resolvi em um único dia o que vinha adiando há tempos. Equipe atenciosa e um ambiente que acalma de verdade.', n: 'Carlos A.', r: 'Paciente' },
   { q: 'A sedação foi tranquila e segura. Saí sem dor e sem medo. Recomendo de olhos fechados.', n: 'Patrícia L.', r: 'Paciente' },
 ];
+
+const hasVideos = videos.length > 0;
 ---
 <section id="depoimentos" class="section depo cv-auto">
   <div class="container">
@@ -14,18 +31,43 @@ const quotes = [
       <h2 class="h2 reveal" style="--d:80ms">Quem venceu o medo, <em>conta</em>.</h2>
     </header>
 
-    <div class="depo__row">
-      {quotes.map((c, idx) => (
-        <figure class="depo__card reveal" style={`--d:${idx * 110}ms`}>
-          <span class="depo__quote" aria-hidden="true">”</span>
-          <blockquote class="depo__q">{c.q}</blockquote>
-          <figcaption class="depo__by">
-            <span class="depo__n">{c.n}</span>
-            <span class="depo__r">{c.r}</span>
-          </figcaption>
-        </figure>
-      ))}
-    </div>
+    {hasVideos ? (
+      <div class={`vdepo__row vdepo__row--${ORIENTATION}`}>
+        {videos.map((v, idx) => (
+          <figure class="vdepo__card reveal" style={`--d:${idx * 110}ms`}>
+            <div class="vdepo__media">
+              <video
+                class="vdepo__video"
+                src={`${v.src}#t=0.6`}
+                preload="metadata"
+                playsinline
+                aria-label={`Depoimento de ${v.n}`}
+              ></video>
+              <button class="vdepo__play" type="button" aria-label={`Reproduzir depoimento de ${v.n}`}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>
+              </button>
+            </div>
+            <figcaption class="vdepo__by">
+              <span class="depo__n">{v.n}</span>
+              <span class="depo__r">{v.r}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    ) : (
+      <div class="depo__row">
+        {quotes.map((c, idx) => (
+          <figure class="depo__card reveal" style={`--d:${idx * 110}ms`}>
+            <span class="depo__quote" aria-hidden="true">”</span>
+            <blockquote class="depo__q">{c.q}</blockquote>
+            <figcaption class="depo__by">
+              <span class="depo__n">{c.n}</span>
+              <span class="depo__r">{c.r}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    )}
 
     <a class="depo__more reveal" style="--d:200ms" href="https://www.instagram.com/akakiodontologia/" target="_blank" rel="noopener noreferrer">
       Ver mais histórias no Instagram
@@ -34,11 +76,34 @@ const quotes = [
   </div>
 </section>
 
+<script>
+  document.querySelectorAll('.vdepo__card').forEach((card) => {
+    const video = card.querySelector('.vdepo__video');
+    const btn = card.querySelector('.vdepo__play');
+    if (!video || !btn) return;
+    btn.addEventListener('click', () => {
+      // pausa qualquer outro depoimento tocando
+      document.querySelectorAll('.vdepo__card.is-playing').forEach((other) => {
+        if (other !== card) {
+          other.classList.remove('is-playing');
+          const ov = other.querySelector('.vdepo__video');
+          ov && ov.pause();
+          ov && ov.removeAttribute('controls');
+        }
+      });
+      card.classList.add('is-playing');
+      video.setAttribute('controls', '');
+      video.play();
+    });
+  });
+</script>
+
 <style>
   .depo { background: var(--cream); }
   .depo__head { text-align: center; max-width: 26ch; margin: 0 auto clamp(40px, 6vh, 64px); }
   .depo__head .h2 { margin-top: 16px; }
 
+  /* ——— variante TEXTO (fallback) ——— */
   .depo__row { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 26px); }
   .depo__card {
     position: relative; background: rgba(255,255,255,0.5);
@@ -59,6 +124,30 @@ const quotes = [
   .depo__n { font-family: var(--sans); font-weight: 600; font-size: 13px; letter-spacing: 0.04em; color: var(--navy); }
   .depo__r { font-family: var(--sans); font-weight: 600; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dark); }
 
+  /* ——— variante VÍDEO ——— */
+  .vdepo__row { display: grid; gap: clamp(16px, 2vw, 26px); }
+  .vdepo__row--portrait { grid-template-columns: repeat(3, 1fr); }
+  .vdepo__row--landscape { grid-template-columns: repeat(2, 1fr); }
+  .vdepo__card { display: flex; flex-direction: column; gap: 16px; }
+  .vdepo__media {
+    position: relative; border-radius: 22px; overflow: hidden; background: var(--navy);
+    box-shadow: 0 26px 52px -34px rgba(24,39,60,0.55);
+  }
+  .vdepo__row--portrait .vdepo__media { aspect-ratio: 9 / 16; }
+  .vdepo__row--landscape .vdepo__media { aspect-ratio: 16 / 9; }
+  .vdepo__video { width: 100%; height: 100%; object-fit: cover; display: block; background: var(--navy); }
+  .vdepo__play {
+    position: absolute; inset: 0; margin: auto; width: 66px; height: 66px; border: 0; cursor: pointer;
+    border-radius: 50%; display: grid; place-items: center; color: var(--navy);
+    background: var(--gold); box-shadow: 0 12px 34px -10px rgba(211,164,108,0.7);
+    transition: transform 300ms var(--silk), background 240ms var(--silk);
+  }
+  .vdepo__play svg { width: 24px; height: 24px; margin-left: 3px; }
+  .vdepo__play:hover { transform: scale(1.06); background: var(--gold-light); }
+  .vdepo__card.is-playing .vdepo__play { display: none; }
+  .vdepo__card.is-playing .vdepo__video { object-fit: contain; }
+  .vdepo__by { display: flex; flex-direction: column; gap: 2px; text-align: center; }
+
   .depo__more {
     display: inline-flex; align-items: center; gap: 9px; margin: clamp(34px, 5vh, 52px) auto 0;
     justify-content: center; width: 100%;
@@ -71,13 +160,16 @@ const quotes = [
   @media (hover: hover) { .depo__card:hover { transform: translateY(-5px); box-shadow: 0 26px 52px -30px rgba(24,39,60,0.4); } }
 
   @media (max-width: 860px) {
-    .depo__row {
-      grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 84%;
+    .depo__row, .vdepo__row {
+      grid-template-columns: none; grid-auto-flow: column;
       overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px;
       margin-inline: calc(clamp(20px, 5vw, 48px) * -1); padding-inline: clamp(20px, 5vw, 48px);
       scrollbar-width: none;
     }
-    .depo__row::-webkit-scrollbar { display: none; }
-    .depo__card { scroll-snap-align: center; }
+    .depo__row { grid-auto-columns: 84%; }
+    .vdepo__row--portrait { grid-auto-columns: 72%; }
+    .vdepo__row--landscape { grid-auto-columns: 88%; }
+    .depo__row::-webkit-scrollbar, .vdepo__row::-webkit-scrollbar { display: none; }
+    .depo__card, .vdepo__card { scroll-snap-align: center; }
   }
 </style>
