@@ -14,7 +14,7 @@ export const services = [
       h1: 'Durma durante o implante. Acorde <em>sem dor, sem corte</em>, com o sorriso pronto.',
       sub: 'Sedação odontológica + Cirurgia Guiada Ankylos. Você dorme, nós implantamos com precisão milimétrica alemã. Pós-operatório tranquilo e osseointegração em cerca de 45 dias.',
       urgency: 'Agenda com vagas limitadas. Consultas de avaliação disponíveis para esta semana.',
-      image: '/assets/t-implantes.webp',
+      image: '/assets/t-implantes-2.webp',
     },
     stats: [
       { n: '+5.000', l: 'Implantes realizados' },
@@ -98,7 +98,7 @@ export const services = [
       h1: 'Resolva todo o seu tratamento dentário em <em>um único dia</em>. Dormindo.',
       sub: 'Day Clinic com sedação odontológica e anestesista. Múltiplos procedimentos em uma única sessão — você chega, dorme, acorda com o sorriso resolvido. Sem tirar a semana da agenda.',
       urgency: 'Agenda com vagas limitadas. Datas de Day Clinic disponíveis para este mês.',
-      image: '/assets/t-dayclinic.webp',
+      image: '/assets/t-dayclinic-2.webp',
     },
     stats: [
       { n: '+5.000', l: 'Implantes realizados' },
@@ -193,7 +193,7 @@ export const services = [
       h1: 'Dentes alinhados para o seu <em>melhor sorriso</em>',
       sub: 'Correção da posição dos dentes e dos ossos maxilares com acompanhamento especializado — mais saúde, mais higiene e a harmonia que o seu sorriso merece.',
       urgency: 'Avaliação ortodôntica completa. Consultas disponíveis para esta semana.',
-      image: '/assets/t-ortodontia.webp',
+      image: '/assets/t-ortodontia-2.webp',
     },
     stats: [
       { n: '35 anos', l: 'De experiência' },
@@ -269,7 +269,7 @@ export const services = [
       h1: 'Para o seu <em>melhor sorriso</em>',
       sub: 'Devolvemos harmonia, brilho e naturalidade ao seu sorriso — com procedimentos estéticos que valorizam a sua confiança no dia a dia. Com sedação, se você preferir.',
       urgency: 'Avaliação do sorriso disponível para esta semana.',
-      image: '/assets/t-estetica.webp',
+      image: '/assets/t-estetica-2.webp',
     },
     stats: [
       { n: '35 anos', l: 'De experiência' },
@@ -345,7 +345,7 @@ export const services = [
       h1: 'Visita ao dentista sempre <em>agradável e feliz</em>',
       sub: 'O cuidado com o sorriso vem desde cedo. Profissionais especializados para a criança crescer cuidando dos dentes de forma lúdica — sem medo e sem traumas.',
       urgency: 'Atendimento infantil especializado. Consultas disponíveis para esta semana.',
-      image: '/assets/t-odontopediatria.webp',
+      image: '/assets/t-odontopediatria-2.webp',
     },
     stats: [
       { n: '35 anos', l: 'De experiência' },
