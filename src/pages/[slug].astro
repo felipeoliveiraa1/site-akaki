@@ -37,26 +37,33 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
     <section class="lp-hero">
       <div class="lp-hero__bg" aria-hidden="true"><img src={s.hero.image} alt="" width="1000" height="750" fetchpriority="high" decoding="async" /></div>
       <div class="lp-hero__veil" aria-hidden="true"></div>
-      <div class="container lp-hero__grid">
-        <div class="lp-hero__text">
-          <p class="eyebrow">{s.hero.eyebrow}</p>
-          <h1 class="display lp-hero__h1" set:html={s.hero.h1}></h1>
-          <p class="lead lp-hero__sub">{s.hero.sub}</p>
-          <p class="lp-urgency"><span class="lp-urgency__dot"></span>{s.hero.urgency}</p>
-          <a class="btn btn--gold lp-hero__cta" data-wpp={`servico-${s.slug}-hero`} href={WPP} target="_blank" rel="noopener noreferrer">
-            <svg viewBox="0 0 24 24" aria-hidden="true" set:html={arrow} /> Agendar minha consulta
-          </a>
-        </div>
+      <div class="container lp-hero__inner">
+        <p class="eyebrow">{s.hero.eyebrow}</p>
+        <h1 class="display lp-hero__h1" set:html={s.hero.h1}></h1>
+        <p class="lead lp-hero__sub">{s.hero.sub}</p>
+        <p class="lp-urgency"><span class="lp-urgency__dot"></span>{s.hero.urgency}</p>
+        <button class="btn btn--gold lp-hero__cta" type="button" data-lp-open aria-haspopup="dialog" aria-controls="lp-modal">
+          <svg viewBox="0 0 24 24" aria-hidden="true" set:html={arrow} /> Agende sua consulta
+        </button>
+      </div>
+    </section>
 
+    <!-- MODAL — formulário de agendamento -->
+    <div class="lp-modal" id="lp-modal" hidden>
+      <div class="lp-modal__backdrop" data-lp-close></div>
+      <div class="lp-modal__panel" role="dialog" aria-modal="true" aria-labelledby="lp-form-title">
+        <button class="lp-modal__close" type="button" data-lp-close aria-label="Fechar formulário">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
         <form class="lp-form" id="lp-form">
-          <p class="lp-form__title">Agende sua consulta</p>
+          <p class="lp-form__title" id="lp-form-title">Agende sua consulta</p>
           <input class="lp-form__in" type="text" name="nome" placeholder="Seu nome" autocomplete="name" required />
           <input class="lp-form__in" type="tel" name="telefone" placeholder="Telefone / WhatsApp" autocomplete="tel" required />
           <button class="btn btn--gold lp-form__btn" type="submit">Quero agendar minha consulta</button>
           <p class="lp-form__note">Nossa equipe entra em contato para confirmar sua data e tirar suas dúvidas.</p>
         </form>
       </div>
-    </section>
+    </div>
 
     <!-- STATS -->
     <section class="lp-stats arc-top">
@@ -294,7 +301,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
   .lp-hero__bg { position: absolute; inset: 0; z-index: 0; }
   .lp-hero__bg img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.42) saturate(0.82) blur(3px); transform: scale(1.08); animation: kenburns 24000ms var(--breath) infinite alternate; }
   .lp-hero__veil { position: absolute; inset: 0; z-index: 1; background: radial-gradient(120% 100% at 25% 35%, rgba(11,14,19,0.3) 0%, rgba(11,14,19,0.72) 70%, rgba(11,14,19,0.88) 100%), linear-gradient(180deg, rgba(11,14,19,0.7) 0%, rgba(11,14,19,0.45) 50%, rgba(11,14,19,0.92) 100%); }
-  .lp-hero__grid { position: relative; z-index: 2; display: grid; grid-template-columns: 1.3fr 0.7fr; gap: clamp(32px, 4.5vw, 72px); align-items: center; }
+  .lp-hero__inner { position: relative; z-index: 2; max-width: 720px; }
   .lp-hero .eyebrow { color: var(--gold-light); }
   .lp-hero__h1 { color: var(--white-text); font-size: clamp(34px, 5.2vw, 60px); margin: 18px 0 20px; max-width: 16ch; }
   .lp-hero__h1 em { color: var(--gold-light); font-style: italic; }
@@ -310,6 +317,18 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
   .lp-form__in::placeholder { color: rgba(245,240,232,0.45); }
   .lp-form__btn { width: 100%; justify-content: center; margin-top: 4px; }
   .lp-form__note { font-size: 11.5px; color: rgba(245,240,232,0.55); text-align: center; line-height: 1.5; }
+
+  /* MODAL de agendamento */
+  .lp-modal[hidden] { display: none; }
+  .lp-modal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 20px; }
+  .lp-modal__backdrop { position: absolute; inset: 0; background: rgba(8,10,14,0.74); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: lpFade 240ms var(--silk); }
+  .lp-modal__panel { position: relative; z-index: 1; width: 100%; max-width: 420px; animation: lpPop 320ms var(--silk); }
+  .lp-modal__close { position: absolute; top: 12px; right: 12px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(211,164,108,0.3); background: rgba(11,14,19,0.55); color: var(--cream); cursor: pointer; display: grid; place-items: center; transition: background 200ms, transform 240ms var(--silk); }
+  .lp-modal__close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .lp-modal__close:hover { background: rgba(211,164,108,0.2); transform: rotate(90deg); }
+  @keyframes lpFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lpPop { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .lp-modal__backdrop, .lp-modal__panel { animation: none; } }
 
   /* STATS — cream band, gold serif numbers, hairline dividers */
   .lp-stats { background: var(--cream); position: relative; z-index: 2; }
@@ -459,8 +478,6 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
   .lp-final__cta svg { width: 16px; height: 16px; }
 
   @media (max-width: 980px) {
-    .lp-hero__grid { grid-template-columns: 1fr; }
-    .lp-form { order: -1; }
     .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-cases__grid, .lp-steps__grid, .lp-proto__grid { grid-template-columns: 1fr 1fr; }
     .lp-spec__grid { grid-template-columns: 1fr; }
     .lp-spec__media { max-width: 360px; margin-inline: auto; }
@@ -473,6 +490,23 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
 </style>
 
 <script>
+  const modal = document.getElementById('lp-modal');
+  const openModal = () => {
+    if (!modal) return;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    const first = modal.querySelector('input');
+    if (first) setTimeout(() => (first as HTMLInputElement).focus(), 60);
+  };
+  const closeModal = () => {
+    if (!modal) return;
+    modal.hidden = true;
+    document.body.style.overflow = '';
+  };
+  document.querySelectorAll('[data-lp-open]').forEach((b) => b.addEventListener('click', openModal));
+  document.querySelectorAll('[data-lp-close]').forEach((b) => b.addEventListener('click', closeModal));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal && !modal.hidden) closeModal(); });
+
   const form = document.getElementById('lp-form');
   if (form) {
     const main = document.querySelector('.lp');
@@ -495,6 +529,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
       parts.push('Anúncio: ' + slug + '-form');
       msg += ' [' + parts.join(' | ') + ']';
       window.open('https://api.whatsapp.com/send?phone=5511947024607&text=' + encodeURIComponent(msg), '_blank');
+      closeModal();
     });
   }
 </script>
