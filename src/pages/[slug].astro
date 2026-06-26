@@ -142,11 +142,11 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
     <section class="section lp-spec band-cream-deep">
       <div class="container lp-spec__grid">
         <figure class="lp-spec__media reveal">
-          <div class="frame-arc"><img src="/assets/dr-akaki-2.webp" alt="Dr. Luiz Akaki, especialista da Akaki Odontologia" width="640" height="664" loading="lazy" decoding="async" /></div>
+          <div class="frame-arc"><img src={s.specPhoto || '/assets/dr-akaki-2.webp'} alt={s.specAlt || 'Dr. Luiz Akaki, especialista da Akaki Odontologia'} width="640" height="664" loading="lazy" decoding="async" /></div>
         </figure>
         <div class="lp-spec__text">
-          <p class="eyebrow reveal">Conheça o especialista</p>
-          <h2 class="h2 reveal" style="--d:80ms">Dr. Luiz <em>Akaki</em></h2>
+          <p class="eyebrow reveal">{s.specEyebrow || 'Conheça o especialista'}</p>
+          <h2 class="h2 reveal" style="--d:80ms" set:html={s.specName || 'Dr. Luiz <em>Akaki</em>'}></h2>
           <p class="lp-spec__role reveal" style="--d:140ms">{s.specRole || 'CRO-SP 45717 · Especialista em Odontologia'}</p>
           <p class="lead lp-spec__bio reveal" style="--d:200ms">{s.specBio || 'Com mais de 35 anos de experiência, o Dr. Luiz Akaki foi pioneiro em trazer técnicas de ponta da Alemanha e dos EUA para o Brasil. Atendimento humanizado, tecnologia de referência e resultados previsíveis.'}</p>
           {s.specQuote && <p class="lp-spec__quote reveal" style="--d:240ms">“{s.specQuote}”</p>}
@@ -366,8 +366,8 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
 
   /* premium translucent cards */
   .lp-dif { background: var(--cream); }
-  .lp-dif__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 1.8vw, 24px); }
-  .lp-card { background: rgba(255,255,255,0.5); border: 1px solid rgba(24,39,60,0.1); border-radius: 20px; padding: clamp(28px, 2.8vw, 38px); transition: transform 340ms var(--silk), box-shadow 340ms var(--silk), border-color 340ms var(--silk); }
+  .lp-dif__grid { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(16px, 1.8vw, 24px); }
+  .lp-card { flex: 1 1 240px; max-width: 300px; background: rgba(255,255,255,0.5); border: 1px solid rgba(24,39,60,0.1); border-radius: 20px; padding: clamp(28px, 2.8vw, 38px); transition: transform 340ms var(--silk), box-shadow 340ms var(--silk), border-color 340ms var(--silk); }
   .lp-card__n { display: block; font-family: var(--serif); font-style: italic; font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(30px, 3vw, 42px); line-height: 1; color: var(--gold-dark); letter-spacing: -0.02em; }
   .lp-card__rule { display: block; width: 34px; height: 2px; border-radius: 2px; background: var(--brass); margin: 16px 0 18px; transition: width 420ms var(--silk); }
   .lp-card__t { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(19px, 2vw, 23px); color: var(--navy); margin-bottom: 10px; letter-spacing: -0.01em; }
