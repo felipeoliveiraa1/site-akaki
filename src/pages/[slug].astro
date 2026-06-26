@@ -181,8 +181,8 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
     <section class="section lp-revs">
       <div class="container">
         <header class="lp-head">
-          <p class="eyebrow eyebrow--center reveal">Resultados</p>
-          <h2 class="h2 reveal" style="--d:80ms">O que nossos pacientes <em>dizem</em></h2>
+          <p class="eyebrow eyebrow--center reveal">{s.revsEyebrow || 'Resultados'}</p>
+          <h2 class="h2 reveal" style="--d:80ms" set:html={s.revsTitle || 'O que nossos pacientes <em>dizem</em>'}></h2>
         </header>
         <div class="lp-google reveal">
           <span class="lp-google__g">G</span>
@@ -285,7 +285,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
       <div class="container lp-faq__wrap">
         <header class="lp-head">
           <p class="eyebrow eyebrow--center reveal">Dúvidas frequentes</p>
-          <h2 class="h2 reveal" style="--d:80ms">Perguntas frequentes</h2>
+          <h2 class="h2 reveal" style="--d:80ms" set:html={s.faqTitle || 'Perguntas frequentes'}></h2>
         </header>
         <div class="lp-faq__list">
           {s.faq.map((f, i) => (
@@ -301,9 +301,9 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
     <!-- CTA FINAL -->
     <section class="lp-final band-dark arc-top">
       <div class="container lp-final__inner">
-        <p class="eyebrow eyebrow--center reveal">Próximo passo</p>
-        <h2 class="display lp-final__h reveal" style="--d:80ms">Agende sua consulta de <em>avaliação</em>.</h2>
-        <p class="lead reveal lp-final__sub" style="--d:140ms">Nossa equipe entra em contato para confirmar sua data e tirar suas dúvidas.</p>
+        <p class="eyebrow eyebrow--center reveal">{s.finalEyebrow || 'Próximo passo'}</p>
+        <h2 class="display lp-final__h reveal" style="--d:80ms" set:html={s.finalTitle || 'Agende sua consulta de <em>avaliação</em>.'}></h2>
+        <p class="lead reveal lp-final__sub" style="--d:140ms">{s.finalSub || 'Nossa equipe entra em contato para confirmar sua data e tirar suas dúvidas.'}</p>
         <div class="lp-final__cta reveal" style="--d:200ms">
           <a class="btn btn--gold" data-wpp={`servico-${s.slug}-final`} href={WPP} target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24" aria-hidden="true" set:html={arrow} /> Quero agendar minha consulta
