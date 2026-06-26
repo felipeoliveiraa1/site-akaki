@@ -117,6 +117,27 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
       </section>
     )}
 
+    <!-- GALERIA DO ESPAÇO (opcional) -->
+    {s.gallery && (
+      <section class="section lp-gal">
+        <div class="container">
+          <header class="lp-head">
+            <p class="eyebrow eyebrow--center reveal">{s.gallery.eyebrow}</p>
+            <h2 class="h2 reveal" style="--d:80ms" set:html={s.gallery.title}></h2>
+            {s.gallery.sub && <p class="lead muted reveal lp-gal__sub" style="--d:140ms">{s.gallery.sub}</p>}
+          </header>
+          <div class="lp-gal__grid">
+            {s.gallery.shots.map((g, i) => (
+              <figure class="lp-gal__item reveal" style={`--d:${i * 70}ms`}>
+                <img src={g.img} alt={g.alt} loading="lazy" decoding="async" />
+                {g.cap && <figcaption>{g.cap}</figcaption>}
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
     <!-- ESPECIALISTA -->
     <section class="section lp-spec band-cream-deep">
       <div class="container lp-spec__grid">
@@ -477,7 +498,16 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
   .lp-final__cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 32px; }
   .lp-final__cta svg { width: 16px; height: 16px; }
 
+  /* GALERIA DO ESPAÇO */
+  .lp-gal__sub { text-align: center; max-width: 52ch; margin: 14px auto 0; }
+  .lp-gal__grid { columns: 3; column-gap: clamp(14px, 1.6vw, 20px); margin-top: clamp(32px, 5vh, 52px); }
+  .lp-gal__item { break-inside: avoid; margin: 0 0 clamp(14px, 1.6vw, 20px); position: relative; overflow: hidden; border-radius: 18px; box-shadow: 0 18px 44px -30px rgba(24,39,60,0.5); }
+  .lp-gal__item img { width: 100%; height: auto; display: block; transition: transform 700ms var(--silk); }
+  .lp-gal__item figcaption { position: absolute; inset: auto 0 0 0; padding: 26px 16px 12px; font-family: var(--sans); font-weight: 600; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #fff; background: linear-gradient(transparent, rgba(11,14,19,0.72)); }
+  @media (hover: hover) { .lp-gal__item:hover img { transform: scale(1.05); } }
+
   @media (max-width: 980px) {
+    .lp-gal__grid { columns: 2; }
     .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-cases__grid, .lp-steps__grid, .lp-proto__grid { grid-template-columns: 1fr 1fr; }
     .lp-spec__grid { grid-template-columns: 1fr; }
     .lp-spec__media { max-width: 360px; margin-inline: auto; }
@@ -485,6 +515,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
   @media (max-width: 620px) {
     .lp-stats__grid { grid-template-columns: 1fr 1fr; gap: 26px 16px; }
     .lp-stat--div::before { display: none; }
+    .lp-gal__grid { columns: 1; max-width: 460px; margin-inline: auto; }
     .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-cases__grid, .lp-steps__grid, .lp-cmp__grid, .lp-proto__grid, .lp-perfis__grid { grid-template-columns: 1fr; }
   }
 </style>
