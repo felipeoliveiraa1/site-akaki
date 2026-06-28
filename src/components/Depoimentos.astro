@@ -11,8 +11,15 @@
 const ORIENTATION = 'portrait'; // 'portrait' = reels 9:16 · 'landscape' = 16:9
 const videos = [
   { src: '/assets/depoimentos/depo-marcelo-guimaraes.mp4', poster: '/assets/depoimentos/depo-marcelo-guimaraes.jpg', n: 'Marcelo Guimarães', r: 'Paciente' },
+  { src: '/assets/depoimentos/depo-carina.mp4',            poster: '/assets/depoimentos/depo-carina.jpg',            n: 'Carina Albamonte', r: 'Empresária' },
+  { src: '/assets/depoimentos/depo-vicent.mp4',            poster: '/assets/depoimentos/depo-vicent.jpg',            n: 'Vincent Mastio',   r: 'Empresário' },
   { src: '/assets/depoimentos/depo-mario-oki.mp4',         poster: '/assets/depoimentos/depo-mario-oki.jpg',         n: 'Mário Oki',         r: 'Empresário' },
-  // { src: '/assets/depoimentos/depo-03.mp4', poster: '/assets/depoimentos/depo-03.jpg', n: 'AGUARDANDO NOME', r: 'Paciente' }, // IMG_8096 — pendente o nome
+  { src: '/assets/depoimentos/depo-renata.mp4',            poster: '/assets/depoimentos/depo-renata.jpg',            n: 'Renata',           r: 'Paciente' },
+  { src: '/assets/depoimentos/depo-victor.mp4',            poster: '/assets/depoimentos/depo-victor.jpg',            n: 'Victor',           r: 'Empresário' },
+  { src: '/assets/depoimentos/depo-stefani.mp4',           poster: '/assets/depoimentos/depo-stefani.jpg',           n: 'Stefani',          r: 'Paciente' },
+  { src: '/assets/depoimentos/depo-joaquim.mp4',           poster: '/assets/depoimentos/depo-joaquim.jpg',           n: 'Joaquim',          r: 'Odontopediatria' },
+  { src: '/assets/depoimentos/depo-dayclinic.mp4',         poster: '/assets/depoimentos/depo-dayclinic.jpg',         n: 'Paciente',         r: 'Day Clinic' },
+  { src: '/assets/depoimentos/depo-uuid.mp4',              poster: '/assets/depoimentos/depo-uuid.jpg',              n: 'Paciente',         r: 'Akaki' },
 ];
 
 // Fallback de texto enquanto os vídeos não sobem (placeholder).
@@ -127,7 +134,8 @@ const hasVideos = videos.length > 0;
 
   /* ——— variante VÍDEO ——— */
   .vdepo__row { display: grid; gap: clamp(16px, 2vw, 26px); }
-  .vdepo__row--portrait { grid-template-columns: repeat(var(--cols, 3), minmax(0, 300px)); justify-content: center; }
+  .vdepo__row--portrait { display: flex; flex-wrap: wrap; justify-content: center; }
+  .vdepo__row--portrait .vdepo__card { width: clamp(240px, 30vw, 300px); }
   .vdepo__row--landscape { grid-template-columns: repeat(2, 1fr); }
   .vdepo__card { display: flex; flex-direction: column; gap: 16px; }
   .vdepo__media {
@@ -162,14 +170,14 @@ const hasVideos = videos.length > 0;
 
   @media (max-width: 860px) {
     .depo__row, .vdepo__row {
-      grid-template-columns: none; grid-auto-flow: column;
       overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px;
       margin-inline: calc(clamp(20px, 5vw, 48px) * -1); padding-inline: clamp(20px, 5vw, 48px);
       scrollbar-width: none;
     }
-    .depo__row { grid-auto-columns: 84%; }
-    .vdepo__row--portrait { grid-auto-columns: 72%; }
-    .vdepo__row--landscape { grid-auto-columns: 88%; }
+    .depo__row { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 84%; }
+    .vdepo__row--portrait { flex-wrap: nowrap; justify-content: flex-start; }
+    .vdepo__row--portrait .vdepo__card { width: 72%; flex: 0 0 72%; }
+    .vdepo__row--landscape { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 88%; }
     .depo__row::-webkit-scrollbar, .vdepo__row::-webkit-scrollbar { display: none; }
     .depo__card, .vdepo__card { scroll-snap-align: center; }
   }
