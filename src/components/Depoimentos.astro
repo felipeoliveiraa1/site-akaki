@@ -39,7 +39,11 @@ const hasVideos = videos.length > 0;
     </header>
 
     {hasVideos ? (
-      <div class={`vdepo__row vdepo__row--${ORIENTATION}`} style={`--cols:${Math.min(videos.length, 3)}`}>
+      <div class="vdepo__carousel">
+        <button class="vdepo__nav vdepo__nav--prev is-off" type="button" aria-label="Ver depoimentos anteriores" data-vdepo-prev>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <div class={`vdepo__row vdepo__row--${ORIENTATION}`} data-vdepo-track>
         {videos.map((v, idx) => (
           <figure class="vdepo__card reveal" style={`--d:${idx * 110}ms`}>
             <div class="vdepo__media">
@@ -61,6 +65,10 @@ const hasVideos = videos.length > 0;
             </figcaption>
           </figure>
         ))}
+        </div>
+        <button class="vdepo__nav vdepo__nav--next" type="button" aria-label="Ver próximos depoimentos" data-vdepo-next>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
     ) : (
       <div class="depo__row">
@@ -104,6 +112,29 @@ const hasVideos = videos.length > 0;
       video.play();
     });
   });
+
+  // Carrossel — setas (desktop) + atualiza estado nas pontas
+  const track = document.querySelector('[data-vdepo-track]');
+  const prevBtn = document.querySelector('[data-vdepo-prev]');
+  const nextBtn = document.querySelector('[data-vdepo-next]');
+  if (track && prevBtn && nextBtn) {
+    const step = () => {
+      const card = track.querySelector('.vdepo__card');
+      const gap = parseFloat(getComputedStyle(track).gap) || 20;
+      const w = card ? card.getBoundingClientRect().width + gap : 300;
+      return Math.max(w, track.clientWidth * 0.85);
+    };
+    prevBtn.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
+    nextBtn.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+    const update = () => {
+      const max = track.scrollWidth - track.clientWidth - 2;
+      prevBtn.classList.toggle('is-off', track.scrollLeft <= 2);
+      nextBtn.classList.toggle('is-off', track.scrollLeft >= max);
+    };
+    track.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  }
 </script>
 
 <style>
@@ -133,10 +164,24 @@ const hasVideos = videos.length > 0;
   .depo__r { font-family: var(--sans); font-weight: 600; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dark); }
 
   /* ——— variante VÍDEO ——— */
-  .vdepo__row { display: grid; gap: clamp(16px, 2vw, 26px); }
-  .vdepo__row--portrait { display: flex; flex-wrap: wrap; justify-content: center; }
-  .vdepo__row--portrait .vdepo__card { width: clamp(240px, 30vw, 300px); }
-  .vdepo__row--landscape { grid-template-columns: repeat(2, 1fr); }
+  .vdepo__carousel { position: relative; }
+  .vdepo__row { display: flex; flex-wrap: nowrap; gap: clamp(14px, 2vw, 24px); overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; padding: 4px 2px 12px; }
+  .vdepo__row::-webkit-scrollbar { display: none; }
+  .vdepo__row--portrait .vdepo__card { flex: 0 0 clamp(230px, 24vw, 275px); scroll-snap-align: center; }
+  .vdepo__row--landscape .vdepo__card { flex: 0 0 clamp(300px, 42vw, 460px); scroll-snap-align: center; }
+  .vdepo__nav {
+    position: absolute; top: 44%; transform: translateY(-50%); z-index: 5;
+    width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
+    display: grid; place-items: center; color: var(--navy);
+    background: var(--cream); border: 1px solid rgba(211,164,108,0.5);
+    box-shadow: 0 12px 30px -12px rgba(24,39,60,0.45);
+    transition: background 200ms var(--silk), transform 200ms var(--silk), opacity 240ms var(--silk);
+  }
+  .vdepo__nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .vdepo__nav:hover { background: var(--gold-light); }
+  .vdepo__nav--prev { left: -8px; }
+  .vdepo__nav--next { right: -8px; }
+  .vdepo__nav.is-off { opacity: 0; pointer-events: none; }
   .vdepo__card { display: flex; flex-direction: column; gap: 16px; }
   .vdepo__media {
     position: relative; border-radius: 22px; overflow: hidden; background: var(--navy);
@@ -169,16 +214,16 @@ const hasVideos = videos.length > 0;
   @media (hover: hover) { .depo__card:hover { transform: translateY(-5px); box-shadow: 0 26px 52px -30px rgba(24,39,60,0.4); } }
 
   @media (max-width: 860px) {
-    .depo__row, .vdepo__row {
+    .vdepo__row { margin-inline: calc(clamp(20px, 5vw, 48px) * -1); padding-inline: clamp(20px, 5vw, 48px); }
+    .vdepo__row--portrait .vdepo__card { flex: 0 0 78%; }
+    .vdepo__row--landscape .vdepo__card { flex: 0 0 88%; }
+    .vdepo__nav { display: none; }
+    .depo__row {
+      grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 84%;
       overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px;
-      margin-inline: calc(clamp(20px, 5vw, 48px) * -1); padding-inline: clamp(20px, 5vw, 48px);
-      scrollbar-width: none;
+      margin-inline: calc(clamp(20px, 5vw, 48px) * -1); padding-inline: clamp(20px, 5vw, 48px); scrollbar-width: none;
     }
-    .depo__row { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 84%; }
-    .vdepo__row--portrait { flex-wrap: nowrap; justify-content: flex-start; }
-    .vdepo__row--portrait .vdepo__card { width: 72%; flex: 0 0 72%; }
-    .vdepo__row--landscape { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 88%; }
-    .depo__row::-webkit-scrollbar, .vdepo__row::-webkit-scrollbar { display: none; }
-    .depo__card, .vdepo__card { scroll-snap-align: center; }
+    .depo__row::-webkit-scrollbar { display: none; }
+    .depo__card { scroll-snap-align: center; }
   }
 </style>
