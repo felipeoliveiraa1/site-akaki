@@ -13,6 +13,31 @@ const {
   description = 'Tratamento odontológico com sedação consciente, em menos tempo e sem medo. Você dorme e acorda com um sorriso novo. Day Clinic, implantes, ortodontia e estética no Jardim Paulista, São Paulo.',
 } = Astro.props;
 const ogImage = new URL('/assets/film-poster.webp', Astro.site).href;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Dentist',
+  name: 'Akaki Odontologia',
+  image: ogImage,
+  url: Astro.site ? Astro.site.href : 'https://akaki.odo.br',
+  telephone: '+5511947024607',
+  email: 'contato@akaki.odo.br',
+  priceRange: '$$$',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Rua Estados Unidos, 205',
+    addressLocality: 'São Paulo',
+    addressRegion: 'SP',
+    postalCode: '01427-002',
+    addressCountry: 'BR',
+  },
+  areaServed: 'São Paulo',
+  aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.9', reviewCount: '214' },
+  sameAs: [
+    'https://www.instagram.com/akakiodontologia/',
+    'https://www.youtube.com/channel/UCyGQUid86fGgsJoGISGSuGQ',
+  ],
+};
 ---
 
 <!doctype html>
@@ -22,6 +47,7 @@ const ogImage = new URL('/assets/film-poster.webp', Astro.site).href;
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
     <meta name="theme-color" content="#0B0E13" />
     <meta name="color-scheme" content="light" />
 
@@ -39,6 +65,8 @@ const ogImage = new URL('/assets/film-poster.webp', Astro.site).href;
     <meta property="og:image" content={ogImage} />
     <meta property="og:locale" content="pt_BR" />
     <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
 
     <!-- UTM por botão (mesma lógica da bio): origem por CTA via data-wpp / data-site -->
     <script is:inline>

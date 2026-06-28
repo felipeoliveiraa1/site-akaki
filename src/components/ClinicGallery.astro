@@ -19,7 +19,7 @@ const shots = [
     <div class="gal__grid">
       {shots.map((s, idx) => (
         <figure class={`gal__item reveal ${idx === 0 ? 'gal__item--lead' : ''}`} style={`--d:${idx * 70}ms`}>
-          <img src={s.img} alt={s.alt} width={s.w} height={s.h} loading="lazy" decoding="async" />
+          <img src={s.img} alt={s.alt} width={s.w} height={s.h} loading="eager" decoding="async" />
         </figure>
       ))}
     </div>

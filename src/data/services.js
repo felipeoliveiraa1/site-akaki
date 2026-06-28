@@ -9,11 +9,13 @@ export const services = [
     slug: 'implantes',
     nav: 'Implantes',
     name: 'Implantes',
+    seoTitle: 'Implante Dentário em São Paulo | Cirurgia Guiada — Akaki',
+    formExtra: { label: 'Sua situação hoje', name: 'situacao', options: ['Perdi um dente', 'Perdi vários dentes', 'Uso prótese ou dentadura', 'Ainda tenho o dente (vou extrair)', 'Não sei / quero avaliar'] },
     hero: {
       eyebrow: 'Implantes dentários em São Paulo',
       h1: 'Durma durante o implante. Acorde <em>sem dor, sem corte</em>, com o sorriso pronto.',
       sub: 'Sedação odontológica + Cirurgia Guiada Ankylos. Você dorme, nós implantamos com precisão milimétrica alemã. Pós-operatório tranquilo e osseointegração em cerca de 45 dias.',
-      urgency: 'Agenda com vagas limitadas. Consultas de avaliação disponíveis para esta semana.',
+      urgency: 'Agenda com vagas limitadas para avaliação. Agende a sua.',
       image: '/assets/t-implantes-2.webp',
     },
     stats: [
@@ -68,7 +70,7 @@ export const services = [
     specRole: 'CRO-SP 45717 · Especialista em Implantodontia',
     specBio: 'Com mais de 35 anos de experiência e 5.000+ implantes realizados, o Dr. Luiz Akaki foi pioneiro em trazer a técnica de Cirurgia Guiada da Alemanha e dos EUA para o Brasil. Referência em sedação odontológica e carga imediata — atendimento humanizado, tecnologia de ponta, resultados previsíveis.',
     specQuote: 'Faça seu implante com a maior referência em implantes no Brasil e no mundo.',
-    specBadges: ['CRO-SP 45717', 'Ankylos Certified', 'Cirurgia Guiada', 'EPAO CRO-SP 031012'],
+    specBadges: ['CRO-SP 45717', 'Ankylos Certified', 'Cirurgia Guiada', 'EPAO CRO-SP 13012'],
     testimonials: [
       { q: 'Fiz 4 implantes com o Dr. Luiz e o resultado foi incrível. Não senti nada durante o procedimento e em menos de um mês já estava mastigando normalmente.', n: 'Márcia F.', loc: 'São Paulo · Implante múltiplo' },
       { q: 'Tinha muito medo de cirurgia. A técnica sem corte foi uma revelação. Saí andando, sem dor, com um sorriso novo. Atendimento impecável do começo ao fim.', n: 'Roberto P.', loc: 'Moema · Implante unitário' },
@@ -93,11 +95,12 @@ export const services = [
     slug: 'sedacao-odontologica',
     nav: 'Sedação Odontológica',
     name: 'Sedação Odontológica',
+    seoTitle: 'Sedação Odontológica em São Paulo | Day Clinic — Akaki',
     hero: {
       eyebrow: 'Sedação odontológica · Day Clinic · São Paulo',
       h1: 'Resolva todo o seu tratamento dentário em <em>um único dia</em>. Dormindo.',
       sub: 'Day Clinic com sedação odontológica e anestesista. Múltiplos procedimentos em uma única sessão — você chega, dorme, acorda com o sorriso resolvido. Sem tirar a semana da agenda.',
-      urgency: 'Agenda com vagas limitadas. Datas de Day Clinic disponíveis para este mês.',
+      urgency: 'Vagas de Day Clinic limitadas. Agende sua avaliação.',
       image: '/assets/t-dayclinic-2.webp',
     },
     stats: [
@@ -163,7 +166,7 @@ export const services = [
     specRole: 'CRO-SP 45717 · Especialista em Implantodontia e Sedação Odontológica',
     specBio: 'Com mais de 35 anos de experiência e 5.000+ procedimentos realizados, o Dr. Luiz Akaki foi pioneiro em trazer a Cirurgia Guiada e o modelo Day Clinic para o Brasil. Referência em sedação odontológica — atendimento humanizado, tecnologia de ponta, resultados previsíveis.',
     specQuote: 'Aqui o seu medo vem em primeiro lugar. Você dorme e acorda com um sorriso novo.',
-    specBadges: ['CRO-SP 45717', 'Sedação Odontológica', 'Day Clinic', 'EPAO CRO-SP 031012'],
+    specBadges: ['CRO-SP 45717', 'Sedação Odontológica', 'Day Clinic', 'EPAO CRO-SP 13012'],
     testimonials: [
       { q: 'Tinha pavor de dentista há mais de 10 anos. No Day Clinic resolvi 3 tratamentos que estava adiando de uma vez. Acordei sem sentir nada e sem nenhum trauma. Melhor decisão que tomei.', n: 'Ricardo F.', loc: 'Itaim Bibi · Day Clinic' },
       { q: 'Como empresário não tenho tempo pra ficar voltando ao dentista toda semana. No Day Clinic resolvi implante, restaurações e limpeza no mesmo dia. Voltei ao trabalho no dia seguinte.', n: 'Marcos S.', loc: 'Jardins · Day Clinic Executivo' },
@@ -188,11 +191,12 @@ export const services = [
     slug: 'ortodontia',
     nav: 'Ortodontia',
     name: 'Ortodontia',
+    seoTitle: 'Ortodontia em São Paulo | Aparelho Estético — Akaki',
     hero: {
       eyebrow: 'Ortodontia em São Paulo',
       h1: 'Dentes alinhados para o seu <em>melhor sorriso</em>',
       sub: 'Correção da posição dos dentes e dos ossos maxilares com acompanhamento especializado — mais saúde, mais higiene e a harmonia que o seu sorriso merece.',
-      urgency: 'Avaliação ortodôntica completa. Consultas disponíveis para esta semana.',
+      urgency: 'Avaliação ortodôntica completa por agendamento.',
       image: '/assets/t-ortodontia-2.webp',
     },
     stats: [
@@ -264,11 +268,13 @@ export const services = [
     slug: 'estetica',
     nav: 'Estética',
     name: 'Estética',
+    seoTitle: 'Estética Dental em São Paulo | Lentes e Facetas — Akaki',
+    formExtra: { label: 'Qual procedimento te interessa?', name: 'procedimento', options: ['Lentes de contato', 'Facetas de porcelana', 'Clareamento', 'Não sei, quero avaliação'] },
     hero: {
       eyebrow: 'Estética dental · Jardins, SP',
       h1: 'O sorriso que você sempre quis. Em <em>poucas sessões</em>.',
       sub: 'Lentes de contato, facetas de porcelana e clareamento com planejamento digital e tecnologia CAD/CAM. Resultados naturais e duradouros — na clínica mais tradicional dos Jardins.',
-      urgency: 'Avaliação do sorriso disponível para esta semana.',
+      urgency: 'Avaliação do sorriso por agendamento.',
       image: '/assets/t-estetica-2.webp',
     },
     revsEyebrow: 'Pacientes',
@@ -356,11 +362,13 @@ export const services = [
     slug: 'odontopediatria',
     nav: 'Odontopediatria',
     name: 'Odontopediatria',
+    seoTitle: 'Dentista para Crianças em São Paulo | AkaKids — Akaki',
+    formExtra: { label: 'Idade da criança', name: 'idade', options: ['Menos de 2 anos', '2 a 5 anos', '6 a 9 anos', '10 a 12 anos', 'Adolescente'] },
     hero: {
       eyebrow: 'AkaKids · Odontopediatria',
       h1: 'Seu filho vai amar ir ao <em>dentista</em>.',
       sub: 'Na Akaki, cada consulta é uma aventura. Espaço 100% lúdico, equipe especializada em crianças e a mesma excelência que nos tornou referência em odontologia — agora para os pequenos.',
-      urgency: 'Atendimento infantil especializado. Consultas disponíveis para esta semana.',
+      urgency: 'Atendimento infantil especializado por agendamento.',
       image: '/assets/t-odontopediatria-2.webp',
     },
     revsEyebrow: 'Pais e mães',
@@ -438,7 +446,7 @@ export const services = [
     testimonials: [
       { q: 'Minha filha tinha pavor de dentista. Na Akaki, em duas consultas, ela já pedia pra voltar. O espaço infantil é incrível e a doutora tem uma paciência admirável.', n: 'Mãe de paciente', loc: 'AkaKids · 8 anos' },
       { q: 'Trouxe meu filho de 3 anos para a primeira consulta e foi surpreendente. Ele nem percebeu que estava no dentista. Saiu abraçando a doutora.', n: 'Pai de paciente', loc: 'AkaKids · 3 anos' },
-      { q: 'A sala de espera com brinquedos faz toda a diferença. Minha filha chega animada, e o atendimento é sempre carinhoso e profissional. Recomendo de olhos fechados.', n: 'Mãe de paciente', loc: 'AkaKids · 8 anos' },
+      { q: 'A sala de espera com brinquedos faz toda a diferença. Minha filha chega animada, e o atendimento é sempre carinhoso e profissional. Recomendo de olhos fechados.', n: 'Mãe de paciente', loc: 'AkaKids · 5 anos' },
     ],
     cases: [
       { t: 'Primeira consulta', d: 'Introdução positiva ao dentista' },

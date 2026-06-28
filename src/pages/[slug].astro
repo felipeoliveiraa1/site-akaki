@@ -9,7 +9,7 @@ export function getStaticPaths() {
 }
 const { service: s } = Astro.props;
 const WPP = 'https://api.whatsapp.com/send?phone=5511947024607';
-const pageTitle = `${s.name} · Akaki Odontologia`;
+const pageTitle = s.seoTitle || `${s.name} · Akaki Odontologia`;
 const pageDesc = s.hero.sub;
 
 const ICONS = {
@@ -26,7 +26,7 @@ const ICONS = {
   tech: '<rect x="3.5" y="5" width="17" height="11" rx="2"/><path d="M9 20h6M12 16v4"/>',
   child: '<circle cx="12" cy="7.5" r="3"/><path d="M5.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/>',
 };
-const badges = ['CRO-SP 45717', 'EPAO CRO-SP 031012', 'Cirurgia Guiada', 'Atendimento humanizado'];
+const badges = ['CRO-SP 45717', 'EPAO CRO-SP 13012', 'Cirurgia Guiada', 'Atendimento humanizado'];
 const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
 ---
 <Layout title={pageTitle} description={pageDesc}>
@@ -55,10 +55,16 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
         <button class="lp-modal__close" type="button" data-lp-close aria-label="Fechar formulário">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
-        <form class="lp-form" id="lp-form">
+        <form class="lp-form" id="lp-form" method="post">
           <p class="lp-form__title" id="lp-form-title">Agende sua consulta</p>
           <input class="lp-form__in" type="text" name="nome" placeholder="Seu nome" autocomplete="name" required />
           <input class="lp-form__in" type="tel" name="telefone" placeholder="Telefone / WhatsApp" autocomplete="tel" required />
+          {s.formExtra && (
+            <select class="lp-form__in lp-form__select" name={s.formExtra.name} data-extra data-extra-label={s.formExtra.label} aria-label={s.formExtra.label} required>
+              <option value="" disabled selected>{s.formExtra.label}</option>
+              {s.formExtra.options.map((o) => <option value={o}>{o}</option>)}
+            </select>
+          )}
           <button class="btn btn--gold lp-form__btn" type="submit">Quero agendar minha consulta</button>
           <p class="lp-form__note">Nossa equipe entra em contato para confirmar sua data e tirar suas dúvidas.</p>
         </form>
@@ -142,7 +148,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
     <section class="section lp-spec band-cream-deep">
       <div class="container lp-spec__grid">
         <figure class="lp-spec__media reveal">
-          <div class="frame-arc"><img src={s.specPhoto || '/assets/dr-akaki-2.webp'} alt={s.specAlt || 'Dr. Luiz Akaki, especialista da Akaki Odontologia'} width="640" height="664" loading="lazy" decoding="async" /></div>
+          <div class="frame-arc"><img src={s.specPhoto || '/assets/dr-akaki-2.webp'} alt={s.specAlt || 'Dr. Luiz Akaki, especialista da Akaki Odontologia'} width="640" height="664" loading="eager" decoding="async" /></div>
         </figure>
         <div class="lp-spec__text">
           <p class="eyebrow reveal">{s.specEyebrow || 'Conheça o especialista'}</p>
@@ -308,7 +314,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
           <a class="btn btn--gold" data-wpp={`servico-${s.slug}-final`} href={WPP} target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24" aria-hidden="true" set:html={arrow} /> Quero agendar minha consulta
           </a>
-          <a class="btn btn--light" href="/#localizacao">Falar com a clínica</a>
+          <button class="btn btn--light" type="button" data-lp-open>Falar com a clínica</button>
         </div>
       </div>
     </section>
@@ -336,6 +342,9 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
   .lp-form__title { font-family: var(--sans); font-weight: 600; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-light); text-align: center; margin-bottom: 4px; }
   .lp-form__in { width: 100%; padding: 14px 16px; border-radius: 11px; border: 1px solid rgba(244,238,227,0.22); background: rgba(11,14,19,0.4); color: var(--cream); font-family: var(--body); font-size: 14.5px; }
   .lp-form__in::placeholder { color: rgba(245,240,232,0.45); }
+  .lp-form__select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 40px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E4BC8A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; }
+  .lp-form__select:invalid { color: rgba(245,240,232,0.5); }
+  .lp-form__select option { color: #18273c; }
   .lp-form__btn { width: 100%; justify-content: center; margin-top: 4px; }
   .lp-form__note { font-size: 11.5px; color: rgba(245,240,232,0.55); text-align: center; line-height: 1.5; }
 
@@ -552,6 +561,9 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
       let msg = 'Olá! Quero agendar uma avaliação de ' + serviceName + '.';
       if (nome) msg += '\nNome: ' + nome;
       if (tel) msg += '\nTelefone: ' + tel;
+      const extra = form.querySelector('[data-extra]');
+      const extraVal = extra ? String((extra as HTMLSelectElement).value || '').trim() : '';
+      if (extra && extraVal) msg += '\n' + (extra.getAttribute('data-extra-label') || 'Info') + ': ' + extraVal;
       const parts = [];
       const src = getCookie('utm_source'), med = getCookie('utm_medium'), camp = getCookie('utm_campaign');
       if (src) parts.push('Fonte: ' + src);
