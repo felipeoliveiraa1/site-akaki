@@ -15,7 +15,7 @@ export const services = [
       eyebrow: 'Implantes dentários em São Paulo',
       h1: 'Durma durante o implante. Acorde <em>sem dor, sem corte</em>, com o sorriso pronto.',
       sub: 'Sedação odontológica + Cirurgia Guiada Ankylos. Você dorme, nós implantamos com precisão milimétrica alemã. Pós-operatório tranquilo e osseointegração em cerca de 45 dias.',
-      urgency: 'Agenda com vagas limitadas para avaliação. Agende a sua.',
+      urgency: 'Avaliação e planejamento de implante por agendamento.',
       image: '/assets/t-implantes-2.webp',
     },
     stats: [
@@ -100,7 +100,7 @@ export const services = [
       eyebrow: 'Sedação odontológica · Day Clinic · São Paulo',
       h1: 'Resolva todo o seu tratamento dentário em <em>um único dia</em>. Dormindo.',
       sub: 'Day Clinic com sedação odontológica e anestesista. Múltiplos procedimentos em uma única sessão — você chega, dorme, acorda com o sorriso resolvido. Sem tirar a semana da agenda.',
-      urgency: 'Vagas de Day Clinic limitadas. Agende sua avaliação.',
+      urgency: 'Day Clinic com avaliação prévia por agendamento.',
       image: '/assets/t-dayclinic-2.webp',
     },
     stats: [

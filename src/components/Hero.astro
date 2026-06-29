@@ -21,8 +21,8 @@ let i = 0;
     <p class="eyebrow hero__eyebrow">Clínica pioneira em odontofobia · Jardins — SP</p>
 
     <h1 class="display hero__title words" aria-label="Você dorme e acorda com um sorriso novo.">
-      {pre.map((w) => <span class="word" style={`--wd:${(i++) * 90}ms`}>{w}{' '}</span>)}
-      <em>{gold.map((w) => <span class="word ember-on" style={`--wd:${(i++) * 90}ms`}>{w}{' '}</span>)}</em>
+      {pre.map((w) => <Fragment><span class="word" style={`--wd:${(i++) * 90}ms`}>{w}</span>{' '}</Fragment>)}
+      <em>{gold.map((w) => <Fragment><span class="word ember-on" style={`--wd:${(i++) * 90}ms`}>{w}</span>{' '}</Fragment>)}</em>
     </h1>
 
     <p class="lead hero__sub">Tratamento odontológico com sedação consciente — em menos tempo e sem medo.</p>

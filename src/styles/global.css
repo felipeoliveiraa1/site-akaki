@@ -221,7 +221,7 @@ img, video { display: block; max-width: 100%; }
 .kenburns { animation: kenburns 20000ms var(--breath) infinite alternate; }
 
 /* ——— headline reveal, word by word (polish) —————————————— */
-.words .word { display: inline-block; margin-right: 0.26em; }
+.words .word { display: inline-block; }
 .js .words .word {
   clip-path: inset(0 112% 0 0);
   filter: blur(8px);
