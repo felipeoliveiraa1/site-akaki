@@ -121,7 +121,7 @@ export const services = [
     stepsTitle: 'O Day Clinic passo a passo',
     stepsSub: 'Da primeira consulta ao dia do procedimento, tudo é planejado para que você não tenha nenhuma surpresa.',
     steps: [
-      { t: 'Consulta de avaliação', d: 'Avaliação clínica completa de todos os procedimentos que serão realizados no Day Clinic. Você aprova o plano antes de marcar o dia.' },
+      { t: 'Consulta com o especialista', d: 'Avaliação clínica completa de todos os procedimentos que serão realizados no Day Clinic. Você aprova o plano antes de marcar o dia.' },
       { t: 'Dia do procedimento', d: 'Você chega em jejum, o anestesista aplica a sedação e você dorme. Toda a equipe trabalha enquanto você descansa.' },
       { t: 'Alta e acompanhamento', d: 'Você acorda com o tratamento finalizado. Alta no mesmo dia, com acompanhante para o retorno a casa, e retorno de acompanhamento agendado.' },
     ],
