@@ -622,7 +622,14 @@ const localForm = true;
       if (first) setTimeout(() => (first as HTMLInputElement).focus(), 60);
     };
     const closeModal = () => { modal.hidden = true; document.body.style.overflow = ''; };
-    document.querySelectorAll('[data-lp-open]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); openModal(); }));
+    // Todos os CTAs de WhatsApp/agendar (hero, header, rodapé, flutuante) abrem o formulário local
+    document.addEventListener('click', (e) => {
+      const t = e.target as Element;
+      const el = t && t.closest ? t.closest('[data-wpp],[data-lp-open]') : null;
+      if (!el) return;
+      e.preventDefault();
+      openModal();
+    });
     document.querySelectorAll('[data-lp-close]').forEach((b) => b.addEventListener('click', closeModal));
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
 
