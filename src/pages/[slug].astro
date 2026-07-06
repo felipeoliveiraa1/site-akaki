@@ -154,7 +154,9 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
           <p class="eyebrow reveal">{s.specEyebrow || 'Conheça o especialista'}</p>
           <h2 class="h2 reveal" style="--d:80ms" set:html={s.specName || 'Dr. Luiz <em>Akaki</em>'}></h2>
           <p class="lp-spec__role reveal" style="--d:140ms">{s.specRole || 'CRO-SP 45717 · Especialista em Odontologia'}</p>
-          <p class="lead lp-spec__bio reveal" style="--d:200ms">{s.specBio || 'Com mais de 35 anos de experiência, o Dr. Luiz Akaki foi pioneiro em trazer técnicas de ponta da Alemanha e dos EUA para o Brasil. Atendimento humanizado, tecnologia de referência e resultados previsíveis.'}</p>
+          {(Array.isArray(s.specBio) ? s.specBio : [s.specBio || 'Com mais de 35 anos de experiência, o Dr. Luiz Akaki foi pioneiro em trazer técnicas de ponta da Alemanha e dos EUA para o Brasil. Atendimento humanizado, tecnologia de referência e resultados previsíveis.']).map((p, i) => (
+            <p class="lead lp-spec__bio reveal" style={`--d:${200 + i * 50}ms`}>{p}</p>
+          ))}
           {s.specQuote && <p class="lp-spec__quote reveal" style="--d:240ms">“{s.specQuote}”</p>}
           <div class="lp-spec__badges reveal" style="--d:280ms">{(s.specBadges || badges).map((b) => <span class="lp-badge">{b}</span>)}</div>
         </div>

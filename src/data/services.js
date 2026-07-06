@@ -227,7 +227,11 @@ export const services = [
       { t: 'Planejamento', d: 'Indicamos a técnica ideal para o seu caso e definimos o plano de tratamento.' },
       { t: 'Acompanhamento', d: 'Ajustes periódicos com acompanhamento especializado até o resultado final.' },
     ],
-    specBio: 'Com mais de 35 anos de experiência, o Dr. Luiz Akaki foi pioneiro em trazer técnicas de ortodontia de ponta da Alemanha e dos EUA para o Brasil. Especialista em alinhadores invisíveis, alia atendimento humanizado, tecnologia de referência e resultados previsíveis para o seu sorriso.',
+    specRole: 'CRO-SP 45717 · Especialista em Ortodontia e Implantes',
+    specBio: [
+      'Com mais de 35 anos de experiência, Dr. Luiz Akaki trata a boca de forma completa. Na ortodontia, seu olhar clínico vai além do alinhamento — ele planeja o tratamento considerando a saúde da mordida, a função e a estética final do sorriso.',
+      'Uma visão ampla, construída ao longo de décadas atendendo casos complexos na mesma clínica.',
+    ],
     spec2: {
       eyebrow: 'Conheça também',
       name: 'Dra. Thais L. <em>Bighetti</em>',
