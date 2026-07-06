@@ -236,7 +236,7 @@ export const services = [
         'Dra. Thais trata o sorriso de dentro para fora. Com especialização em ortodontia, ela corrige o alinhamento dos dentes e a posição da mordida — e vai além, combinando o tratamento ortodôntico com harmonização orofacial quando necessário.',
         'O resultado é um sorriso alinhado que também harmoniza com os contornos naturais do rosto.',
       ],
-      photo: null, // '/assets/dra-thais.webp' — o bloco aparece automaticamente quando a foto estiver aqui
+      photo: '/assets/dra-thais-orto.webp',
       alt: 'Dra. Thais L. Bighetti, da equipe Akaki Odontologia',
     },
     typesEyebrow: 'Tratamentos',

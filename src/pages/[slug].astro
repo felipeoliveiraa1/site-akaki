@@ -166,7 +166,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
       <section class="section lp-spec lp-spec--alt band-cream-deep">
         <div class="container lp-spec__grid lp-spec__grid--rev">
           <figure class="lp-spec__media reveal">
-            <div class="frame-arc"><img src={s.spec2.photo} alt={s.spec2.alt} width="640" height="664" loading="lazy" decoding="async" /></div>
+            <div class="frame-arc"><img src={s.spec2.photo} alt={s.spec2.alt} width="640" height="664" loading="lazy" decoding="async" style={s.spec2.photoPos ? `object-position:${s.spec2.photoPos}` : undefined} /></div>
           </figure>
           <div class="lp-spec__text">
             <p class="eyebrow reveal">{s.spec2.eyebrow || 'Conheça também'}</p>
