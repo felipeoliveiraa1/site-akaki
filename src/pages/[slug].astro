@@ -161,6 +161,27 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
       </div>
     </section>
 
+    <!-- SEGUNDO ESPECIALISTA (opcional) — aparece só quando spec2.photo existe -->
+    {s.spec2 && s.spec2.photo && (
+      <section class="section lp-spec lp-spec--alt band-cream-deep">
+        <div class="container lp-spec__grid lp-spec__grid--rev">
+          <figure class="lp-spec__media reveal">
+            <div class="frame-arc"><img src={s.spec2.photo} alt={s.spec2.alt} width="640" height="664" loading="lazy" decoding="async" /></div>
+          </figure>
+          <div class="lp-spec__text">
+            <p class="eyebrow reveal">{s.spec2.eyebrow || 'Conheça também'}</p>
+            <h2 class="h2 reveal" style="--d:80ms" set:html={s.spec2.name}></h2>
+            <p class="lp-spec__role reveal" style="--d:140ms">{s.spec2.role}</p>
+            {s.spec2.bio.map((p, i) => (
+              <p class="lead lp-spec__bio reveal" style={`--d:${200 + i * 50}ms`}>{p}</p>
+            ))}
+            {s.spec2.quote && <p class="lp-spec__quote reveal" style="--d:300ms">“{s.spec2.quote}”</p>}
+            {s.spec2.badges && <div class="lp-spec__badges reveal" style="--d:340ms">{s.spec2.badges.map((b) => <span class="lp-badge">{b}</span>)}</div>}
+          </div>
+        </div>
+      </section>
+    )}
+
     <!-- PROTOCOLO DE SEGURANÇA (opcional) -->
     {s.protocolo && (
       <section class="section lp-proto band-dark arc-top">
@@ -431,6 +452,12 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
   .lp-spec__text .h2 em { font-style: italic; color: var(--gold-dark); }
   .lp-spec__role { font-family: var(--sans); font-weight: 600; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-dark); margin: 12px 0 16px; }
   .lp-spec__bio { color: var(--navy-soft); max-width: 52ch; }
+  .lp-spec__bio + .lp-spec__bio { margin-top: 14px; }
+  /* segundo especialista — layout espelhado, mesma faixa creme */
+  .lp-spec--alt { padding-top: clamp(28px, 4vh, 50px); border-top: 1px solid rgba(211,164,108,0.18); }
+  .lp-spec__grid--rev { grid-template-columns: 1.2fr 0.8fr; }
+  .lp-spec__grid--rev .lp-spec__media { order: 2; }
+  .lp-spec__grid--rev .lp-spec__text { order: 1; }
   .lp-spec__badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
   .lp-badge { font-family: var(--sans); font-weight: 600; font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--navy-soft); border: 1px solid rgba(24,39,60,0.18); border-radius: 999px; padding: 6px 12px; }
 
@@ -567,6 +594,8 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
     .lp-gal__grid { columns: 2; }
     .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-steps__grid, .lp-proto__grid { grid-template-columns: 1fr 1fr; }
     .lp-spec__grid { grid-template-columns: 1fr; }
+    .lp-spec__grid--rev .lp-spec__media { order: 0; }
+    .lp-spec__grid--rev .lp-spec__text { order: 1; }
     .lp-spec__media { max-width: 360px; margin-inline: auto; }
   }
   @media (max-width: 620px) {

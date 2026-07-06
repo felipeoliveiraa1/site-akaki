@@ -207,7 +207,7 @@ export const services = [
     },
     stats: [
       { n: '35 anos', l: 'De experiência' },
-      { n: '+1.800', l: 'Pacientes atendidos' },
+      { n: '+5.000', l: 'Pacientes atendidos' },
       { n: '4,9 ★', l: 'No Google' },
       { n: 'Tratamentos', l: 'Personalizados' },
     ],
@@ -228,6 +228,17 @@ export const services = [
       { t: 'Acompanhamento', d: 'Ajustes periódicos com acompanhamento especializado até o resultado final.' },
     ],
     specBio: 'Com mais de 35 anos de experiência, o Dr. Luiz Akaki foi pioneiro em trazer técnicas de ortodontia de ponta da Alemanha e dos EUA para o Brasil. Especialista em alinhadores invisíveis, alia atendimento humanizado, tecnologia de referência e resultados previsíveis para o seu sorriso.',
+    spec2: {
+      eyebrow: 'Conheça também',
+      name: 'Dra. Thais L. <em>Bighetti</em>',
+      role: 'Especialista em Ortodontia e Harmonização Orofacial',
+      bio: [
+        'Dra. Thais trata o sorriso de dentro para fora. Com especialização em ortodontia, ela corrige o alinhamento dos dentes e a posição da mordida — e vai além, combinando o tratamento ortodôntico com harmonização orofacial quando necessário.',
+        'O resultado é um sorriso alinhado que também harmoniza com os contornos naturais do rosto.',
+      ],
+      photo: null, // '/assets/dra-thais.webp' — o bloco aparece automaticamente quando a foto estiver aqui
+      alt: 'Dra. Thais L. Bighetti, da equipe Akaki Odontologia',
+    },
     typesEyebrow: 'Tratamentos',
     typesTitle: 'Opções de tratamento',
     types: [
@@ -275,8 +286,8 @@ export const services = [
     formExtra: { label: 'Qual procedimento te interessa?', name: 'procedimento', options: ['Lentes de contato', 'Facetas de porcelana', 'Clareamento', 'Não sei, quero avaliação'] },
     hero: {
       eyebrow: 'Estética dental · Jardins, SP',
-      h1: 'O sorriso que você sempre quis. Em <em>poucas sessões</em>.',
-      sub: 'Lentes de contato, facetas, clareamento e harmonização orofacial com planejamento digital. Resultados naturais e duradouros na clínica mais tradicional do Jardim Paulista.',
+      h1: 'O sorriso que <em>transforma</em>. O rosto que <em>rejuvenesce</em>.',
+      sub: 'Lentes de contato, facetas de porcelana, clareamento e harmonização orofacial. Tudo planejado para realçar o que é seu — com naturalidade e sofisticação.',
       urgency: 'Consulta do sorriso por agendamento.',
       image: '/assets/t-estetica-2.webp',
     },
@@ -285,7 +296,7 @@ export const services = [
     faqTitle: 'Tudo que você precisa saber antes de <em>decidir</em>.',
     finalEyebrow: 'Dê o primeiro passo',
     finalTitle: 'Seu sorriso merece o melhor da estética <em>dental</em>.',
-    finalSub: 'Agende sua avaliação. Planejamento digital, equipe especializada e a tradição da Akaki Odontologia.',
+    finalSub: 'Agende sua consulta. Planejamento digital, equipe especializada e a tradição da Akaki Odontologia.',
     stats: [
       { n: '+5.000', l: 'Sorrisos transformados' },
       { n: '+35 anos', l: 'De tradição' },
@@ -309,10 +320,21 @@ export const services = [
       { t: 'Mockup', d: 'Teste do sorriso na boca com resina provisória. Você vê e sente o resultado antes da peça definitiva.' },
       { t: 'Instalação', d: 'As peças definitivas de porcelana são cimentadas. Resultado final: natural, duradouro e personalizado.' },
     ],
-    specRole: 'CRO-SP 45717 · Estética dental e reabilitação do sorriso',
-    specBio: 'Com mais de 35 anos de experiência, o Dr. Luiz Akaki e a equipe da Akaki são referência em estética dental nos Jardins. Lentes, facetas e reabilitação estética com planejamento digital e tecnologia CAD/CAM — para um resultado natural e duradouro.',
+    specRole: 'CRO-SP 45717 · Especialista em Estética Dental e Lentes de Contato',
+    specBio: 'Mais de 35 anos dedicados à odontologia estética. Dr. Luiz Akaki é referência em lentes de contato dental — um procedimento que transforma o sorriso com mínimo desgaste e resultado extremamente natural. As lentes são confeccionadas no laboratório próprio da clínica, o que garante controle total sobre forma, cor e acabamento — e um resultado sob medida para o seu rosto.',
     specQuote: 'Meu trabalho é devolver sorrisos que as pessoas tenham orgulho de mostrar.',
     specBadges: ['CRO-SP 45717', 'Planejamento digital', 'CAD/CAM', 'Estética natural'],
+    spec2: {
+      eyebrow: 'Conheça também',
+      name: 'Dra. Thais L. <em>Bighetti</em>',
+      role: 'Especialista em Harmonização Orofacial',
+      bio: [
+        'Dra. Thais é especialista em harmonização orofacial — a área que equilibra os contornos do rosto com precisão e naturalidade. Botox, preenchimento labial, bioremodeladores e tratamento para bruxismo fazem parte do seu dia a dia na clínica.',
+        'Seu olhar integrado une a saúde bucal à estética facial, entregando resultados que rejuvenescem sem perder a identidade de cada paciente.',
+      ],
+      photo: null, // '/assets/dra-thais.webp' — o bloco aparece automaticamente quando a foto estiver aqui
+      alt: 'Dra. Thais L. Bighetti, da equipe Akaki Odontologia',
+    },
     typesEyebrow: 'Procedimentos',
     typesTitle: 'O tratamento certo para o seu sorriso.',
     types: [
