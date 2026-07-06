@@ -15,7 +15,7 @@ export const services = [
       eyebrow: 'Implantes dentários em São Paulo',
       h1: 'Durma durante o implante. Acorde <em>sem dor, sem corte</em>, com o sorriso pronto.',
       sub: 'Sedação odontológica + Cirurgia Guiada Ankylos. Você dorme, nós implantamos com precisão milimétrica alemã. Pós-operatório tranquilo e osseointegração em cerca de 45 dias.',
-      urgency: 'Avaliação e planejamento de implante por agendamento.',
+      urgency: 'Consulta e planejamento de implante por agendamento.',
       image: '/assets/t-implantes-2.webp',
     },
     stats: [
