@@ -332,7 +332,7 @@ export const services = [
         'Dra. Thais é especialista em harmonização orofacial — a área que equilibra os contornos do rosto com precisão e naturalidade. Botox, preenchimento labial, bioremodeladores e tratamento para bruxismo fazem parte do seu dia a dia na clínica.',
         'Seu olhar integrado une a saúde bucal à estética facial, entregando resultados que rejuvenescem sem perder a identidade de cada paciente.',
       ],
-      photo: null, // '/assets/dra-thais.webp' — o bloco aparece automaticamente quando a foto estiver aqui
+      photo: '/assets/dra-thais-estetica.webp',
       alt: 'Dra. Thais L. Bighetti, da equipe Akaki Odontologia',
     },
     typesEyebrow: 'Procedimentos',
