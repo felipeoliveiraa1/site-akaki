@@ -199,6 +199,7 @@ export const services = [
     nav: 'Ortodontia',
     name: 'Ortodontia',
     seoTitle: 'Ortodontia em São Paulo | Aparelho Estético — Akaki',
+    formExtra: { label: 'Qual tipo de aparelho te interessa?', name: 'aparelho', options: ['Aparelho fixo (metálico)', 'Aparelho estético (cerâmico ou safira)', 'Alinhador invisível (Invisalign ou similar)', 'Ainda não sei / quero avaliar'] },
     hero: {
       eyebrow: 'Ortodontia em São Paulo',
       h1: 'Dentes alinhados para o seu <em>melhor sorriso</em>',
@@ -289,7 +290,7 @@ export const services = [
     nav: 'Estética',
     name: 'Estética',
     seoTitle: 'Estética Dental em São Paulo | Lentes e Facetas — Akaki',
-    formExtra: { label: 'Qual procedimento te interessa?', name: 'procedimento', options: ['Lentes de contato', 'Facetas de porcelana', 'Clareamento', 'Não sei, quero avaliação'] },
+    formExtra: { label: 'O que você tem interesse em fazer?', name: 'procedimento', options: ['Lentes de contato dental', 'Facetas de porcelana', 'Clareamento dental', 'Harmonização orofacial', 'Ainda não sei / quero avaliar'] },
     hero: {
       eyebrow: 'Estética dental · Jardins, SP',
       h1: 'O sorriso que <em>transforma</em>. O rosto que <em>rejuvenesce</em>.',

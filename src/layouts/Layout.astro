@@ -242,43 +242,45 @@ const schema = {
       .wlead { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 20px; opacity: 0; transition: opacity 260ms var(--silk); }
       .wlead[hidden] { display: none; }
       .wlead.is-open { opacity: 1; }
-      .wlead__backdrop { position: absolute; inset: 0; background: rgba(11,14,19,0.62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+      .wlead__backdrop { position: absolute; inset: 0; background: rgba(8,10,14,0.74); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
       .wlead__card {
         position: relative; z-index: 1; width: 100%; max-width: 400px;
-        background: var(--cream); border-radius: 24px; padding: 40px 32px 28px; text-align: center;
-        box-shadow: 0 40px 90px -30px rgba(11,14,19,0.6); border: 1px solid rgba(211,164,108,0.28);
+        background: rgba(11,14,19,0.55); border-radius: 24px; padding: 40px 32px 28px; text-align: center;
+        border: 1px solid rgba(211,164,108,0.3); box-shadow: 0 40px 90px -30px rgba(0,0,0,0.8);
+        -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
         transform: translateY(14px) scale(0.98); transition: transform 320ms var(--silk);
       }
       .wlead.is-open .wlead__card { transform: none; }
       .wlead__x {
-        position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border: 0; cursor: pointer;
-        border-radius: 50%; display: grid; place-items: center; color: var(--navy);
-        background: rgba(24,39,60,0.06); transition: background 200ms var(--silk);
+        position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; cursor: pointer;
+        border-radius: 50%; display: grid; place-items: center; color: var(--cream);
+        border: 1px solid rgba(211,164,108,0.3); background: rgba(11,14,19,0.55);
+        transition: background 200ms var(--silk), transform 240ms var(--silk);
       }
-      .wlead__x:hover { background: rgba(24,39,60,0.12); }
-      .wlead__x svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
-      .wlead__ic { display: inline-grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; background: #25D366; color: #fff; box-shadow: 0 14px 32px -8px rgba(37,211,102,0.6); margin-bottom: 18px; }
-      .wlead__ic svg { width: 32px; height: 32px; fill: currentColor; }
-      .wlead__title { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(22px, 4vw, 27px); color: var(--navy); letter-spacing: -0.01em; }
-      .wlead__sub { font-family: var(--body); font-size: 14px; line-height: 1.5; color: rgba(24,39,60,0.7); max-width: 30ch; margin: 8px auto 22px; }
+      .wlead__x:hover { background: rgba(211,164,108,0.2); transform: rotate(90deg); }
+      .wlead__x svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+      .wlead__ic { display: inline-grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-light), var(--gold-dark)); color: var(--navy); box-shadow: 0 14px 32px -10px rgba(211,164,108,0.55); margin-bottom: 18px; }
+      .wlead__ic svg { width: 30px; height: 30px; fill: currentColor; }
+      .wlead__title { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(22px, 4vw, 27px); color: var(--cream); letter-spacing: -0.01em; }
+      .wlead__sub { font-family: var(--body); font-size: 14px; line-height: 1.5; color: rgba(245,240,232,0.7); max-width: 30ch; margin: 8px auto 22px; }
       .wlead__form { display: flex; flex-direction: column; gap: 12px; }
       .wlead__in {
-        width: 100%; font-family: var(--sans); font-size: 15px; color: var(--navy);
-        background: #fff; border: 1px solid rgba(24,39,60,0.16); border-radius: 13px; padding: 14px 16px;
+        width: 100%; font-family: var(--body); font-size: 14.5px; color: var(--cream);
+        background: rgba(11,14,19,0.4); border: 1px solid rgba(244,238,227,0.22); border-radius: 12px; padding: 14px 16px;
         transition: border-color 200ms var(--silk), box-shadow 200ms var(--silk);
       }
-      .wlead__in::placeholder { color: rgba(24,39,60,0.4); }
+      .wlead__in::placeholder { color: rgba(245,240,232,0.45); }
       .wlead__in:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(211,164,108,0.18); }
-      .wlead__in.is-err { border-color: #d9534f; box-shadow: 0 0 0 3px rgba(217,83,79,0.14); }
+      .wlead__in.is-err { border-color: #d9534f; box-shadow: 0 0 0 3px rgba(217,83,79,0.16); }
       .wlead__go {
         margin-top: 4px; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-        font-family: var(--sans); font-weight: 600; font-size: 15px; color: #fff; cursor: pointer;
-        background: linear-gradient(135deg, #2AC96A, #1EA855); border: 0; border-radius: 13px; padding: 15px 20px;
-        box-shadow: 0 14px 34px -12px rgba(37,211,102,0.7); transition: transform 200ms var(--silk), box-shadow 200ms var(--silk);
+        font-family: var(--sans); font-weight: 600; font-size: 14px; letter-spacing: 0.02em; color: var(--navy); cursor: pointer;
+        background: linear-gradient(135deg, var(--gold-light), var(--gold-dark)); border: 0; border-radius: 12px; padding: 15px 20px;
+        box-shadow: 0 14px 34px -14px rgba(211,164,108,0.7); transition: transform 200ms var(--silk), box-shadow 200ms var(--silk);
       }
-      .wlead__go:hover { transform: translateY(-1px); box-shadow: 0 18px 42px -12px rgba(37,211,102,0.85); }
-      .wlead__go svg { width: 20px; height: 20px; fill: currentColor; }
-      .wlead__note { font-family: var(--body); font-size: 11.5px; color: rgba(24,39,60,0.5); margin-top: 6px; }
+      .wlead__go:hover { transform: translateY(-1px); box-shadow: 0 18px 44px -12px rgba(211,164,108,0.85); }
+      .wlead__go svg { width: 19px; height: 19px; fill: currentColor; }
+      .wlead__note { font-family: var(--body); font-size: 11.5px; color: rgba(245,240,232,0.55); margin-top: 6px; }
       @media (max-width: 480px) { .wlead__card { padding: 34px 22px 24px; } }
       @media (prefers-reduced-motion: reduce) { .wlead, .wlead__card { transition: none; } }
     </style>
