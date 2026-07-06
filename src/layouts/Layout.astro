@@ -342,8 +342,6 @@ const schema = {
           var s = val('utm_source'), m = val('utm_medium'), c = val('utm_campaign'), t = val('utm_term'),
               ct = val('utm_content') || lastContent, g = val('gclid');
           var msg = BASE;
-          if (nome) msg += '\nNome: ' + nome;
-          if (tel) msg += '\nTelefone: ' + tel;
           var partes = [];
           if (s) partes.push('Fonte: ' + s);
           if (m) partes.push('Meio: ' + m);
