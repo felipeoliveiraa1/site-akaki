@@ -28,8 +28,8 @@ const ICONS = {
 };
 const badges = ['CRO-SP 45717', 'EPAO CRO-SP 13012', 'Cirurgia Guiada', 'Atendimento humanizado'];
 const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
-// Páginas que mantêm o formulário próprio (com qualificação) em vez do modal global do site
-const localForm = ['odontopediatria', 'implantes'].includes(s.slug);
+// Todas as LPs usam o formulário próprio (com qualificação quando houver); o modal global fica só na home
+const localForm = true;
 ---
 <Layout title={pageTitle} description={pageDesc}>
   <Header />
