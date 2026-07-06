@@ -42,11 +42,35 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
         <h1 class="display lp-hero__h1" set:html={s.hero.h1}></h1>
         <p class="lead lp-hero__sub">{s.hero.sub}</p>
         <p class="lp-urgency"><span class="lp-urgency__dot"></span>{s.hero.urgency}</p>
-        <button class="btn btn--gold lp-hero__cta" type="button" data-lp-open aria-haspopup="dialog" aria-controls="wa-modal">
+        <button class="btn btn--gold lp-hero__cta" type="button" data-lp-open aria-haspopup="dialog" aria-controls={s.slug === 'odontopediatria' ? 'lp-modal' : 'wa-modal'}>
           <svg viewBox="0 0 24 24" aria-hidden="true" set:html={arrow} /> Agende sua consulta
         </button>
       </div>
     </section>
+
+    {s.slug === 'odontopediatria' && (
+      <div class="lp-modal" id="lp-modal" hidden>
+        <div class="lp-modal__backdrop" data-lp-close></div>
+        <div class="lp-modal__panel" role="dialog" aria-modal="true" aria-labelledby="lp-form-title">
+          <button class="lp-modal__close" type="button" data-lp-close aria-label="Fechar formulário">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+          <form class="lp-form" id="lp-form" method="post">
+            <p class="lp-form__title" id="lp-form-title">Agende sua consulta</p>
+            <input class="lp-form__in" type="text" name="nome" placeholder="Seu nome" autocomplete="name" required />
+            <input class="lp-form__in" type="tel" name="telefone" placeholder="Telefone / WhatsApp" autocomplete="tel" required />
+            {s.formExtra && (
+              <select class="lp-form__in lp-form__select" name={s.formExtra.name} data-extra data-extra-label={s.formExtra.label} aria-label={s.formExtra.label} required>
+                <option value="" disabled selected>{s.formExtra.label}</option>
+                {s.formExtra.options.map((o) => <option value={o}>{o}</option>)}
+              </select>
+            )}
+            <button class="btn btn--gold lp-form__btn" type="submit">Quero agendar minha consulta</button>
+            <p class="lp-form__note">Nossa equipe entra em contato para confirmar sua data e tirar suas dúvidas.</p>
+          </form>
+        </div>
+      </div>
+    )}
 
     <!-- STATS -->
     <section class="lp-stats arc-top">
@@ -586,6 +610,55 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
 </style>
 
 <script>
+  // Modal do formulário — SOMENTE odontopediatria (as demais páginas usam o modal global do Layout)
+  const modal = document.getElementById('lp-modal');
+  if (modal) {
+    const openModal = () => {
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      const first = modal.querySelector('input');
+      if (first) setTimeout(() => (first as HTMLInputElement).focus(), 60);
+    };
+    const closeModal = () => { modal.hidden = true; document.body.style.overflow = ''; };
+    document.querySelectorAll('[data-lp-open]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); openModal(); }));
+    document.querySelectorAll('[data-lp-close]').forEach((b) => b.addEventListener('click', closeModal));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+
+    const form = document.getElementById('lp-form');
+    if (form) {
+      const getCookie = (n) => { const m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)')); return m ? decodeURIComponent(m[2]) : ''; };
+      const MAKE_WEBHOOK = 'https://hook.us2.make.com/tn2iu445t1a3ub4kkyys4jcjn81tbneg';
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = new FormData(form as HTMLFormElement);
+        const nome = String(data.get('nome') || '').trim();
+        const tel = String(data.get('telefone') || '').trim();
+        const telDigits = tel.replace(/\D/g, '');
+        let msg = 'Olá, gostaria de agendar uma consulta na Akaki.';
+        if (nome) msg += '\nNome: ' + nome;
+        if (tel) msg += '\nTelefone: ' + tel;
+        const extra = form.querySelector('[data-extra]');
+        const extraVal = extra ? String((extra as HTMLSelectElement).value || '').trim() : '';
+        if (extra && extraVal) msg += '\n' + (extra.getAttribute('data-extra-label') || 'Info') + ': ' + extraVal;
+        const src = getCookie('utm_source'), med = getCookie('utm_medium'), camp = getCookie('utm_campaign'), cont = getCookie('utm_content'), g = getCookie('gclid');
+        const parts = [];
+        if (src) parts.push('Fonte: ' + src);
+        if (med) parts.push('Meio: ' + med);
+        if (camp) parts.push('Campanha: ' + camp);
+        if (cont) parts.push('Anúncio: ' + cont);
+        if (g) parts.push('Google Ads: sim');
+        if (parts.length) msg += ' [' + parts.join(' | ') + ']';
+        // tracking (igual ao modal global): webhook Make + evento GTM
+        if (g && telDigits) {
+          try { fetch(MAKE_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ gclid: g, telefone: telDigits, utm_source: src, utm_medium: med, utm_campaign: camp }), keepalive: true }); } catch (err) {}
+        }
+        try { (window as any).dataLayer = (window as any).dataLayer || []; (window as any).dataLayer.push({ event: 'whatsapp_lead', lead_nome: nome, lead_telefone: telDigits, cta: 'odonto-form' }); } catch (err) {}
+        window.open('https://api.whatsapp.com/send?phone=5511947024607&text=' + encodeURIComponent(msg), '_blank');
+        closeModal();
+      });
+    }
+  }
+
   // Depoimentos em vídeo — play sob demanda + carrossel (setas no desktop)
   document.querySelectorAll('.vdepo__card').forEach((card) => {
     const video = card.querySelector('.vdepo__video');

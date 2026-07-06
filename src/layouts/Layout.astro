@@ -291,6 +291,8 @@ const schema = {
         var modal = document.getElementById('wa-modal');
         var form = document.getElementById('wa-form');
         if (!modal || !form) return;
+        // Odontopediatria mantém o formulário próprio (modal local) — não usa o modal global
+        if (document.getElementById('lp-modal')) return;
         var nomeEl = document.getElementById('wa-nome');
         var telEl = document.getElementById('wa-tel');
         var lastContent = '';
