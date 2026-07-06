@@ -274,7 +274,7 @@ export const services = [
       eyebrow: 'Estética dental · Jardins, SP',
       h1: 'O sorriso que você sempre quis. Em <em>poucas sessões</em>.',
       sub: 'Lentes de contato, facetas de porcelana e clareamento com planejamento digital e tecnologia CAD/CAM. Resultados naturais e duradouros — na clínica mais tradicional dos Jardins.',
-      urgency: 'Avaliação do sorriso por agendamento.',
+      urgency: 'Consulta do sorriso por agendamento.',
       image: '/assets/t-estetica-2.webp',
     },
     revsEyebrow: 'Pacientes',
