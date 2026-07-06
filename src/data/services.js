@@ -437,7 +437,7 @@ export const services = [
     },
     specEyebrow: 'Nossa especialista',
     specName: 'Dra. Amanda Carneiro <em>Aragão</em>',
-    specPhoto: '/assets/dra-odonto.webp',
+    specPhoto: '/assets/dra-amanda.webp',
     specAlt: 'Dra. Amanda Carneiro Aragão, odontopediatra do AKA Kids',
     specRole: 'Especialista em Ortodontia e Ortopedia Facial · CRO-CE 8766',
     specBio: [
