@@ -83,7 +83,7 @@ const schema = {
         var WPP = '5511947024607';
         var BASE = 'Olá, gostaria de agendar uma avaliação na Akaki.';
         var SITE_URL = 'https://akaki.odo.br';
-        var KEYS = ['utm_source','utm_medium','utm_campaign','utm_term','gclid','fbclid'];
+        var KEYS = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','gclid','fbclid'];
 
         function setCookie(n, v){ try { document.cookie = n + '=' + encodeURIComponent(v) + '; path=/; max-age=2592000; SameSite=Lax'; } catch (e) {} }
         function getCookie(n){ var m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)')); return m ? decodeURIComponent(m[2]) : ''; }
@@ -92,6 +92,12 @@ const schema = {
 
         try {
           var p = new URLSearchParams(location.search);
+          // entrada orgânica NOVA (sem utm_source e vinda de fora) limpa campanha anterior;
+          // navegação interna preserva a atribuição.
+          if (!p.has('utm_source')) {
+            var internal = document.referrer && document.referrer.indexOf(location.host) !== -1;
+            if (!internal) { KEYS.forEach(function (k){ setCookie(k, ''); lsSet(k, ''); }); }
+          }
           KEYS.forEach(function (k){ var v = p.get(k); if (v) { setCookie(k, v); lsSet(k, v); } });
         } catch (e) {}
 
@@ -206,6 +212,167 @@ const schema = {
         setTimeout(sweep, 2800);
         setInterval(() => { if (!document.hidden) sweep(); }, 9000);
       }
+    </script>
+
+    <!-- Modal global — captura de lead p/ WhatsApp (flutuante + todos os CTAs) -->
+    <div class="wlead" id="wa-modal" hidden>
+      <div class="wlead__backdrop" data-wa-close></div>
+      <div class="wlead__card" role="dialog" aria-modal="true" aria-labelledby="wa-title">
+        <button class="wlead__x" type="button" data-wa-close aria-label="Fechar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <span class="wlead__ic" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M16 3a13 13 0 0 0-11.1 19.7L3 29l6.5-1.8A13 13 0 1 0 16 3zm0 23.6a10.6 10.6 0 0 1-5.4-1.5l-.4-.2-3.9 1 1-3.8-.3-.4A10.6 10.6 0 1 1 16 26.6zm5.9-7.9c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.7 8.7 0 0 1-2.6-1.6 9.6 9.6 0 0 1-1.8-2.2c-.2-.3 0-.5.1-.7l.5-.6.3-.5a.6.6 0 0 0 0-.6c0-.2-.7-1.7-1-2.3s-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.6 3.6 0 0 0-1.1 2.7 6.3 6.3 0 0 0 1.3 3.3 14.4 14.4 0 0 0 5.5 4.9c.8.3 1.4.5 1.9.7a4.5 4.5 0 0 0 2 .1c.6-.1 1.9-.8 2.2-1.5s.3-1.4.2-1.5-.3-.2-.6-.4z"/></svg>
+        </span>
+        <h2 class="wlead__title" id="wa-title">Vamos conversar</h2>
+        <p class="wlead__sub">Deixe seu nome e telefone para iniciarmos seu atendimento no WhatsApp.</p>
+        <form class="wlead__form" id="wa-form" novalidate>
+          <input class="wlead__in" id="wa-nome" name="nome" type="text" autocomplete="name" placeholder="Seu nome" required />
+          <input class="wlead__in" id="wa-tel" name="telefone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="(11) 99999-9999" required />
+          <button class="wlead__go" type="submit">
+            <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.1 19.7L3 29l6.5-1.8A13 13 0 1 0 16 3zm0 23.6a10.6 10.6 0 0 1-5.4-1.5l-.4-.2-3.9 1 1-3.8-.3-.4A10.6 10.6 0 1 1 16 26.6zm5.9-7.9c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.7 8.7 0 0 1-2.6-1.6 9.6 9.6 0 0 1-1.8-2.2c-.2-.3 0-.5.1-.7l.5-.6.3-.5a.6.6 0 0 0 0-.6c0-.2-.7-1.7-1-2.3s-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.6 3.6 0 0 0-1.1 2.7 6.3 6.3 0 0 0 1.3 3.3 14.4 14.4 0 0 0 5.5 4.9c.8.3 1.4.5 1.9.7a4.5 4.5 0 0 0 2 .1c.6-.1 1.9-.8 2.2-1.5s.3-1.4.2-1.5-.3-.2-.6-.4z"/></svg>
+          Iniciar a conversa
+          </button>
+          <p class="wlead__note">Resposta rápida no horário comercial · Sem compromisso</p>
+        </form>
+      </div>
+    </div>
+
+    <style>
+      .wlead { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 20px; opacity: 0; transition: opacity 260ms var(--silk); }
+      .wlead[hidden] { display: none; }
+      .wlead.is-open { opacity: 1; }
+      .wlead__backdrop { position: absolute; inset: 0; background: rgba(11,14,19,0.62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+      .wlead__card {
+        position: relative; z-index: 1; width: 100%; max-width: 400px;
+        background: var(--cream); border-radius: 24px; padding: 40px 32px 28px; text-align: center;
+        box-shadow: 0 40px 90px -30px rgba(11,14,19,0.6); border: 1px solid rgba(211,164,108,0.28);
+        transform: translateY(14px) scale(0.98); transition: transform 320ms var(--silk);
+      }
+      .wlead.is-open .wlead__card { transform: none; }
+      .wlead__x {
+        position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border: 0; cursor: pointer;
+        border-radius: 50%; display: grid; place-items: center; color: var(--navy);
+        background: rgba(24,39,60,0.06); transition: background 200ms var(--silk);
+      }
+      .wlead__x:hover { background: rgba(24,39,60,0.12); }
+      .wlead__x svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+      .wlead__ic { display: inline-grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; background: #25D366; color: #fff; box-shadow: 0 14px 32px -8px rgba(37,211,102,0.6); margin-bottom: 18px; }
+      .wlead__ic svg { width: 32px; height: 32px; fill: currentColor; }
+      .wlead__title { font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: clamp(22px, 4vw, 27px); color: var(--navy); letter-spacing: -0.01em; }
+      .wlead__sub { font-family: var(--body); font-size: 14px; line-height: 1.5; color: rgba(24,39,60,0.7); max-width: 30ch; margin: 8px auto 22px; }
+      .wlead__form { display: flex; flex-direction: column; gap: 12px; }
+      .wlead__in {
+        width: 100%; font-family: var(--sans); font-size: 15px; color: var(--navy);
+        background: #fff; border: 1px solid rgba(24,39,60,0.16); border-radius: 13px; padding: 14px 16px;
+        transition: border-color 200ms var(--silk), box-shadow 200ms var(--silk);
+      }
+      .wlead__in::placeholder { color: rgba(24,39,60,0.4); }
+      .wlead__in:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(211,164,108,0.18); }
+      .wlead__in.is-err { border-color: #d9534f; box-shadow: 0 0 0 3px rgba(217,83,79,0.14); }
+      .wlead__go {
+        margin-top: 4px; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+        font-family: var(--sans); font-weight: 600; font-size: 15px; color: #fff; cursor: pointer;
+        background: linear-gradient(135deg, #2AC96A, #1EA855); border: 0; border-radius: 13px; padding: 15px 20px;
+        box-shadow: 0 14px 34px -12px rgba(37,211,102,0.7); transition: transform 200ms var(--silk), box-shadow 200ms var(--silk);
+      }
+      .wlead__go:hover { transform: translateY(-1px); box-shadow: 0 18px 42px -12px rgba(37,211,102,0.85); }
+      .wlead__go svg { width: 20px; height: 20px; fill: currentColor; }
+      .wlead__note { font-family: var(--body); font-size: 11.5px; color: rgba(24,39,60,0.5); margin-top: 6px; }
+      @media (max-width: 480px) { .wlead__card { padding: 34px 22px 24px; } }
+      @media (prefers-reduced-motion: reduce) { .wlead, .wlead__card { transition: none; } }
+    </style>
+
+    <script is:inline>
+      (function(){
+        var WPP = '5511947024607';
+        var BASE = 'Olá, gostaria de agendar uma consulta na Akaki.';
+        var MAKE_WEBHOOK = 'https://hook.us2.make.com/tn2iu445t1a3ub4kkyys4jcjn81tbneg';
+        var modal = document.getElementById('wa-modal');
+        var form = document.getElementById('wa-form');
+        if (!modal || !form) return;
+        var nomeEl = document.getElementById('wa-nome');
+        var telEl = document.getElementById('wa-tel');
+        var lastContent = '';
+        var opener = null;
+
+        function getCookie(n){ var m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)')); return m ? decodeURIComponent(m[2]) : ''; }
+        function lsGet(n){ try { return localStorage.getItem(n) || ''; } catch (e) { return ''; } }
+        function val(k){ var u = ''; try { u = new URLSearchParams(location.search).get(k) || ''; } catch (e) {} return u || getCookie(k) || lsGet(k) || ''; }
+
+        function openModal(content){
+          lastContent = content || '';
+          modal.hidden = false;
+          document.body.style.overflow = 'hidden';
+          requestAnimationFrame(function(){ modal.classList.add('is-open'); });
+          setTimeout(function(){ nomeEl && nomeEl.focus(); }, 90);
+        }
+        function closeModal(){
+          modal.classList.remove('is-open');
+          document.body.style.overflow = '';
+          setTimeout(function(){ modal.hidden = true; }, 280);
+          if (opener && opener.focus) { try { opener.focus(); } catch (e) {} }
+        }
+
+        // Abre o modal em TODO CTA de WhatsApp / agendar (flutuante + todos os botões)
+        document.addEventListener('click', function(e){
+          var el = e.target && e.target.closest ? e.target.closest('[data-wpp],[data-lp-open]') : null;
+          if (!el) return;
+          e.preventDefault();
+          opener = el;
+          openModal(el.getAttribute('data-wpp') || el.getAttribute('data-lp-open') || '');
+        });
+
+        modal.querySelectorAll('[data-wa-close]').forEach(function(b){ b.addEventListener('click', closeModal); });
+        document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+
+        // Máscara BR simples (00) 00000-0000
+        if (telEl) telEl.addEventListener('input', function(){
+          var d = telEl.value.replace(/\D/g, '').slice(0, 11), out = d;
+          if (d.length > 7) out = '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7);
+          else if (d.length > 2) out = '(' + d.slice(0,2) + ') ' + d.slice(2);
+          else if (d.length > 0) out = '(' + d;
+          telEl.value = out; telEl.classList.remove('is-err');
+        });
+        if (nomeEl) nomeEl.addEventListener('input', function(){ nomeEl.classList.remove('is-err'); });
+
+        function buildMsg(nome, tel){
+          var s = val('utm_source'), m = val('utm_medium'), c = val('utm_campaign'), t = val('utm_term'),
+              ct = val('utm_content') || lastContent, g = val('gclid');
+          var msg = BASE;
+          if (nome) msg += '\nNome: ' + nome;
+          if (tel) msg += '\nTelefone: ' + tel;
+          var partes = [];
+          if (s) partes.push('Fonte: ' + s);
+          if (m) partes.push('Meio: ' + m);
+          if (c) partes.push('Campanha: ' + c);
+          if (t) partes.push('Termo: ' + t);
+          if (ct) partes.push('Anúncio: ' + ct);
+          if (g) partes.push('Google Ads: sim');
+          if (partes.length) msg += ' [' + partes.join(' | ') + ']';
+          return msg;
+        }
+
+        form.addEventListener('submit', function(e){
+          e.preventDefault();
+          var nome = (nomeEl.value || '').trim();
+          var tel = (telEl.value || '').trim();
+          var telDigits = tel.replace(/\D/g, '');
+          if (!nome) { nomeEl.classList.add('is-err'); nomeEl.focus(); return; }
+          if (telDigits.length < 10) { telEl.classList.add('is-err'); telEl.focus(); return; }
+
+          var g = val('gclid');
+          // Webhook Make (mesma lógica do site atual): dispara com gclid + telefone
+          if (g && telDigits) {
+            try { fetch(MAKE_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ gclid: g, telefone: telDigits, utm_source: val('utm_source'), utm_medium: val('utm_medium'), utm_campaign: val('utm_campaign') }), keepalive: true }); } catch (err) {}
+          }
+          // Evento p/ GTM
+          try { window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event: 'whatsapp_lead', lead_nome: nome, lead_telefone: telDigits, cta: lastContent }); } catch (err) {}
+
+          window.open('https://api.whatsapp.com/send?phone=' + WPP + '&text=' + encodeURIComponent(buildMsg(nome, tel)), '_blank');
+          closeModal();
+        });
+      })();
     </script>
   </body>
 </html>
