@@ -208,21 +208,39 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
       </div>
     </section>
 
-    <!-- CASOS -->
-    <section class="section--tight lp-cases">
-      <div class="container">
-        <p class="eyebrow eyebrow--center reveal">Casos clínicos</p>
-        <div class="lp-cases__grid">
-          {s.cases.map((c, i) => (
-            <figure class="lp-case reveal" style={`--d:${i * 80}ms`}>
-              <div class="lp-case__ba"><span class="lp-case__antes">Antes</span><span class="lp-case__depois">Depois</span></div>
-              <figcaption class="lp-case__cap"><span class="lp-case__t">{c.t}</span><span class="lp-case__d">{c.d}</span></figcaption>
-            </figure>
-          ))}
+    <!-- DEPOIMENTOS EM VÍDEO (opcional) -->
+    {s.lpVideos && (
+      <section class="section lp-vdepo">
+        <div class="container">
+          <p class="eyebrow eyebrow--center reveal">Em vídeo</p>
+          <h2 class="h2 reveal lp-vdepo__title" style="--d:80ms">Histórias de quem já <em>viveu</em>.</h2>
+          <div class="vdepo__carousel">
+            <button class="vdepo__nav vdepo__nav--prev is-off" type="button" aria-label="Ver depoimentos anteriores" data-vdepo-prev>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+            </button>
+            <div class="vdepo__row vdepo__row--portrait" data-vdepo-track>
+              {s.lpVideos.map((v, idx) => (
+                <figure class="vdepo__card reveal" style={`--d:${idx * 90}ms`}>
+                  <div class="vdepo__media">
+                    <video class="vdepo__video" src={v.src} poster={v.poster} preload="none" playsinline aria-label={`Depoimento de ${v.n}`}></video>
+                    <button class="vdepo__play" type="button" aria-label={`Reproduzir depoimento de ${v.n}`}>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>
+                    </button>
+                  </div>
+                  <figcaption class="vdepo__by">
+                    <span class="vdepo__n">{v.n}</span>
+                    <span class="vdepo__r">{v.r}</span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+            <button class="vdepo__nav vdepo__nav--next" type="button" aria-label="Ver próximos depoimentos" data-vdepo-next>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+            </button>
+          </div>
         </div>
-        <p class="lp-cases__note reveal">Imagens ilustrativas — casos reais apresentados na consulta de avaliação.</p>
-      </div>
-    </section>
+      </section>
+    )}
 
     <!-- COMO FUNCIONA -->
     <section class="section lp-steps band-dark arc-top">
@@ -432,18 +450,48 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
   .lp-rev__n { display: block; font-family: var(--sans); font-weight: 600; font-size: 13px; color: var(--navy); }
   .lp-rev__l { display: block; font-size: 11.5px; color: var(--navy-ghost); }
 
-  /* CASOS */
-  .lp-cases { background: var(--cream); }
-  .lp-cases__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.8vw, 22px); margin-top: clamp(28px, 4vh, 44px); }
-  .lp-case { border-radius: 18px; overflow: hidden; border: 1px solid rgba(24,39,60,0.08); background: rgba(255,255,255,0.5); }
-  .lp-case__ba { display: grid; grid-template-columns: 1fr 1fr; height: 160px; }
-  .lp-case__antes, .lp-case__depois { display: grid; place-items: center; font-family: var(--sans); font-weight: 600; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; }
-  .lp-case__antes { background: var(--cream-shadow); color: var(--navy-ghost); }
-  .lp-case__depois { background: linear-gradient(135deg, var(--navy), var(--cinema-black)); color: var(--gold-light); }
-  .lp-case__cap { display: block; padding: 17px 20px; }
-  .lp-case__t { display: block; font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144; font-size: 16px; color: var(--navy); }
-  .lp-case__d { display: block; font-size: 12px; color: var(--navy-ghost); margin-top: 3px; }
-  .lp-cases__note { text-align: center; font-size: 11.5px; color: var(--navy-ghost); margin-top: 24px; }
+  /* DEPOIMENTOS EM VÍDEO */
+  .lp-vdepo { background: var(--cream); }
+  .lp-vdepo__title { text-align: center; max-width: 22ch; margin: 14px auto clamp(30px, 5vh, 52px); }
+  .lp-vdepo__title em { font-style: italic; color: var(--gold-dark); }
+  .vdepo__carousel { position: relative; }
+  .vdepo__row { display: flex; flex-wrap: nowrap; gap: clamp(14px, 2vw, 24px); overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; padding: 4px 2px 12px; }
+  .vdepo__row::-webkit-scrollbar { display: none; }
+  .vdepo__row--portrait .vdepo__card { flex: 0 0 clamp(230px, 24vw, 275px); scroll-snap-align: center; }
+  .vdepo__nav {
+    position: absolute; top: 44%; transform: translateY(-50%); z-index: 5;
+    width: 46px; height: 46px; border-radius: 50%; cursor: pointer;
+    display: grid; place-items: center; color: var(--navy);
+    background: var(--cream); border: 1px solid rgba(211,164,108,0.5);
+    box-shadow: 0 12px 30px -12px rgba(24,39,60,0.45);
+    transition: background 200ms var(--silk), transform 200ms var(--silk), opacity 240ms var(--silk);
+  }
+  .vdepo__nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .vdepo__nav:hover { background: var(--gold-light); }
+  .vdepo__nav--prev { left: -8px; }
+  .vdepo__nav--next { right: -8px; }
+  .vdepo__nav.is-off { opacity: 0; pointer-events: none; }
+  .vdepo__card { display: flex; flex-direction: column; gap: 16px; }
+  .vdepo__media { position: relative; border-radius: 22px; overflow: hidden; background: var(--navy); box-shadow: 0 26px 52px -34px rgba(24,39,60,0.55); aspect-ratio: 9 / 16; }
+  .vdepo__video { width: 100%; height: 100%; object-fit: cover; display: block; background: var(--navy); }
+  .vdepo__play {
+    position: absolute; inset: 0; margin: auto; width: 66px; height: 66px; border: 0; cursor: pointer;
+    border-radius: 50%; display: grid; place-items: center; color: var(--navy);
+    background: var(--gold); box-shadow: 0 12px 34px -10px rgba(211,164,108,0.7);
+    transition: transform 300ms var(--silk), background 240ms var(--silk);
+  }
+  .vdepo__play svg { width: 24px; height: 24px; margin-left: 3px; }
+  .vdepo__play:hover { transform: scale(1.06); background: var(--gold-light); }
+  .vdepo__card.is-playing .vdepo__play { display: none; }
+  .vdepo__card.is-playing .vdepo__video { object-fit: contain; }
+  .vdepo__by { display: flex; flex-direction: column; gap: 2px; text-align: center; }
+  .vdepo__n { font-family: var(--sans); font-weight: 600; font-size: 13px; letter-spacing: 0.04em; color: var(--navy); }
+  .vdepo__r { font-family: var(--sans); font-weight: 600; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dark); }
+  @media (max-width: 860px) {
+    .lp-vdepo .vdepo__row { margin-inline: calc(clamp(20px, 5vw, 48px) * -1); padding-inline: clamp(20px, 5vw, 48px); }
+    .lp-vdepo .vdepo__row--portrait .vdepo__card { flex: 0 0 78%; }
+    .lp-vdepo .vdepo__nav { display: none; }
+  }
 
   /* PASSOS */
   .lp-steps__sub { color: rgba(245,240,232,0.78); }
@@ -517,7 +565,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
 
   @media (max-width: 980px) {
     .lp-gal__grid { columns: 2; }
-    .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-cases__grid, .lp-steps__grid, .lp-proto__grid { grid-template-columns: 1fr 1fr; }
+    .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-steps__grid, .lp-proto__grid { grid-template-columns: 1fr 1fr; }
     .lp-spec__grid { grid-template-columns: 1fr; }
     .lp-spec__media { max-width: 360px; margin-inline: auto; }
   }
@@ -525,7 +573,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
     .lp-stats__grid { grid-template-columns: 1fr 1fr; gap: 26px 16px; }
     .lp-stat--div::before { display: none; }
     .lp-gal__grid { columns: 1; max-width: 460px; margin-inline: auto; }
-    .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-cases__grid, .lp-steps__grid, .lp-cmp__grid, .lp-proto__grid, .lp-perfis__grid { grid-template-columns: 1fr; }
+    .lp-dif__grid, .lp-revs__grid, .lp-types__grid, .lp-steps__grid, .lp-cmp__grid, .lp-proto__grid, .lp-perfis__grid { grid-template-columns: 1fr; }
   }
 </style>
 
@@ -574,5 +622,46 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
       window.open('https://api.whatsapp.com/send?phone=5511947024607&text=' + encodeURIComponent(msg), '_blank');
       closeModal();
     });
+  }
+
+  // Depoimentos em vídeo — play sob demanda + carrossel (setas no desktop)
+  document.querySelectorAll('.vdepo__card').forEach((card) => {
+    const video = card.querySelector('.vdepo__video');
+    const btn = card.querySelector('.vdepo__play');
+    if (!video || !btn) return;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.vdepo__card.is-playing').forEach((other) => {
+        if (other !== card) {
+          other.classList.remove('is-playing');
+          const ov = other.querySelector('.vdepo__video');
+          if (ov) { (ov as HTMLVideoElement).pause(); ov.removeAttribute('controls'); }
+        }
+      });
+      card.classList.add('is-playing');
+      (video as HTMLVideoElement).setAttribute('controls', '');
+      (video as HTMLVideoElement).play();
+    });
+  });
+
+  const vtrack = document.querySelector('[data-vdepo-track]');
+  const vprev = document.querySelector('[data-vdepo-prev]');
+  const vnext = document.querySelector('[data-vdepo-next]');
+  if (vtrack && vprev && vnext) {
+    const vstep = () => {
+      const card = vtrack.querySelector('.vdepo__card');
+      const gap = parseFloat(getComputedStyle(vtrack).gap) || 20;
+      const w = card ? card.getBoundingClientRect().width + gap : 300;
+      return Math.max(w, vtrack.clientWidth * 0.85);
+    };
+    vprev.addEventListener('click', () => vtrack.scrollBy({ left: -vstep(), behavior: 'smooth' }));
+    vnext.addEventListener('click', () => vtrack.scrollBy({ left: vstep(), behavior: 'smooth' }));
+    const vupdate = () => {
+      const max = vtrack.scrollWidth - vtrack.clientWidth - 2;
+      vprev.classList.toggle('is-off', vtrack.scrollLeft <= 2);
+      vnext.classList.toggle('is-off', vtrack.scrollLeft >= max);
+    };
+    vtrack.addEventListener('scroll', vupdate, { passive: true });
+    window.addEventListener('resize', vupdate);
+    vupdate();
   }
 </script>

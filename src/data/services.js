@@ -4,6 +4,20 @@
 
 const GOOGLE = { rating: '4,9', count: '214' };
 
+// Depoimentos em vídeo (os mesmos da home) — reaproveitados nas LPs por serviço.
+const V = {
+  marcelo:  { src: '/assets/depoimentos/depo-marcelo-guimaraes.mp4', poster: '/assets/depoimentos/depo-marcelo-guimaraes.jpg', n: 'Marcelo Guimarães', r: 'Empresário' },
+  carina:   { src: '/assets/depoimentos/depo-carina.mp4',            poster: '/assets/depoimentos/depo-carina.jpg',            n: 'Carina Albamonte', r: 'Empresária' },
+  vincent:  { src: '/assets/depoimentos/depo-vicent.mp4',            poster: '/assets/depoimentos/depo-vicent.jpg',            n: 'Vincent Mastio',   r: 'Empresário' },
+  mario:    { src: '/assets/depoimentos/depo-mario-oki.mp4',         poster: '/assets/depoimentos/depo-mario-oki.jpg',         n: 'Mário Oki',        r: 'Empresário' },
+  renata:   { src: '/assets/depoimentos/depo-renata.mp4',            poster: '/assets/depoimentos/depo-renata.jpg',            n: 'Renata',           r: 'Paciente' },
+  victor:   { src: '/assets/depoimentos/depo-victor.mp4',            poster: '/assets/depoimentos/depo-victor.jpg',            n: 'Victor',           r: 'Empresário' },
+  stefani:  { src: '/assets/depoimentos/depo-stefani.mp4',           poster: '/assets/depoimentos/depo-stefani.jpg',           n: 'Stefani',          r: 'Paciente' },
+  joaquim:  { src: '/assets/depoimentos/depo-joaquim.mp4',           poster: '/assets/depoimentos/depo-joaquim.jpg',           n: 'Joaquim',          r: 'Odontopediatria' },
+  wilson:   { src: '/assets/depoimentos/depo-dayclinic.mp4',         poster: '/assets/depoimentos/depo-dayclinic.jpg',         n: 'Wilson Fernandes', r: 'Empresário' },
+  paciente: { src: '/assets/depoimentos/depo-uuid.mp4',              poster: '/assets/depoimentos/depo-uuid.jpg',              n: 'Paciente',         r: 'Akaki' },
+};
+
 export const services = [
   {
     slug: 'implantes',
@@ -76,11 +90,7 @@ export const services = [
       { q: 'Tinha muito medo de cirurgia. A técnica sem corte foi uma revelação. Saí andando, sem dor, com um sorriso novo. Atendimento impecável do começo ao fim.', n: 'Roberto P.', loc: 'Moema · Implante unitário' },
       { q: 'Pesquisei muitas clínicas antes de escolher a Akaki. A diferença da Cirurgia Guiada é absurda — recuperação rápida, sem dor e resultado perfeito.', n: 'Carlos M.', loc: 'Itaim Bibi · Implantes múltiplos' },
     ],
-    cases: [
-      { t: 'Implante unitário', d: 'Elemento 21 — resultado em 4 semanas' },
-      { t: 'Protocolo total', d: '6 implantes, sem corte, reabilitação completa' },
-      { t: 'Múltiplos implantes', d: 'Elementos 14, 15 e 16 — pós-op tranquilo' },
-    ],
+    lpVideos: [V.mario, V.marcelo, V.wilson, V.carina, V.victor],
     faq: [
       { q: 'A cirurgia de implante dói?', a: 'Com sedação odontológica você dorme durante todo o procedimento — não sente absolutamente nada. Ao acordar, o desconforto é mínimo, geralmente muito menor do que uma extração convencional.' },
       { q: 'O que é sedação odontológica? É segura?', a: 'É uma técnica onde o paciente é sedado por via venosa e dorme durante toda a cirurgia. Segura e amplamente utilizada, aplicada por profissional habilitado. Você acorda sem lembrar do procedimento, sem trauma, sem estresse.' },
@@ -172,11 +182,7 @@ export const services = [
       { q: 'Como empresário não tenho tempo pra ficar voltando ao dentista toda semana. No Day Clinic resolvi implante, restaurações e limpeza no mesmo dia. Voltei ao trabalho no dia seguinte.', n: 'Marcos S.', loc: 'Jardins · Day Clinic Executivo' },
       { q: 'Fui sedada e não lembro de absolutamente nada do procedimento. Acordei com o tratamento finalizado, sem dor e sem ansiedade. Nunca imaginei que ir ao dentista poderia ser assim.', n: 'Ana L.', loc: 'Moema · Sedação + implante' },
     ],
-    cases: [
-      { t: '3 tratamentos em 1 dia', d: 'Resolvidos de uma vez, sob sedação' },
-      { t: 'Paciente executivo', d: 'Sem afastamento da agenda' },
-      { t: 'Odontofobia severa', d: 'Tratamento completo, sem trauma' },
-    ],
+    lpVideos: [V.renata, V.wilson, V.marcelo, V.mario, V.vincent],
     faq: [
       { q: 'Qual a diferença entre sedação odontológica e anestesia geral?', a: 'Na sedação odontológica o paciente entra em um estado de relaxamento profundo — dorme, não sente e não memoriza o procedimento — mas sem os riscos de uma anestesia geral. É realizada por médico anestesiologista com monitoramento contínuo durante todo o procedimento.' },
       { q: 'Vou sentir dor durante o procedimento?', a: 'Não. Com a sedação você estará em estado de relaxamento profundo e não terá nenhuma percepção do procedimento. Ao acordar, qualquer desconforto é gerenciado com medicação analgésica prescrita pela equipe.' },
@@ -217,10 +223,11 @@ export const services = [
     stepsTitle: 'O seu tratamento, passo a passo',
     stepsSub: 'Um plano ortodôntico sob medida, com avaliação completa e acompanhamento próximo.',
     steps: [
-      { t: 'Avaliação', d: 'Análise da posição dos dentes e da mordida, com diagnóstico completo.' },
+      { t: 'Consulta com o especialista', d: 'Análise da posição dos dentes e da mordida, com diagnóstico completo.' },
       { t: 'Planejamento', d: 'Indicamos a técnica ideal para o seu caso e definimos o plano de tratamento.' },
       { t: 'Acompanhamento', d: 'Ajustes periódicos com acompanhamento especializado até o resultado final.' },
     ],
+    specBio: 'Com mais de 35 anos de experiência, o Dr. Luiz Akaki foi pioneiro em trazer técnicas de ortodontia de ponta da Alemanha e dos EUA para o Brasil. Especialista em alinhadores invisíveis, alia atendimento humanizado, tecnologia de referência e resultados previsíveis para o seu sorriso.',
     typesEyebrow: 'Tratamentos',
     typesTitle: 'Opções de tratamento',
     types: [
@@ -251,11 +258,7 @@ export const services = [
       { q: 'Além da estética, as minhas dores de cabeça melhoraram muito depois que corrigi a mordida.', n: 'Felipe N.', loc: 'Jardins · Ortodontia' },
       { q: 'Equipe muito atenciosa, sempre explicando cada etapa. Resultado lindo e natural.', n: 'Ana C.', loc: 'Pinheiros · Ortodontia' },
     ],
-    cases: [
-      { t: 'Apinhamento', d: 'Alinhamento completo do arco superior' },
-      { t: 'Correção de mordida', d: 'Encaixe restabelecido com conforto' },
-      { t: 'Sorriso harmonizado', d: 'Resultado natural e estável' },
-    ],
+    lpVideos: [V.stefani, V.carina, V.victor, V.paciente],
     faq: [
       { q: 'Qual a melhor idade para iniciar?', a: 'Não há idade limite. Adultos e crianças podem se beneficiar da ortodontia — na avaliação indicamos o melhor momento e a técnica ideal.' },
       { q: 'O aparelho incomoda?', a: 'Há um período de adaptação, mas as técnicas atuais são muito mais confortáveis. Acompanhamos de perto para minimizar qualquer desconforto.' },
@@ -273,7 +276,7 @@ export const services = [
     hero: {
       eyebrow: 'Estética dental · Jardins, SP',
       h1: 'O sorriso que você sempre quis. Em <em>poucas sessões</em>.',
-      sub: 'Lentes de contato, facetas de porcelana e clareamento com planejamento digital e tecnologia CAD/CAM. Resultados naturais e duradouros — na clínica mais tradicional dos Jardins.',
+      sub: 'Lentes de contato, facetas, clareamento e harmonização orofacial com planejamento digital. Resultados naturais e duradouros na clínica mais tradicional do Jardim Paulista.',
       urgency: 'Consulta do sorriso por agendamento.',
       image: '/assets/t-estetica-2.webp',
     },
@@ -343,11 +346,7 @@ export const services = [
       { q: 'Sempre tive vergonha de sorrir. Depois das facetas na Akaki, não paro de sorrir em todas as fotos. Mudou minha vida.', n: 'Patrícia S.', loc: 'Facetas de porcelana' },
       { q: 'O clareamento ficou incrível e muito natural. A equipe é super atenciosa e o ambiente da clínica é de outro nível.', n: 'Beatriz O.', loc: 'Clareamento dental' },
     ],
-    cases: [
-      { t: 'Lentes de contato dental', d: 'Sorriso harmonizado com naturalidade' },
-      { t: 'Clareamento', d: 'Mais brilho, com segurança' },
-      { t: 'Reabilitação estética', d: 'Harmonia completa do sorriso' },
-    ],
+    lpVideos: [V.carina, V.stefani, V.victor, V.paciente],
     faq: [
       { q: 'Qual a diferença entre lente e faceta?', a: 'A lente de contato é ultrafina (0,3mm) e exige mínimo ou nenhum desgaste do dente. A faceta é um pouco mais espessa e indicada para casos que precisam de mais correção. Ambas são de porcelana e duradouras.' },
       { q: 'O procedimento dói?', a: 'Não. Lentes e facetas são instaladas com anestesia local e o processo é indolor. Para pacientes com qualquer receio, oferecemos sedação consciente.' },
@@ -405,7 +404,7 @@ export const services = [
       shots: [
         { img: '/assets/akakids-1.webp', alt: 'Criança atendida no espaço AKA Kids da Akaki', cap: 'Sem medo' },
         { img: '/assets/akakids-2.webp', alt: 'Equipe especializada atendendo uma criança', cap: 'Equipe especializada' },
-        { img: '/assets/akakids-5.webp', alt: 'Piso interativo do espaço AKA Kids', cap: 'Piso interativo' },
+        { img: '/assets/akakids-5.webp', alt: 'Família acolhida no espaço AKA Kids da Akaki', cap: 'Espaço acolhedor' },
         { img: '/assets/akakids-3.webp', alt: 'Atendimento infantil lúdico na Akaki', cap: 'Atendimento lúdico' },
         { img: '/assets/akakids-4.webp', alt: 'Criança sorrindo na cadeira do AKA Kids', cap: 'Aventura, não consulta' },
       ],
@@ -447,11 +446,6 @@ export const services = [
       { q: 'Minha filha tinha pavor de dentista. Na Akaki, em duas consultas, ela já pedia pra voltar. O espaço infantil é incrível e a doutora tem uma paciência admirável.', n: 'Mãe de paciente', loc: 'AKA Kids · 8 anos' },
       { q: 'Trouxe meu filho de 3 anos para a primeira consulta e foi surpreendente. Ele nem percebeu que estava no dentista. Saiu abraçando a doutora.', n: 'Pai de paciente', loc: 'AKA Kids · 3 anos' },
       { q: 'A sala de espera com brinquedos faz toda a diferença. Minha filha chega animada, e o atendimento é sempre carinhoso e profissional. Recomendo de olhos fechados.', n: 'Mãe de paciente', loc: 'AKA Kids · 5 anos' },
-    ],
-    cases: [
-      { t: 'Primeira consulta', d: 'Introdução positiva ao dentista' },
-      { t: 'Prevenção', d: 'Bons hábitos desde cedo' },
-      { t: 'Vencendo o medo', d: 'Criança à vontade e sorrindo' },
     ],
     faq: [
       { q: 'A partir de que idade posso levar meu filho?', a: 'O ideal é a partir do aparecimento dos primeiros dentes (por volta dos 6 meses). A primeira consulta serve para orientar os pais sobre higiene bucal e acompanhar o desenvolvimento.' },
