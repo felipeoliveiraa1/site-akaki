@@ -235,7 +235,7 @@ export const services = [
     spec2: {
       eyebrow: 'Conheça também',
       name: 'Dra. Thais L. <em>Bighetti</em>',
-      role: 'Especialista em Ortodontia e Harmonização Orofacial',
+      role: 'Especialista em Ortodontia e Harmonização Orofacial · CRO-SP 140.982',
       bio: [
         'Dra. Thais trata o sorriso de dentro para fora. Com especialização em ortodontia, ela corrige o alinhamento dos dentes e a posição da mordida — e vai além, combinando o tratamento ortodôntico com harmonização orofacial quando necessário.',
         'O resultado é um sorriso alinhado que também harmoniza com os contornos naturais do rosto.',
@@ -331,7 +331,7 @@ export const services = [
     spec2: {
       eyebrow: 'Conheça também',
       name: 'Dra. Thais L. <em>Bighetti</em>',
-      role: 'Especialista em Harmonização Orofacial',
+      role: 'Especialista em Harmonização Orofacial · CRO-SP 140.982',
       bio: [
         'Dra. Thais é especialista em harmonização orofacial — a área que equilibra os contornos do rosto com precisão e naturalidade. Botox, preenchimento labial, bioremodeladores e tratamento para bruxismo fazem parte do seu dia a dia na clínica.',
         'Seu olhar integrado une a saúde bucal à estética facial, entregando resultados que rejuvenescem sem perder a identidade de cada paciente.',
