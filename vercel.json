@@ -1,4 +1,18 @@
 {
+  "redirects": [
+    { "source": "/dentista-com-sedacao-odontologica", "destination": "/sedacao-odontologica", "permanent": true },
+    { "source": "/dentista-com-sedacao-odontologica/", "destination": "/sedacao-odontologica", "permanent": true },
+    { "source": "/implante-dentario", "destination": "/implantes", "permanent": true },
+    { "source": "/implante-dentario/", "destination": "/implantes", "permanent": true },
+    { "source": "/estetica-3", "destination": "/estetica", "permanent": true },
+    { "source": "/estetica-3/", "destination": "/estetica", "permanent": true },
+    { "source": "/especialistas", "destination": "/", "permanent": true },
+    { "source": "/especialistas/", "destination": "/", "permanent": true },
+    { "source": "/sobre", "destination": "/", "permanent": true },
+    { "source": "/sobre/", "destination": "/", "permanent": true },
+    { "source": "/obg-forms", "destination": "/", "permanent": true },
+    { "source": "/obg-forms/", "destination": "/", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",

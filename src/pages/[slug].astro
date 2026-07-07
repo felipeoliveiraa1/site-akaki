@@ -12,6 +12,12 @@ const { service: s } = Astro.props;
 const WPP = 'https://api.whatsapp.com/send?phone=5511947024607';
 const pageTitle = s.seoTitle || `${s.name} · Akaki Odontologia`;
 const pageDesc = s.seoDesc || s.hero.sub;
+// Dados estruturados de FAQ (rich results no Google) a partir das perguntas da LP
+const faqSchema = (s.faq && s.faq.length) ? {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: s.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+} : null;
 
 const ICONS = {
   cut: '<circle cx="6.5" cy="7" r="2.2"/><circle cx="6.5" cy="17" r="2.2"/><path d="M8.4 8.1l11 7.9M8.4 15.9l11-7.9"/>',
@@ -32,6 +38,7 @@ const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
 ---
 <Layout title={pageTitle} description={pageDesc}>
   <Header />
+  {faqSchema && <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />}
   <main class="lp" data-slug={s.slug} data-service={s.name}>
 
     <!-- HERO -->
