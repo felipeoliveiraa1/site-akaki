@@ -24,6 +24,7 @@ export const services = [
     nav: 'Implantes',
     name: 'Implantes',
     seoTitle: 'Implante Dentário em São Paulo | Cirurgia Guiada — Akaki',
+    seoDesc: 'Sedação odontológica + Cirurgia Guiada Ankylos. Você dorme, implantamos com precisão alemã. Pós-operatório tranquilo, osseointegração rápida.',
     formExtra: { label: 'Sua situação hoje', name: 'situacao', options: ['Perdi um dente', 'Perdi vários dentes', 'Uso prótese ou dentadura', 'Ainda tenho o dente (vou extrair)', 'Não sei / quero avaliar'] },
     hero: {
       eyebrow: 'Implantes dentários em São Paulo',
