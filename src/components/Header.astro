@@ -93,15 +93,16 @@ const nav = [
       position: fixed; inset: 0 0 auto 0; top: 0; height: 100svh;
       flex-direction: column; align-items: flex-start; justify-content: center; gap: 18px;
       padding: 92px clamp(28px, 8vw, 56px) 48px;
-      background: rgba(11,14,19,0.97); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
-      transform: translateY(-100%); opacity: 0; pointer-events: none;
-      transition: transform 520ms var(--silk), opacity 360ms var(--silk);
+      /* fundo SÓLIDO opaco — legibilidade garantida sem depender de backdrop-filter (que compõe mal junto de opacity animada) */
+      background: linear-gradient(180deg, var(--cinema-black) 0%, #10141c 100%);
+      transform: translateY(-100%); pointer-events: none;
+      transition: transform 520ms var(--silk);
       overflow-y: auto;
     }
     .hdr__nav > a { font-size: 19px; letter-spacing: 0.04em; font-family: var(--serif); text-transform: none; font-weight: 400; }
     .hdr__navfoot { display: flex; align-items: center; gap: 18px; margin-top: 14px; }
     .hdr__cta--mob { display: inline-flex; }
-    :global(.nav-open) .hdr__nav { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    :global(.nav-open) .hdr__nav { transform: translateY(0); pointer-events: auto; }
     :global(.nav-open) .hdr__burger span:nth-child(1) { transform: translateY(5.6px) rotate(45deg); }
     :global(.nav-open) .hdr__burger span:nth-child(2) { opacity: 0; }
     :global(.nav-open) .hdr__burger span:nth-child(3) { transform: translateY(-5.6px) rotate(-45deg); }
