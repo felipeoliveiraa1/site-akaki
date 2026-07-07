@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import ContactModal from '../components/ContactModal.astro';
 import { services, google } from '../data/services.js';
 
 export function getStaticPaths() {
@@ -28,8 +29,6 @@ const ICONS = {
 };
 const badges = ['CRO-SP 45717', 'EPAO CRO-SP 13012', 'Cirurgia Guiada', 'Atendimento humanizado'];
 const arrow = '<path d="M5 12h13"/><path d="M13 6l6 6-6 6"/>';
-// Todas as LPs usam o formulário próprio (com qualificação quando houver); o modal global fica só na home
-const localForm = true;
 ---
 <Layout title={pageTitle} description={pageDesc}>
   <Header />
@@ -44,35 +43,13 @@ const localForm = true;
         <h1 class="display lp-hero__h1" set:html={s.hero.h1}></h1>
         <p class="lead lp-hero__sub">{s.hero.sub}</p>
         {s.hero.urgency && <p class="lp-urgency"><span class="lp-urgency__dot"></span>{s.hero.urgency}</p>}
-        <button class="btn btn--gold lp-hero__cta" type="button" data-lp-open aria-haspopup="dialog" aria-controls={localForm ? 'lp-modal' : 'wa-modal'}>
+        <button class="btn btn--gold lp-hero__cta" type="button" data-lp-open aria-haspopup="dialog" aria-controls="lp-modal">
           <svg viewBox="0 0 24 24" aria-hidden="true" set:html={arrow} /> Agende sua consulta
         </button>
       </div>
     </section>
 
-    {localForm && (
-      <div class="lp-modal" id="lp-modal" hidden>
-        <div class="lp-modal__backdrop" data-lp-close></div>
-        <div class="lp-modal__panel" role="dialog" aria-modal="true" aria-labelledby="lp-form-title">
-          <button class="lp-modal__close" type="button" data-lp-close aria-label="Fechar formulário">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-          </button>
-          <form class="lp-form" id="lp-form" method="post">
-            <p class="lp-form__title" id="lp-form-title">Agende sua consulta</p>
-            <input class="lp-form__in" type="text" name="nome" placeholder="Seu nome" autocomplete="name" required />
-            <input class="lp-form__in" type="tel" name="telefone" placeholder="Telefone / WhatsApp" autocomplete="tel" required />
-            {s.formExtra && (
-              <select class="lp-form__in lp-form__select" name={s.formExtra.name} data-extra data-extra-label={s.formExtra.label} aria-label={s.formExtra.label} required>
-                <option value="" disabled selected>{s.formExtra.label}</option>
-                {s.formExtra.options.map((o) => <option value={o}>{o}</option>)}
-              </select>
-            )}
-            <button class="btn btn--gold lp-form__btn" type="submit">Quero agendar minha consulta</button>
-            <p class="lp-form__note">Nossa equipe entra em contato para confirmar sua data e tirar suas dúvidas.</p>
-          </form>
-        </div>
-      </div>
-    )}
+    <ContactModal formExtra={s.formExtra} />
 
     <!-- STATS -->
     <section class="lp-stats arc-top">
@@ -353,7 +330,7 @@ const localForm = true;
       <div class="container lp-final__inner">
         <p class="eyebrow eyebrow--center reveal">{s.finalEyebrow || 'Próximo passo'}</p>
         <h2 class="display lp-final__h reveal" style="--d:80ms" set:html={s.finalTitle || 'Agende sua consulta com o <em>especialista</em>.'}></h2>
-        <p class="lead reveal lp-final__sub" style="--d:140ms">{s.finalSub || 'Nossa equipe entra em contato para confirmar sua data e tirar suas dúvidas.'}</p>
+        <p class="lead reveal lp-final__sub" style="--d:140ms">{s.finalSub || 'Preencha e inicie a conversa com a nossa equipe direto no WhatsApp.'}</p>
         <div class="lp-final__cta reveal" style="--d:200ms">
           <a class="btn btn--gold" data-wpp={`servico-${s.slug}-final`} href={WPP} target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24" aria-hidden="true" set:html={arrow} /> Quero agendar minha consulta
@@ -381,29 +358,6 @@ const localForm = true;
   .lp-urgency__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex: 0 0 auto; animation: pulse 2.4s var(--breath) infinite; }
   @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(211,164,108,0.5); } 50% { box-shadow: 0 0 0 7px rgba(211,164,108,0); } }
   .lp-hero__cta svg { width: 16px; height: 16px; }
-
-  .lp-form { background: rgba(11,14,19,0.55); border: 1px solid rgba(211,164,108,0.3); border-radius: 20px; padding: clamp(24px, 2.6vw, 34px); display: flex; flex-direction: column; gap: 13px; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 30px 70px -40px rgba(0,0,0,0.8); }
-  .lp-form__title { font-family: var(--sans); font-weight: 600; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-light); text-align: center; margin-bottom: 4px; }
-  .lp-form__in { width: 100%; padding: 14px 16px; border-radius: 11px; border: 1px solid rgba(244,238,227,0.22); background: rgba(11,14,19,0.4); color: var(--cream); font-family: var(--body); font-size: 14.5px; }
-  .lp-form__in::placeholder { color: rgba(245,240,232,0.45); }
-  .lp-form__select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 40px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E4BC8A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; }
-  .lp-form__select:invalid { color: rgba(245,240,232,0.5); }
-  .lp-form__select option { color: #18273c; }
-  .lp-form__btn { width: 100%; justify-content: center; margin-top: 4px; background: var(--moss); color: var(--white-text); }
-  .lp-form__btn:hover { background: #78896a; }
-  .lp-form__note { font-size: 11.5px; color: rgba(245,240,232,0.55); text-align: center; line-height: 1.5; }
-
-  /* MODAL de agendamento */
-  .lp-modal[hidden] { display: none; }
-  .lp-modal { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 20px; }
-  .lp-modal__backdrop { position: absolute; inset: 0; background: rgba(8,10,14,0.74); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: lpFade 240ms var(--silk); }
-  .lp-modal__panel { position: relative; z-index: 1; width: 100%; max-width: 420px; animation: lpPop 320ms var(--silk); }
-  .lp-modal__close { position: absolute; top: 12px; right: 12px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(211,164,108,0.3); background: rgba(11,14,19,0.55); color: var(--cream); cursor: pointer; display: grid; place-items: center; transition: background 200ms, transform 240ms var(--silk); }
-  .lp-modal__close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
-  .lp-modal__close:hover { background: rgba(211,164,108,0.2); transform: rotate(90deg); }
-  @keyframes lpFade { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes lpPop { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .lp-modal__backdrop, .lp-modal__panel { animation: none; } }
 
   /* STATS — cream band, gold serif numbers, hairline dividers */
   .lp-stats { background: var(--cream); position: relative; z-index: 2; }
@@ -613,62 +567,6 @@ const localForm = true;
 </style>
 
 <script>
-  // Modal do formulário — SOMENTE odontopediatria (as demais páginas usam o modal global do Layout)
-  const modal = document.getElementById('lp-modal');
-  if (modal) {
-    const openModal = () => {
-      modal.hidden = false;
-      document.body.style.overflow = 'hidden';
-      const first = modal.querySelector('input');
-      if (first) setTimeout(() => (first as HTMLInputElement).focus(), 60);
-    };
-    const closeModal = () => { modal.hidden = true; document.body.style.overflow = ''; };
-    // CTAs de WhatsApp/agendar abrem o formulário completo — exceto o flutuante (.wfab), que abre o modal simples (.wlead)
-    document.addEventListener('click', (e) => {
-      const t = e.target as Element;
-      const el = t && t.closest ? t.closest('[data-wpp],[data-lp-open]') : null;
-      if (!el) return;
-      if (el.classList.contains('wfab')) return;
-      e.preventDefault();
-      openModal();
-    });
-    document.querySelectorAll('[data-lp-close]').forEach((b) => b.addEventListener('click', closeModal));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) closeModal(); });
-
-    const form = document.getElementById('lp-form');
-    if (form) {
-      const getCookie = (n) => { const m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)')); return m ? decodeURIComponent(m[2]) : ''; };
-      const MAKE_WEBHOOK = 'https://hook.us2.make.com/tn2iu445t1a3ub4kkyys4jcjn81tbneg';
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const data = new FormData(form as HTMLFormElement);
-        const nome = String(data.get('nome') || '').trim();
-        const tel = String(data.get('telefone') || '').trim();
-        const telDigits = tel.replace(/\D/g, '');
-        let msg = 'Olá, gostaria de agendar uma consulta na Akaki.';
-        const extra = form.querySelector('[data-extra]');
-        const extraVal = extra ? String((extra as HTMLSelectElement).value || '').trim() : '';
-        if (extra && extraVal) msg += '\n' + (extra.getAttribute('data-extra-label') || 'Info') + ': ' + extraVal;
-        const src = getCookie('utm_source'), med = getCookie('utm_medium'), camp = getCookie('utm_campaign'), cont = getCookie('utm_content'), g = getCookie('gclid');
-        const parts = [];
-        if (src) parts.push('Fonte: ' + src);
-        if (med) parts.push('Meio: ' + med);
-        if (camp) parts.push('Campanha: ' + camp);
-        if (cont) parts.push('Anúncio: ' + cont);
-        if (g) parts.push('Google Ads: sim');
-        if (parts.length) msg += ' [' + parts.join(' | ') + ']';
-        // tracking (igual ao modal global): webhook Make + evento GTM
-        if (g && telDigits) {
-          try { fetch(MAKE_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ gclid: g, telefone: telDigits, utm_source: src, utm_medium: med, utm_campaign: camp }), keepalive: true }); } catch (err) {}
-        }
-        const lpSlug = (document.querySelector('.lp') && document.querySelector('.lp').getAttribute('data-slug')) || 'lp';
-        try { (window as any).dataLayer = (window as any).dataLayer || []; (window as any).dataLayer.push({ event: 'whatsapp_lead', lead_nome: nome, lead_telefone: telDigits, cta: lpSlug + '-form' }); } catch (err) {}
-        window.open('https://api.whatsapp.com/send?phone=5511947024607&text=' + encodeURIComponent(msg), '_blank');
-        closeModal();
-      });
-    }
-  }
-
   // Depoimentos em vídeo — play sob demanda + carrossel (setas no desktop)
   document.querySelectorAll('.vdepo__card').forEach((card) => {
     const video = card.querySelector('.vdepo__video');
