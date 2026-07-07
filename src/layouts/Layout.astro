@@ -332,7 +332,10 @@ const schema = {
 
         // Máscara BR simples (00) 00000-0000
         if (telEl) telEl.addEventListener('input', function(){
-          var d = telEl.value.replace(/\D/g, '').slice(0, 11), out = d;
+          var d = telEl.value.replace(/\D/g, '');
+          if (d.length > 11 && d.slice(0,2) === '55') d = d.slice(2); // remove código do país (55) que o autofill coloca na frente
+          d = d.slice(0, 11);
+          var out = d;
           if (d.length > 7) out = '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7);
           else if (d.length > 2) out = '(' + d.slice(0,2) + ') ' + d.slice(2);
           else if (d.length > 0) out = '(' + d;
@@ -342,17 +345,15 @@ const schema = {
 
         function buildMsg(nome, tel){
           var s = val('utm_source'), m = val('utm_medium'), c = val('utm_campaign'), t = val('utm_term'),
-              ct = val('utm_content') || lastContent, g = val('gclid');
-          var msg = BASE;
-          var partes = [];
+              ct = val('utm_content'), g = val('gclid');
+          var partes = ['whatsapp'];
           if (s) partes.push('Fonte: ' + s);
           if (m) partes.push('Meio: ' + m);
           if (c) partes.push('Campanha: ' + c);
           if (t) partes.push('Termo: ' + t);
           if (ct) partes.push('Anúncio: ' + ct);
           if (g) partes.push('Google Ads: sim');
-          if (partes.length) msg += ' [' + partes.join(' | ') + ']';
-          return msg;
+          return BASE + ' [' + partes.join(' | ') + ']';
         }
 
         form.addEventListener('submit', function(e){
@@ -360,6 +361,7 @@ const schema = {
           var nome = (nomeEl.value || '').trim();
           var tel = (telEl.value || '').trim();
           var telDigits = tel.replace(/\D/g, '');
+          if (telDigits.length > 11 && telDigits.slice(0,2) === '55') telDigits = telDigits.slice(2);
           if (!nome) { nomeEl.classList.add('is-err'); nomeEl.focus(); return; }
           if (telDigits.length < 10) { telEl.classList.add('is-err'); telEl.focus(); return; }
 

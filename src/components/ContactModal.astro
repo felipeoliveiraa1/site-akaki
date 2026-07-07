@@ -73,6 +73,17 @@ const { formExtra } = Astro.props;
 
     const form = document.getElementById('lp-form');
     if (form) {
+      const telInput = form.querySelector('[name=telefone]');
+      if (telInput) telInput.addEventListener('input', () => {
+        let d = (telInput as HTMLInputElement).value.replace(/\D/g, '');
+        if (d.length > 11 && d.slice(0,2) === '55') d = d.slice(2); // remove código do país (55) que o autofill coloca na frente
+        d = d.slice(0, 11);
+        let out = d;
+        if (d.length > 7) out = '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7);
+        else if (d.length > 2) out = '(' + d.slice(0,2) + ') ' + d.slice(2);
+        else if (d.length > 0) out = '(' + d;
+        (telInput as HTMLInputElement).value = out;
+      });
       const getCookie = (n) => { const m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)')); return m ? decodeURIComponent(m[2]) : ''; };
       const MAKE_WEBHOOK = 'https://hook.us2.make.com/tn2iu445t1a3ub4kkyys4jcjn81tbneg';
       form.addEventListener('submit', (e) => {
@@ -80,19 +91,19 @@ const { formExtra } = Astro.props;
         const data = new FormData(form as HTMLFormElement);
         const nome = String(data.get('nome') || '').trim();
         const tel = String(data.get('telefone') || '').trim();
-        const telDigits = tel.replace(/\D/g, '');
+        let telDigits = tel.replace(/\D/g, '');
+        if (telDigits.length > 11 && telDigits.slice(0,2) === '55') telDigits = telDigits.slice(2);
         let msg = 'Olá, gostaria de agendar uma consulta na Akaki.';
         const extra = form.querySelector('[data-extra]');
         const extraVal = extra ? String((extra as HTMLSelectElement).value || '').trim() : '';
-        if (extra && extraVal) msg += '\n' + (extra.getAttribute('data-extra-label') || 'Info') + ': ' + extraVal;
         const src = getCookie('utm_source'), med = getCookie('utm_medium'), camp = getCookie('utm_campaign'), cont = getCookie('utm_content'), g = getCookie('gclid');
-        const parts = [];
+        const parts = [extraVal || 'site'];
         if (src) parts.push('Fonte: ' + src);
         if (med) parts.push('Meio: ' + med);
         if (camp) parts.push('Campanha: ' + camp);
         if (cont) parts.push('Anúncio: ' + cont);
         if (g) parts.push('Google Ads: sim');
-        if (parts.length) msg += ' [' + parts.join(' | ') + ']';
+        msg += ' [' + parts.join(' | ') + ']';
         if (g && telDigits) {
           try { fetch(MAKE_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ gclid: g, telefone: telDigits, utm_source: src, utm_medium: med, utm_campaign: camp }), keepalive: true }); } catch (err) {}
         }
