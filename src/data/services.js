@@ -110,7 +110,7 @@ export const services = [
     hero: {
       eyebrow: 'Sedação odontológica · Day Clinic · São Paulo',
       h1: 'Resolva todo o seu tratamento dentário em <em>um único dia</em>. Dormindo.',
-      sub: 'Day Clinic com sedação odontológica e anestesista. Múltiplos procedimentos em uma única sessão — você chega, dorme, acorda com o sorriso resolvido. Sem tirar a semana da agenda.',
+      sub: 'Day Clinic com sedação odontológica e anestesista. Múltiplos procedimentos em uma única sessão — você chega, dorme e acorda com um sorriso novo.',
       urgency: 'Day Clinic com avaliação prévia por agendamento.',
       image: '/assets/t-dayclinic-2.webp',
     },
@@ -397,7 +397,7 @@ export const services = [
     hero: {
       eyebrow: 'AKA Kids & Teens · Odontopediatria',
       h1: 'Seu filho vai amar ir ao <em>dentista</em>.',
-      sub: 'Na Akaki, cada consulta é uma aventura. Espaço 100% lúdico, equipe especializada em crianças e a mesma excelência que nos tornou referência em odontologia — agora para os pequenos.',
+      sub: 'Na Akaki, cada consulta é uma aventura. Espaço 100% lúdico e equipe especializada em crianças — a mesma excelência da Akaki, agora para os pequenos.',
       urgency: 'Atendimento infantil especializado por agendamento.',
       image: '/assets/t-odontopediatria-2.webp',
     },
