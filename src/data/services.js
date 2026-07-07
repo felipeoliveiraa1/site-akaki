@@ -6,16 +6,16 @@ const GOOGLE = { rating: '4,9', count: '214' };
 
 // Depoimentos em vídeo (os mesmos da home) — reaproveitados nas LPs por serviço.
 const V = {
-  marcelo:  { src: '/assets/depoimentos/depo-marcelo-guimaraes.mp4', poster: '/assets/depoimentos/depo-marcelo-guimaraes.jpg', n: 'Marcelo Guimarães', r: 'Empresário' },
-  carina:   { src: '/assets/depoimentos/depo-carina.mp4',            poster: '/assets/depoimentos/depo-carina.jpg',            n: 'Carina Albamonte', r: 'Empresária' },
-  vincent:  { src: '/assets/depoimentos/depo-vicent.mp4',            poster: '/assets/depoimentos/depo-vicent.jpg',            n: 'Vincent Mastio',   r: 'Empresário' },
-  mario:    { src: '/assets/depoimentos/depo-mario-oki.mp4',         poster: '/assets/depoimentos/depo-mario-oki.jpg',         n: 'Mário Oki',        r: 'Empresário' },
-  renata:   { src: '/assets/depoimentos/depo-renata.mp4',            poster: '/assets/depoimentos/depo-renata.jpg',            n: 'Renata',           r: 'Paciente' },
-  victor:   { src: '/assets/depoimentos/depo-victor.mp4',            poster: '/assets/depoimentos/depo-victor.jpg',            n: 'Victor',           r: 'Empresário' },
-  stefani:  { src: '/assets/depoimentos/depo-stefani.mp4',           poster: '/assets/depoimentos/depo-stefani.jpg',           n: 'Stefani',          r: 'Paciente' },
-  joaquim:  { src: '/assets/depoimentos/depo-joaquim.mp4',           poster: '/assets/depoimentos/depo-joaquim.jpg',           n: 'Joaquim',          r: 'Odontopediatria' },
-  wilson:   { src: '/assets/depoimentos/depo-dayclinic.mp4',         poster: '/assets/depoimentos/depo-dayclinic.jpg',         n: 'Wilson Fernandes', r: 'Empresário' },
-  paciente: { src: '/assets/depoimentos/depo-uuid.mp4',              poster: '/assets/depoimentos/depo-uuid.jpg',              n: 'Paciente',         r: 'Akaki' },
+  marcelo:  { src: '/assets/depoimentos/depo-marcelo-guimaraes.mp4', poster: '/assets/depoimentos/depo-marcelo-guimaraes.webp', n: 'Marcelo Guimarães', r: 'Empresário' },
+  carina:   { src: '/assets/depoimentos/depo-carina.mp4',            poster: '/assets/depoimentos/depo-carina.webp',            n: 'Carina Albamonte', r: 'Empresária' },
+  vincent:  { src: '/assets/depoimentos/depo-vicent.mp4',            poster: '/assets/depoimentos/depo-vicent.webp',            n: 'Vincent Mastio',   r: 'Empresário' },
+  mario:    { src: '/assets/depoimentos/depo-mario-oki.mp4',         poster: '/assets/depoimentos/depo-mario-oki.webp',         n: 'Mário Oki',        r: 'Empresário' },
+  renata:   { src: '/assets/depoimentos/depo-renata.mp4',            poster: '/assets/depoimentos/depo-renata.webp',            n: 'Renata',           r: 'Paciente' },
+  victor:   { src: '/assets/depoimentos/depo-victor.mp4',            poster: '/assets/depoimentos/depo-victor.webp',            n: 'Victor',           r: 'Empresário' },
+  stefani:  { src: '/assets/depoimentos/depo-stefani.mp4',           poster: '/assets/depoimentos/depo-stefani.webp',           n: 'Stefani',          r: 'Paciente' },
+  joaquim:  { src: '/assets/depoimentos/depo-joaquim.mp4',           poster: '/assets/depoimentos/depo-joaquim.webp',           n: 'Joaquim',          r: 'Odontopediatria' },
+  wilson:   { src: '/assets/depoimentos/depo-dayclinic.mp4',         poster: '/assets/depoimentos/depo-dayclinic.webp',         n: 'Wilson Fernandes', r: 'Empresário' },
+  paciente: { src: '/assets/depoimentos/depo-uuid.mp4',              poster: '/assets/depoimentos/depo-uuid.webp',              n: 'Paciente',         r: 'Akaki' },
 };
 
 export const services = [
