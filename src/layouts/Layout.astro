@@ -233,7 +233,7 @@ const schema = {
             <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3a13 13 0 0 0-11.1 19.7L3 29l6.5-1.8A13 13 0 1 0 16 3zm0 23.6a10.6 10.6 0 0 1-5.4-1.5l-.4-.2-3.9 1 1-3.8-.3-.4A10.6 10.6 0 1 1 16 26.6zm5.9-7.9c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.7 8.7 0 0 1-2.6-1.6 9.6 9.6 0 0 1-1.8-2.2c-.2-.3 0-.5.1-.7l.5-.6.3-.5a.6.6 0 0 0 0-.6c0-.2-.7-1.7-1-2.3s-.5-.5-.7-.5h-.6a1.2 1.2 0 0 0-.9.4 3.6 3.6 0 0 0-1.1 2.7 6.3 6.3 0 0 0 1.3 3.3 14.4 14.4 0 0 0 5.5 4.9c.8.3 1.4.5 1.9.7a4.5 4.5 0 0 0 2 .1c.6-.1 1.9-.8 2.2-1.5s.3-1.4.2-1.5-.3-.2-.6-.4z"/></svg>
           Iniciar a conversa
           </button>
-          <p class="wlead__note">Resposta rápida no horário comercial · Sem compromisso</p>
+          <p class="wlead__note">Isso vai abrir uma conversa no WhatsApp.</p>
         </form>
       </div>
     </div>
@@ -274,11 +274,11 @@ const schema = {
       .wlead__in.is-err { border-color: #d9534f; box-shadow: 0 0 0 3px rgba(217,83,79,0.16); }
       .wlead__go {
         margin-top: 4px; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-        font-family: var(--sans); font-weight: 600; font-size: 14px; letter-spacing: 0.02em; color: var(--navy); cursor: pointer;
-        background: linear-gradient(135deg, var(--gold-light), var(--gold-dark)); border: 0; border-radius: 12px; padding: 15px 20px;
-        box-shadow: 0 14px 34px -14px rgba(211,164,108,0.7); transition: transform 200ms var(--silk), box-shadow 200ms var(--silk);
+        font-family: var(--sans); font-weight: 600; font-size: 14px; letter-spacing: 0.02em; color: var(--white-text); cursor: pointer;
+        background: var(--moss); border: 0; border-radius: 12px; padding: 15px 20px;
+        box-shadow: 0 14px 34px -14px rgba(107,125,94,0.7); transition: transform 200ms var(--silk), box-shadow 200ms var(--silk);
       }
-      .wlead__go:hover { transform: translateY(-1px); box-shadow: 0 18px 44px -12px rgba(211,164,108,0.85); }
+      .wlead__go:hover { transform: translateY(-1px); box-shadow: 0 18px 44px -12px rgba(107,125,94,0.9); }
       .wlead__go svg { width: 19px; height: 19px; fill: currentColor; }
       .wlead__note { font-family: var(--body); font-size: 11.5px; color: rgba(245,240,232,0.55); margin-top: 6px; }
       @media (max-width: 480px) { .wlead__card { padding: 34px 22px 24px; } }
@@ -293,8 +293,9 @@ const schema = {
         var modal = document.getElementById('wa-modal');
         var form = document.getElementById('wa-form');
         if (!modal || !form) return;
-        // Odontopediatria mantém o formulário próprio (modal local) — não usa o modal global
-        if (document.getElementById('lp-modal')) return;
+        // Onde existe o modal completo (#lp-modal, nas LPs), este modal simples (.wlead) atende SÓ o botão
+        // flutuante (.wfab). Na home (sem #lp-modal) ele atende todos os CTAs.
+        var hasFullModal = !!document.getElementById('lp-modal');
         var nomeEl = document.getElementById('wa-nome');
         var telEl = document.getElementById('wa-tel');
         var lastContent = '';
@@ -318,10 +319,11 @@ const schema = {
           if (opener && opener.focus) { try { opener.focus(); } catch (e) {} }
         }
 
-        // Abre o modal em TODO CTA de WhatsApp / agendar (flutuante + todos os botões)
+        // Botão flutuante (.wfab) sempre abre este modal simples; onde há modal completo, os demais CTAs ficam com ele
         document.addEventListener('click', function(e){
           var el = e.target && e.target.closest ? e.target.closest('[data-wpp],[data-lp-open]') : null;
           if (!el) return;
+          if (hasFullModal && !el.classList.contains('wfab')) return;
           e.preventDefault();
           opener = el;
           openModal(el.getAttribute('data-wpp') || el.getAttribute('data-lp-open') || '');

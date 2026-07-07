@@ -622,11 +622,12 @@ const localForm = true;
       if (first) setTimeout(() => (first as HTMLInputElement).focus(), 60);
     };
     const closeModal = () => { modal.hidden = true; document.body.style.overflow = ''; };
-    // Todos os CTAs de WhatsApp/agendar (hero, header, rodapé, flutuante) abrem o formulário local
+    // CTAs de WhatsApp/agendar abrem o formulário completo — exceto o flutuante (.wfab), que abre o modal simples (.wlead)
     document.addEventListener('click', (e) => {
       const t = e.target as Element;
       const el = t && t.closest ? t.closest('[data-wpp],[data-lp-open]') : null;
       if (!el) return;
+      if (el.classList.contains('wfab')) return;
       e.preventDefault();
       openModal();
     });
