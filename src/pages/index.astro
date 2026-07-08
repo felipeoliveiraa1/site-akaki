@@ -76,6 +76,34 @@ import ContactModal from '../components/ContactModal.astro';
     else requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => hero.classList.add('lit'), 280)));
   }
 
+  /* modo cinema — "Veja nosso filme": esconde textos/botões e toca o filme COM SOM no hero.
+     Clique em qualquer lugar do vídeo (ou Esc, ou fim do filme) pausa e traz tudo de volta. */
+  const filmBtn = document.getElementById('hero-film-btn');
+  const heroFilm = document.getElementById('hero-film') as HTMLVideoElement | null;
+  if (hero && filmBtn && heroFilm) {
+    let cinema = false;
+    const enterCinema = () => {
+      cinema = true;
+      hero.classList.add('cinema');
+      filmBtn.setAttribute('aria-pressed', 'true');
+      if (video) { try { video.pause(); } catch (e) {} }
+      if (!heroFilm.src) heroFilm.src = '/assets/akaki-film.mp4';
+      heroFilm.muted = false;
+      const p = heroFilm.play(); if (p && p.catch) p.catch(() => {});
+    };
+    const exitCinema = () => {
+      cinema = false;
+      hero.classList.remove('cinema');
+      filmBtn.setAttribute('aria-pressed', 'false');
+      try { heroFilm.pause(); } catch (e) {}
+      if (video && wantsVideo && !reduce && !saveData) { const p = video.play(); if (p && p.catch) p.catch(() => {}); }
+    };
+    filmBtn.addEventListener('click', (e) => { e.stopPropagation(); cinema ? exitCinema() : enterCinema(); });
+    hero.addEventListener('click', () => { if (cinema) exitCinema(); });
+    heroFilm.addEventListener('ended', exitCinema);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && cinema) exitCinema(); });
+  }
+
   /* Day Clinic scroll-scrub (--p 0→1) */
   const scrub = document.querySelector('[data-scrub]') as HTMLElement | null;
   if (scrub && !reduce) {
