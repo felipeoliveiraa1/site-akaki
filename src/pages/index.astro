@@ -51,7 +51,9 @@ import ContactModal from '../components/ContactModal.astro';
   let seen = false;
   try { seen = !!sessionStorage.getItem('akaki_splash_seen'); } catch (e) {}
 
-  if (video && !saveData && !reduce) {
+  // No mobile o vídeo de fundo (~870KB) fica quase invisível atrás do veil — não vale o custo. Só desktop.
+  const wantsVideo = matchMedia('(min-width: 900px)').matches;
+  if (video && wantsVideo && !saveData && !reduce) {
     // O vídeo (~800KB) só é baixado DEPOIS do LCP — o poster (32KB) é a LCP.
     const activateVideo = () => {
       video.querySelectorAll('source[data-src]').forEach((s) => {

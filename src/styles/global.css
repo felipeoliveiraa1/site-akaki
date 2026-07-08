@@ -29,7 +29,7 @@
   --breath:  cubic-bezier(0.37, 0, 0.63, 1);
 
   /* type */
-  --serif: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --serif: 'Fraunces Variable', 'Fraunces Fallback', Georgia, 'Times New Roman', serif;
   --sans:  'Montserrat', system-ui, -apple-system, sans-serif;
   --body:  'Roboto', system-ui, -apple-system, sans-serif;
 
