@@ -60,7 +60,7 @@ const schema = {
         ['scroll', 'mousemove', 'touchstart', 'keydown', 'click'].forEach(function (e) {
           window.addEventListener(e, loadGTM, { once: true, passive: true });
         });
-        setTimeout(loadGTM, 3500);
+        setTimeout(loadGTM, 10000);
       })();
     </script>
     <!-- End Google Tag Manager -->
@@ -188,7 +188,7 @@ const schema = {
         }
         if (reduce || seen) { s.parentNode && s.parentNode.removeChild(s); return; }
         requestAnimationFrame(function () { requestAnimationFrame(function () { s.classList.add('play'); }); });
-        var t = setTimeout(done, 1650);
+        var t = setTimeout(done, 950);
         ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (e) {
           window.addEventListener(e, function () { clearTimeout(t); done(); }, { once: true, passive: true });
         });

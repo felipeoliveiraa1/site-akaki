@@ -285,16 +285,16 @@ img, video { display: block; max-width: 100%; }
 .splash[hidden] { display: none; }
 .splash__inner { display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .splash__word { position: relative; width: clamp(190px, 52vw, 300px); color: var(--gold); opacity: 0; transform: translateY(10px) scale(0.985); }
-.splash.play .splash__word { animation: splash-in 850ms var(--silk) 120ms forwards; }
+.splash.play .splash__word { animation: splash-in 650ms var(--silk) 80ms forwards; }
 .splash__word .wordmark__shine { opacity: 0; }
-.splash.play .splash__word .wordmark__shine { animation: sweep 1150ms var(--silk) 700ms 1; }
+.splash.play .splash__word .wordmark__shine { animation: sweep 900ms var(--silk) 450ms 1; }
 .splash__tag {
   font-family: var(--sans); font-weight: 600; font-size: 10px; letter-spacing: 0.42em;
   text-transform: uppercase; color: rgba(245,240,232,0.55); opacity: 0; padding-left: 0.42em;
 }
-.splash.play .splash__tag { animation: splash-in 700ms var(--silk) 520ms forwards; }
+.splash.play .splash__tag { animation: splash-in 550ms var(--silk) 320ms forwards; }
 @keyframes splash-in { to { opacity: 1; transform: none; } }
-.splash.gone { opacity: 0; pointer-events: none; transition: opacity 650ms var(--exhale); }
+.splash.gone { opacity: 0; pointer-events: none; transition: opacity 420ms var(--exhale); }
 
 /* floating whatsapp button */
 .wfab {

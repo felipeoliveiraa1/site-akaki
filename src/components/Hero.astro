@@ -78,7 +78,7 @@ let i = 0;
   .hero__eyebrow { color: var(--gold-light); margin-bottom: 22px; }
   .hero__title { max-width: 15ch; color: var(--white-text); margin-bottom: 26px; }
   .hero__title em { font-style: italic; color: var(--gold-light); }
-  .hero.lit .ember-on { animation: ember 1100ms ease-out 1100ms 1; }
+  .hero.lit .ember-on { animation: ember 900ms ease-out 750ms 1; }
 
   .hero__sub { color: rgba(245,240,232,0.84); max-width: 44ch; margin-bottom: 34px; }
 
@@ -98,9 +98,9 @@ let i = 0;
 
   /* entrance for sub + ctas + seal (after lit) */
   .hero__sub, .hero__cta, .hero__seal { opacity: 0; transform: translateY(16px); }
-  .hero.lit .hero__sub { animation: hero-in 700ms var(--silk) 1200ms forwards; }
-  .hero.lit .hero__cta { animation: hero-in 700ms var(--tactile) 1500ms forwards; }
-  .hero.lit .hero__seal { animation: hero-in 700ms var(--silk) 1750ms forwards; }
+  .hero.lit .hero__sub { animation: hero-in 600ms var(--silk) 550ms forwards; }
+  .hero.lit .hero__cta { animation: hero-in 600ms var(--tactile) 700ms forwards; }
+  .hero.lit .hero__seal { animation: hero-in 600ms var(--silk) 850ms forwards; }
   @keyframes hero-in { to { opacity: 1; transform: none; } }
 
   .hero__cue {
