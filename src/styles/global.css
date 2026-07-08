@@ -227,6 +227,12 @@ img, video { display: block; max-width: 100%; }
   filter: blur(8px);
   transform: translateY(0.16em);
   opacity: 0;
+  /* revela por CSS no próprio load — não espera o JS (.lit), pra não travar o LCP do H1 */
+  animation: word-reveal 520ms var(--silk) both;
+  animation-delay: var(--wd, 0ms);
+}
+@keyframes word-reveal {
+  to { clip-path: inset(0 -4% 0 0); filter: blur(0); transform: none; opacity: 1; }
 }
 .words.is-in .word, .lit .words .word {
   clip-path: inset(0 -4% 0 0);
@@ -306,7 +312,7 @@ img, video { display: block; max-width: 100%; }
   html { scroll-behavior: auto; }
   .wfab { animation: none; }
   .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
-  .words .word { clip-path: none !important; filter: none !important; transform: none !important; opacity: 1 !important; }
+  .words .word { clip-path: none !important; filter: none !important; transform: none !important; opacity: 1 !important; animation: none !important; }
   .breathe, .breathe svg, .kenburns, .leaf-bg { animation: none !important; }
   .draw .leaf-stroke { stroke-dashoffset: 0 !important; }
   .thread { width: min(160px, 60%) !important; }
