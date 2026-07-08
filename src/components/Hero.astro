@@ -17,7 +17,7 @@ let i = 0;
   </video>
   <div class="hero__veil" aria-hidden="true"></div>
 
-  <!-- filme institucional (com som) — só carrega ao clicar em "Veja nosso filme" -->
+  <!-- filme institucional (com som) — só carrega ao clicar no play -->
   <video class="hero__film" id="hero-film" playsinline preload="none" aria-label="Filme institucional da Akaki"></video>
 
   <div class="hero__inner container">
@@ -35,9 +35,8 @@ let i = 0;
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg>
         Agende sua consulta
       </a>
-      <button class="btn btn--light" type="button" id="hero-film-btn" aria-pressed="false">
+      <button class="hero__playbtn" type="button" id="hero-film-btn" aria-pressed="false" aria-label="Assistir ao filme da Akaki">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>
-        Veja nosso filme
       </button>
     </div>
 
@@ -111,7 +110,23 @@ let i = 0;
     to   { box-shadow: 0 18px 54px -10px rgba(211,164,108,0.78), 0 3px 10px rgba(11,14,19,0.3); }
   }
   .hero__primary svg { width: 16px; height: 16px; }
-  .hero__cta .btn--light svg { width: 14px; height: 14px; fill: currentColor; stroke: none; }
+
+  /* play redondo (só o ícone) — abre o modo cinema */
+  .hero__playbtn {
+    width: 56px; height: 56px; border-radius: 50%; cursor: pointer; flex: 0 0 auto;
+    display: grid; place-items: center; color: var(--gold-light);
+    background: rgba(11,14,19,0.35); border: 1.5px solid var(--gold);
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+    animation: play-glow 5500ms var(--breath) infinite alternate;
+    transition: transform 320ms var(--tactile), background-color 320ms var(--silk), color 320ms var(--silk);
+  }
+  .hero__playbtn svg { width: 22px; height: 22px; fill: currentColor; stroke: none; margin-left: 3px; }
+  .hero__playbtn:hover { transform: scale(1.08); background: var(--gold); color: var(--cinema-black); }
+  @keyframes play-glow {
+    from { box-shadow: 0 0 0 0 rgba(211,164,108,0); }
+    to   { box-shadow: 0 0 30px -4px rgba(211,164,108,0.55); }
+  }
+  @media (prefers-reduced-motion: reduce) { .hero__playbtn { animation: none; } }
 
   .hero__seal {
     margin-top: 30px; font-family: var(--sans); font-weight: 600; font-size: 10.5px;
