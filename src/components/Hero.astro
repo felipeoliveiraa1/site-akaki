@@ -9,11 +9,11 @@ let i = 0;
     class="hero__video"
     id="hero-video"
     poster="/assets/hero-poster.webp"
-    muted autoplay loop playsinline preload="metadata"
+    muted loop playsinline preload="none"
     disablepictureinpicture aria-hidden="true"
   >
-    <source src="/assets/akaki-loop.webm" type="video/webm" />
-    <source src="/assets/akaki-loop.mp4" type="video/mp4" />
+    <source data-src="/assets/akaki-loop.webm" type="video/webm" />
+    <source data-src="/assets/akaki-loop.mp4" type="video/mp4" />
   </video>
   <div class="hero__veil" aria-hidden="true"></div>
 

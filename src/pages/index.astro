@@ -51,9 +51,13 @@ import ContactModal from '../components/ContactModal.astro';
   let seen = false;
   try { seen = !!sessionStorage.getItem('akaki_splash_seen'); } catch (e) {}
 
-  if (video) {
-    if (saveData || reduce) { try { video.pause(); video.removeAttribute('autoplay'); video.preload = 'none'; } catch (e) {} }
-    else {
+  if (video && !saveData && !reduce) {
+    // O vídeo (~800KB) só é baixado DEPOIS do LCP — o poster (32KB) é a LCP.
+    const activateVideo = () => {
+      video.querySelectorAll('source[data-src]').forEach((s) => {
+        const el = s as HTMLSourceElement; if (el.dataset.src) el.src = el.dataset.src;
+      });
+      video.load();
       const vio = new IntersectionObserver((es) => {
         es.forEach((e) => {
           if (e.isIntersecting) { const p = video.play(); if (p && p.catch) p.catch(() => {}); }
@@ -61,7 +65,9 @@ import ContactModal from '../components/ContactModal.astro';
         });
       }, { threshold: 0.08 });
       if (hero) vio.observe(hero);
-    }
+    };
+    if (document.readyState === 'complete') setTimeout(activateVideo, 700);
+    else window.addEventListener('load', () => setTimeout(activateVideo, 700), { once: true });
   }
   if (hero) {
     if (reduce || saveData) hero.classList.add('lit');

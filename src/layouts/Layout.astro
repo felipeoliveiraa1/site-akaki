@@ -45,12 +45,24 @@ const schema = {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
-    <!-- Google Tag Manager -->
-    <script is:inline>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-NS7C585T');</script>
+    <!-- Google Tag Manager (carregado na 1ª interação ou após 3.5s — melhora TBT/LCP sem perder tracking relevante) -->
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      (function () {
+        var loaded = false;
+        function loadGTM() {
+          if (loaded) return; loaded = true;
+          window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+          var f = document.getElementsByTagName('script')[0], j = document.createElement('script');
+          j.async = true; j.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-NS7C585T';
+          f.parentNode.insertBefore(j, f);
+        }
+        ['scroll', 'mousemove', 'touchstart', 'keydown', 'click'].forEach(function (e) {
+          window.addEventListener(e, loadGTM, { once: true, passive: true });
+        });
+        setTimeout(loadGTM, 3500);
+      })();
+    </script>
     <!-- End Google Tag Manager -->
 
     <title>{title}</title>
@@ -65,8 +77,6 @@ const schema = {
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="preconnect" href="https://www.googletagmanager.com" />
-    <link rel="preload" href="/fonts/fraunces-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" as="image" href="/assets/hero-poster.webp" fetchpriority="high" />
 
     <meta property="og:type" content="website" />
