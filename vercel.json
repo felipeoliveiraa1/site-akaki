@@ -1,23 +1,39 @@
 {
   "redirects": [
-    { "source": "/dentista-com-sedacao-odontologica", "destination": "/sedacao-odontologica", "permanent": true },
-    { "source": "/dentista-com-sedacao-odontologica/", "destination": "/sedacao-odontologica", "permanent": true },
-    { "source": "/implante-dentario", "destination": "/implantes", "permanent": true },
-    { "source": "/implante-dentario/", "destination": "/implantes", "permanent": true },
-    { "source": "/estetica-3", "destination": "/estetica", "permanent": true },
-    { "source": "/estetica-3/", "destination": "/estetica", "permanent": true },
+    { "source": "/sedacao-odontologica", "destination": "/dentista-com-sedacao-odontologica/", "permanent": true },
+    { "source": "/sedacao-odontologica/", "destination": "/dentista-com-sedacao-odontologica/", "permanent": true },
+    { "source": "/implantes", "destination": "/implante-dentario/", "permanent": true },
+    { "source": "/implantes/", "destination": "/implante-dentario/", "permanent": true },
+    { "source": "/estetica", "destination": "/estetica-3/", "permanent": true },
+    { "source": "/estetica/", "destination": "/estetica-3/", "permanent": true },
     { "source": "/especialistas", "destination": "/", "permanent": true },
     { "source": "/especialistas/", "destination": "/", "permanent": true },
     { "source": "/sobre", "destination": "/", "permanent": true },
     { "source": "/sobre/", "destination": "/", "permanent": true },
     { "source": "/obg-forms", "destination": "/", "permanent": true },
-    { "source": "/obg-forms/", "destination": "/", "permanent": true }
+    { "source": "/obg-forms/", "destination": "/", "permanent": true },
+    { "source": "/sitemap_index.xml", "destination": "/sitemap-index.xml", "permanent": true },
+    { "source": "/page-sitemap.xml", "destination": "/sitemap-0.xml", "permanent": true }
   ],
   "headers": [
     {
       "source": "/assets/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "new.akaki.odo.br" }],
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "site-akaki.vercel.app" }],
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
       ]
     }
   ]

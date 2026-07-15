@@ -20,7 +20,7 @@ const V = {
 
 export const services = [
   {
-    slug: 'implantes',
+    slug: 'implante-dentario',
     nav: 'Implantes',
     name: 'Implantes',
     seoTitle: 'Implante Dentário em São Paulo | Cirurgia Guiada — Akaki',
@@ -102,7 +102,7 @@ export const services = [
   },
 
   {
-    slug: 'sedacao-odontologica',
+    slug: 'dentista-com-sedacao-odontologica',
     nav: 'Sedação Odontológica',
     name: 'Sedação Odontológica',
     seoTitle: 'Sedação Odontológica em São Paulo | Day Clinic — Akaki',
@@ -287,7 +287,7 @@ export const services = [
   },
 
   {
-    slug: 'estetica',
+    slug: 'estetica-3',
     nav: 'Estética',
     name: 'Estética',
     seoTitle: 'Estética Dental em São Paulo | Lentes e Facetas — Akaki',
