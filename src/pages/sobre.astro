@@ -1,0 +1,43 @@
+---
+// Página /sobre/ — URL própria (preserva o histórico de indexação do site antigo).
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import About from '../components/About.astro';
+import Diferenciais from '../components/Diferenciais.astro';
+import ClinicGallery from '../components/ClinicGallery.astro';
+import CtaFinal from '../components/CtaFinal.astro';
+import Footer from '../components/Footer.astro';
+import ContactModal from '../components/ContactModal.astro';
+---
+<Layout
+  title="Akaki Odontologia | 30+ Anos de Excelência em São Paulo"
+  description="Conheça a Akaki Odontologia: mais de 30 anos de excelência no Jardim Paulista, pioneira em odontofobia e sedação consciente. Uma casa projetada para cuidar de você."
+>
+  <Header />
+  <main>
+    <section class="sobre-hero">
+      <div class="container">
+        <p class="eyebrow">Sobre a Akaki</p>
+        <h1 class="display sobre-hero__h1">Mais de 30 anos cuidando de sorrisos — <em>e de pessoas</em>.</h1>
+        <p class="lead sobre-hero__sub">Clínica pioneira em odontofobia no Jardim Paulista, São Paulo. Tratamento odontológico com sedação consciente, num ambiente projetado para acalmar.</p>
+      </div>
+    </section>
+    <About />
+    <Diferenciais />
+    <ClinicGallery />
+    <CtaFinal />
+  </main>
+  <Footer />
+  <ContactModal />
+</Layout>
+
+<style>
+  .sobre-hero {
+    background: var(--cinema-black); color: var(--white-text);
+    padding: calc(var(--nav-h) + clamp(44px, 7vh, 84px)) 0 clamp(44px, 7vh, 76px);
+  }
+  .sobre-hero .eyebrow { color: var(--gold-light); }
+  .sobre-hero__h1 { color: var(--white-text); max-width: 20ch; margin: 16px 0 18px; font-size: clamp(32px, 4.8vw, 54px); line-height: 1.08; }
+  .sobre-hero__h1 em { font-style: italic; color: var(--gold-light); }
+  .sobre-hero__sub { color: rgba(245,240,232,0.82); max-width: 52ch; }
+</style>

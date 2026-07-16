@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://akaki.odo.br/sitemap-index.xml
+Sitemap: https://www.akaki.odo.br/sitemap-index.xml

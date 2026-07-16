@@ -8,8 +8,6 @@
     { "source": "/estetica/", "destination": "/estetica-3/", "permanent": true },
     { "source": "/especialistas", "destination": "/", "permanent": true },
     { "source": "/especialistas/", "destination": "/", "permanent": true },
-    { "source": "/sobre", "destination": "/", "permanent": true },
-    { "source": "/sobre/", "destination": "/", "permanent": true },
     { "source": "/obg-forms", "destination": "/", "permanent": true },
     { "source": "/obg-forms/", "destination": "/", "permanent": true },
     { "source": "/sitemap_index.xml", "destination": "/sitemap-index.xml", "permanent": true },
