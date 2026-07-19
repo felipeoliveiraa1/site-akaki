@@ -85,7 +85,7 @@ const { formExtra } = Astro.props;
         (telInput as HTMLInputElement).value = out;
       });
       const getCookie = (n) => { const m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)')); return m ? decodeURIComponent(m[2]) : ''; };
-      const MAKE_WEBHOOK = 'https://hook.us2.make.com/tn2iu445t1a3ub4kkyys4jcjn81tbneg';
+      const MAKE_WEBHOOK = 'https://claude.rizeperformance.com.br/webhook/gclid-lp';
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         const data = new FormData(form as HTMLFormElement);
