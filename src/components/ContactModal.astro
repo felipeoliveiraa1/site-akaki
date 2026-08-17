@@ -86,6 +86,7 @@ const { formExtra } = Astro.props;
       });
       const getCookie = (n) => { const m = document.cookie.match(new RegExp('(^| )' + n + '=([^;]+)')); return m ? decodeURIComponent(m[2]) : ''; };
       const MAKE_WEBHOOK = 'https://claude.rizeperformance.com.br/webhook/gclid-lp';
+      const SHEETS_WEBHOOK = 'https://script.google.com/macros/s/AKfycbyLlENWTXZLWtIlyQ6x5FgyIJP8mE0EpuKc08rJw2wu1_jLopM3tYPYkh9r-GXGaZCw2Q/exec';
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         const data = new FormData(form as HTMLFormElement);
@@ -108,6 +109,16 @@ const { formExtra } = Astro.props;
           try { fetch(MAKE_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ gclid: g, telefone: telDigits, utm_source: src, utm_medium: med, utm_campaign: camp }), keepalive: true }); } catch (err) {}
         }
         const page = (location.pathname.split('/').filter(Boolean)[0] || 'home');
+        const servico = (document.querySelector('.lp') && document.querySelector('.lp').getAttribute('data-service')) || 'Home';
+        // Planilha de leads (Google Sheets) — grava TODO envio, com ou sem gclid, pra não perder nenhum lead.
+        // Content-Type text/plain evita o preflight CORS (Apps Script não responde OPTIONS); o Google lê o corpo como JSON normalmente.
+        try {
+          fetch(SHEETS_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ nome, telefone: telDigits, servico, qualificacao: extraVal, utm_source: src, utm_medium: med, utm_campaign: camp, utm_content: cont, gclid: g }),
+          });
+        } catch (err) {}
         try { (window as any).dataLayer = (window as any).dataLayer || []; (window as any).dataLayer.push({ event: 'whatsapp_lead', lead_nome: nome, lead_telefone: telDigits, cta: page + '-form' }); } catch (err) {}
         window.open('https://api.whatsapp.com/send?phone=5511947024607&text=' + encodeURIComponent(msg), '_blank');
         closeModal();

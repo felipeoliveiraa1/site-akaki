@@ -310,6 +310,7 @@ const schema = {
         var WPP = '5511947024607';
         var BASE = 'Olá, gostaria de agendar uma consulta na Akaki.';
         var MAKE_WEBHOOK = 'https://claude.rizeperformance.com.br/webhook/gclid-lp';
+        var SHEETS_WEBHOOK = 'https://script.google.com/macros/s/AKfycbyLlENWTXZLWtIlyQ6x5FgyIJP8mE0EpuKc08rJw2wu1_jLopM3tYPYkh9r-GXGaZCw2Q/exec';
         var modal = document.getElementById('wa-modal');
         var form = document.getElementById('wa-form');
         if (!modal || !form) return;
@@ -392,6 +393,17 @@ const schema = {
           if (g && telDigits) {
             try { fetch(MAKE_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ gclid: g, telefone: telDigits, utm_source: val('utm_source'), utm_medium: val('utm_medium'), utm_campaign: val('utm_campaign') }), keepalive: true }); } catch (err) {}
           }
+          // Planilha de leads (Google Sheets) — grava TODO envio, com ou sem gclid, pra não perder nenhum lead.
+          // Content-Type text/plain evita o preflight CORS (Apps Script não responde OPTIONS); o Google lê o corpo como JSON normalmente.
+          try {
+            var lpEl = document.querySelector('.lp');
+            var servico = (lpEl && lpEl.getAttribute('data-service')) || 'Home';
+            fetch(SHEETS_WEBHOOK, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ nome: nome, telefone: telDigits, servico: servico, qualificacao: '', utm_source: val('utm_source'), utm_medium: val('utm_medium'), utm_campaign: val('utm_campaign'), utm_content: val('utm_content'), gclid: g }),
+            });
+          } catch (err) {}
           // Evento p/ GTM
           try { window.dataLayer = window.dataLayer || []; window.dataLayer.push({ event: 'whatsapp_lead', lead_nome: nome, lead_telefone: telDigits, cta: lastContent }); } catch (err) {}
 
