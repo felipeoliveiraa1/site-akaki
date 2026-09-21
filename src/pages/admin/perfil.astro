@@ -1,0 +1,118 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import type { Perfil } from '../../lib/supabase';
+
+const perfil = Astro.locals.perfil as Perfil;
+const supabase = Astro.locals.supabase!;
+
+let erro = '';
+let aviso = '';
+let v: Record<string, string> = {
+  nome: perfil.nome, cargo: perfil.cargo ?? '', cro: perfil.cro ?? '',
+  cro_uf: perfil.cro_uf ?? '', bio: perfil.bio ?? '',
+  avatar_url: perfil.avatar_url ?? '', avatar_alt: perfil.avatar_alt ?? '',
+  instagram_url: perfil.instagram_url ?? '',
+};
+
+if (Astro.request.method === 'POST') {
+  const d = await Astro.request.formData();
+  v = {
+    nome: String(d.get('nome') ?? '').trim(),
+    cargo: String(d.get('cargo') ?? '').trim(),
+    cro: String(d.get('cro') ?? '').trim(),
+    cro_uf: String(d.get('cro_uf') ?? '').trim().toUpperCase(),
+    bio: String(d.get('bio') ?? '').trim(),
+    avatar_url: String(d.get('avatar_url') ?? '').trim(),
+    avatar_alt: String(d.get('avatar_alt') ?? '').trim(),
+    instagram_url: String(d.get('instagram_url') ?? '').trim(),
+  };
+
+  if (v.nome.length < 2) erro = 'Informe seu nome.';
+  else if (v.cro_uf && !/^[A-Z]{2}$/.test(v.cro_uf)) erro = 'A UF do CRO deve ter duas letras (ex.: SP).';
+  else {
+    const { error } = await supabase.from('perfis').update({
+      nome: v.nome, cargo: v.cargo || null, cro: v.cro || null,
+      cro_uf: v.cro_uf || null, bio: v.bio || null,
+      avatar_url: v.avatar_url || null, avatar_alt: v.avatar_alt || null,
+      instagram_url: v.instagram_url || null,
+    }).eq('id', perfil.id);
+    if (error) erro = error.message;
+    else return Astro.redirect('/admin/perfil?ok=1', 303);
+  }
+  if (erro) Astro.response.status = 422;
+}
+if (Astro.url.searchParams.get('ok')) aviso = 'Perfil atualizado.';
+
+const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+---
+<AdminLayout titulo="Meu perfil" perfil={perfil}>
+  <div class="ad-cab">
+    <div>
+      <h1 class="ad-cab__t">Meu perfil</h1>
+      <p class="ad-cab__d">
+        É o que aparece assinando seus artigos. Em conteúdo de saúde, o Google
+        dá peso a quem assina — nome, cargo e registro profissional contam.
+      </p>
+    </div>
+  </div>
+
+  {aviso && <div class="ad-aviso ad-aviso--ok" role="status">{aviso}</div>}
+  {erro && <div class="ad-aviso ad-aviso--erro" role="alert">{erro}</div>}
+
+  <form method="POST" style="max-width:660px">
+    <div class="ad-card">
+      <p class="ad-card__t">Identificação</p>
+      <div class="ad-campo">
+        <label class="ad-rot" for="nome">Nome</label>
+        <input class="ad-in" id="nome" name="nome" value={v.nome} required />
+      </div>
+      <div class="ad-campo">
+        <label class="ad-rot" for="cargo">Cargo / especialidade</label>
+        <input class="ad-in" id="cargo" name="cargo" value={v.cargo}
+               placeholder="Ex.: Cirurgião-dentista · Implantodontia" />
+      </div>
+      <div class="ed-dupla">
+        <div class="ad-campo">
+          <label class="ad-rot" for="cro">CRO</label>
+          <input class="ad-in" id="cro" name="cro" value={v.cro} inputmode="numeric" placeholder="45717" />
+        </div>
+        <div class="ad-campo" style="margin-top:0">
+          <label class="ad-rot" for="cro_uf">UF</label>
+          <select class="ad-sel" id="cro_uf" name="cro_uf">
+            <option value="">—</option>
+            {UFS.map((u) => <option value={u} selected={v.cro_uf === u}>{u}</option>)}
+          </select>
+        </div>
+      </div>
+      <p class="ad-dica" style="margin-top:8px">Aparece como "CRO-SP 45717" no rodapé dos seus artigos.</p>
+    </div>
+
+    <div class="ad-card">
+      <p class="ad-card__t">Apresentação</p>
+      <div class="ad-campo">
+        <label class="ad-rot" for="bio">Mini biografia</label>
+        <textarea class="ad-area" id="bio" name="bio" style="min-height:130px"
+                  placeholder="Formação, especialidades e tempo de atuação.">{v.bio}</textarea>
+        <p class="ad-dica">Sem bio, sua página de autor não é indexada — evita página vazia no Google.</p>
+      </div>
+      <div class="ad-campo">
+        <label class="ad-rot" for="avatar_url">Foto (endereço da imagem)</label>
+        <input class="ad-in" id="avatar_url" name="avatar_url" value={v.avatar_url} placeholder="https://…" />
+      </div>
+      <div class="ad-campo">
+        <label class="ad-rot" for="avatar_alt">Descrição da foto</label>
+        <input class="ad-in" id="avatar_alt" name="avatar_alt" value={v.avatar_alt}
+               placeholder={`Ex.: Foto de ${v.nome || 'perfil'}`} />
+      </div>
+      <div class="ad-campo">
+        <label class="ad-rot" for="instagram_url">Instagram <span>— opcional</span></label>
+        <input class="ad-in" id="instagram_url" name="instagram_url" value={v.instagram_url}
+               placeholder="https://instagram.com/…" inputmode="url" />
+      </div>
+    </div>
+
+    <button class="ad-btn ad-btn--p" type="submit" style="margin-top:18px">Salvar perfil</button>
+  </form>
+</AdminLayout>

@@ -1,0 +1,119 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { podePublicar, type Perfil } from '../../../lib/supabase';
+import { dataCurta } from '../../../lib/blog/formato';
+
+const perfil = Astro.locals.perfil as Perfil;
+const supabase = Astro.locals.supabase!;
+
+const filtro = Astro.url.searchParams.get('status') ?? 'todos';
+const busca = (Astro.url.searchParams.get('q') ?? '').trim().slice(0, 80);
+
+let consulta = supabase
+  .from('posts')
+  .select('id, slug, titulo, status, destaque, publicado_em, atualizado_em, autor:perfis!posts_autor_id_fkey(nome), categoria:categorias(nome)')
+  .order('atualizado_em', { ascending: false })
+  .limit(100);
+
+if (filtro !== 'todos') consulta = consulta.eq('status', filtro);
+if (busca) consulta = consulta.ilike('titulo', `%${busca}%`);
+
+// O RLS já limita o autor aos próprios posts — não é preciso filtrar aqui,
+// e depender só do filtro da aplicação seria justamente o erro a evitar.
+const { data: posts, error } = await consulta;
+
+const { data: contagens } = await supabase.from('posts').select('status');
+const conta = (s: string) => (contagens ?? []).filter((p: any) => p.status === s).length;
+
+const ROTULO = { rascunho: 'Rascunho', revisao: 'Em revisão', publicado: 'Publicado' } as const;
+const chips = [
+  { id: 'todos', rotulo: 'Todos', n: (contagens ?? []).length },
+  { id: 'rascunho', rotulo: 'Rascunhos', n: conta('rascunho') },
+  { id: 'revisao', rotulo: 'Em revisão', n: conta('revisao') },
+  { id: 'publicado', rotulo: 'Publicados', n: conta('publicado') },
+];
+---
+<AdminLayout titulo="Posts" perfil={perfil}>
+  <div class="ad-cab">
+    <div>
+      <h1 class="ad-cab__t">Posts</h1>
+      <p class="ad-cab__d">
+        {podePublicar(perfil.papel)
+          ? 'Todos os artigos do blog. Você pode criar, editar e publicar.'
+          : 'Seus artigos. Ao terminar, envie para revisão — a publicação é feita por um editor.'}
+      </p>
+    </div>
+    <div class="ad-cab__acoes">
+      <a class="ad-btn ad-btn--p" href="/admin/posts/novo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        Novo post
+      </a>
+    </div>
+  </div>
+
+  {error && (
+    <div class="ad-aviso ad-aviso--erro" role="alert">
+      Não conseguimos carregar os posts. <a href="/admin/posts">Tentar novamente</a>
+      <br /><small>{error.message}</small>
+    </div>
+  )}
+
+  <div class="ad-filtros">
+    {chips.map((c) => (
+      <a class="ad-chip" href={c.id === 'todos' ? '/admin/posts' : `/admin/posts?status=${c.id}`}
+         aria-current={filtro === c.id ? 'page' : undefined}>
+        {c.rotulo} <b>{c.n}</b>
+      </a>
+    ))}
+  </div>
+
+  <form method="GET" style="margin-bottom:18px;display:flex;gap:10px;max-width:420px">
+    {filtro !== 'todos' && <input type="hidden" name="status" value={filtro} />}
+    <input class="ad-in" type="search" name="q" value={busca}
+           placeholder="Buscar por título…" aria-label="Buscar posts" maxlength="80" />
+    <button class="ad-btn ad-btn--f" type="submit">Buscar</button>
+  </form>
+
+  {(posts ?? []).length === 0 ? (
+    <div class="ad-vazio">
+      <p class="ad-vazio__t">
+        {busca || filtro !== 'todos' ? 'Nenhum post com esses filtros.' : 'Nenhum post ainda.'}
+      </p>
+      <p class="ad-vazio__d">
+        {busca || filtro !== 'todos'
+          ? 'Tente limpar a busca ou escolher outro status.'
+          : 'Comece pelo primeiro artigo — leva poucos minutos.'}
+      </p>
+      {busca || filtro !== 'todos'
+        ? <a class="ad-btn ad-btn--f" href="/admin/posts">Limpar filtros</a>
+        : <a class="ad-btn ad-btn--p" href="/admin/posts/novo">Escrever o primeiro post</a>}
+    </div>
+  ) : (
+    <ul class="ad-lista">
+      {(posts ?? []).map((p: any) => (
+        <li class="ad-linha">
+          <div>
+            <p class="ad-linha__t">{p.titulo || 'Sem título'}</p>
+            <p class="ad-linha__meta">
+              {p.categoria?.nome ?? 'Sem categoria'}
+              {' · '}{p.autor?.nome ?? '—'}
+              {' · '}{dataCurta(p.atualizado_em)}
+              {p.destaque ? ' · ★ destaque' : ''}
+            </p>
+          </div>
+          <div class="ad-linha__col"><span class={`ad-marca ad-marca--${p.status}`}>{ROTULO[p.status]}</span></div>
+          <div class="ad-linha__col ad-linha__meta">{p.publicado_em ? dataCurta(p.publicado_em) : '—'}</div>
+          <div class="ad-linha__col ad-linha__meta" style="overflow-wrap:anywhere">/{p.slug}</div>
+          <div class="ad-linha__acoes">
+            {p.status === 'publicado' && (
+              <a class="ad-btn ad-btn--f" href={`/blog/${p.slug}/`} target="_blank" rel="noopener">Ver</a>
+            )}
+            <a class="ad-btn ad-btn--p" href={`/admin/posts/${p.id}`}>Editar</a>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )}
+</AdminLayout>

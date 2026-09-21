@@ -1,0 +1,149 @@
+---
+// Layout próprio do admin.
+//
+// Deliberadamente NÃO reaproveita o Layout.astro do site: aquele injeta a
+// abertura de marca, o botão flutuante de WhatsApp, GTM, Clarity e um modal
+// cujo handler intercepta TODO clique em [data-wpp]/[data-lp-open] da página —
+// o que quebraria os botões do painel.
+import Wordmark from '../components/Wordmark.astro';
+import type { Perfil } from '../lib/supabase';
+import { ehAdmin, podePublicar } from '../lib/supabase';
+import '../styles/fonts.css';
+import '@fontsource/montserrat/latin-500.css';
+import '@fontsource/montserrat/latin-600.css';
+import '@fontsource/roboto/latin-300.css';
+import '@fontsource/roboto/latin-400.css';
+import '../styles/admin.css';
+
+interface Props { titulo: string; perfil: Perfil }
+const { titulo, perfil } = Astro.props;
+const atual = Astro.url.pathname;
+const ativo = (p: string) => (atual === p || atual.startsWith(p + '/') ? 'page' : undefined);
+
+const PAPEL = { admin: 'Administrador', editor: 'Editor', autor: 'Autor' } as const;
+
+const menu = [
+  { href: '/admin/posts', rotulo: 'Posts', icone: 'M5 4h11l3 3v13H5z M9 10h6 M9 14h6' },
+  ...(podePublicar(perfil.papel)
+    ? [{ href: '/admin/categorias', rotulo: 'Categorias', icone: 'M4 6h16 M4 12h16 M4 18h10' }]
+    : []),
+  ...(ehAdmin(perfil.papel)
+    ? [{ href: '/admin/usuarios', rotulo: 'Usuários', icone: 'M16 19v-2a4 4 0 0 0-8 0v2 M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z' }]
+    : []),
+  { href: '/admin/perfil', rotulo: 'Meu perfil', icone: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M5 20a7 7 0 0 1 14 0' },
+];
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- Nunca indexar o painel. Reforçado por cabeçalho no middleware e pelo robots.txt. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{titulo} · Admin Akaki</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  </head>
+
+  <body>
+    <div class="ad">
+      <header class="ad-topo">
+        <button class="ad-burg" id="ad-burg" aria-label="Abrir menu" aria-expanded="false" aria-controls="ad-lat">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+        </button>
+        <span class="marca" style="display:inline-block;width:92px;color:var(--gold)"><Wordmark /></span>
+      </header>
+
+      <nav class="ad-lat" id="ad-lat" aria-label="Menu do painel">
+        <div class="ad-lat__marca">
+          <Wordmark />
+          <span>Painel do blog</span>
+        </div>
+
+        {menu.map((m) => (
+          <a class="ad-item" href={m.href} aria-current={ativo(m.href)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d={m.icone} /></svg>
+            {m.rotulo}
+          </a>
+        ))}
+
+        <div class="ad-lat__fim">
+          <a class="ad-item" href="/blog/" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6 M20 4l-9 9 M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" /></svg>
+            Ver o blog
+          </a>
+          <div class="ad-lat__eu">
+            <strong>{perfil.nome}</strong>
+            <span class="ad-lat__papel">{PAPEL[perfil.papel]}</span>
+          </div>
+          <!-- Sair é POST: um link GET seria disparado por pré-carregamento do
+               navegador ou por antivírus, deslogando a pessoa sozinha. -->
+          <form method="POST" action="/admin/sair">
+            <button class="ad-item" type="submit">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4 M16 17l5-5-5-5 M21 12H9" /></svg>
+              Sair
+            </button>
+          </form>
+        </div>
+      </nav>
+
+      <main class="ad-main">
+        <slot />
+      </main>
+    </div>
+
+    <script>
+      // Gaveta lateral no celular.
+      const burg = document.getElementById('ad-burg');
+      const lat = document.getElementById('ad-lat');
+      let veu: HTMLElement | null = null;
+
+      function fechar() {
+        lat?.removeAttribute('data-aberta');
+        burg?.setAttribute('aria-expanded', 'false');
+        veu?.remove(); veu = null;
+        burg?.focus();
+      }
+      burg?.addEventListener('click', () => {
+        const aberta = lat?.getAttribute('data-aberta') === '1';
+        if (aberta) return fechar();
+        lat?.setAttribute('data-aberta', '1');
+        burg.setAttribute('aria-expanded', 'true');
+        veu = document.createElement('div');
+        veu.className = 'ad-veu';
+        veu.addEventListener('click', fechar);
+        document.body.appendChild(veu);
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && lat?.getAttribute('data-aberta') === '1') fechar();
+      });
+
+      // Impede envio duplicado por clique repetido. O botão só é desabilitado
+      // no quadro seguinte: desabilitar durante o clique faz o Safari descartar
+      // o valor do botão e o servidor perde qual ação foi pedida.
+      document.addEventListener('submit', (e) => {
+        const f = e.target as HTMLFormElement;
+        if (f.dataset.enviando) { e.preventDefault(); return; }
+        f.dataset.enviando = '1';
+        requestAnimationFrame(() => {
+          f.querySelectorAll<HTMLButtonElement>('button[type=submit]').forEach((b) => {
+            b.setAttribute('aria-busy', 'true');
+          });
+        });
+      });
+
+      // Contadores de caracteres para os campos de SEO.
+      document.querySelectorAll<HTMLElement>('[data-conta]').forEach((saida) => {
+        const campo = document.getElementById(saida.dataset.conta!) as HTMLInputElement | null;
+        const limite = Number(saida.dataset.limite || 0);
+        if (!campo) return;
+        const atualizar = () => {
+          const n = campo.value.length;
+          saida.textContent = `${n}/${limite}`;
+          saida.dataset.excedido = n > limite ? '1' : '0';
+        };
+        campo.addEventListener('input', atualizar);
+        atualizar();
+      });
+    </script>
+  </body>
+</html>
