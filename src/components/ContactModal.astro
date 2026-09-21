@@ -109,7 +109,10 @@ const { formExtra } = Astro.props;
           try { fetch(MAKE_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ gclid: g, telefone: telDigits, utm_source: src, utm_medium: med, utm_campaign: camp }), keepalive: true }); } catch (err) {}
         }
         const page = (location.pathname.split('/').filter(Boolean)[0] || 'home');
-        const servico = (document.querySelector('.lp') && document.querySelector('.lp').getAttribute('data-service')) || 'Home';
+        // Lê de qualquer elemento com data-service (antes exigia .lp, então
+        // lead vindo do blog era gravado como "Home" na planilha).
+        const svcEl = document.querySelector('[data-service]');
+        const servico = (svcEl && svcEl.getAttribute('data-service')) || 'Home';
         // Planilha de leads (Google Sheets) — grava TODO envio, com ou sem gclid, pra não perder nenhum lead.
         // Content-Type text/plain evita o preflight CORS (Apps Script não responde OPTIONS); o Google lê o corpo como JSON normalmente.
         try {

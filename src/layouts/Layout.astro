@@ -7,17 +7,49 @@ import '@fontsource/roboto/latin-400.css';
 import '../styles/global.css';
 import Wordmark from '../components/Wordmark.astro';
 
+// Todos os padrões reproduzem exatamente o comportamento anterior, para que as
+// 7 páginas institucionais continuem gerando o mesmo HTML sem nenhuma alteração.
 const {
   title = 'Akaki Odontologia · Clínica pioneira em odontofobia · Jardim Paulista, SP',
   description = 'Tratamento odontológico com sedação consciente — em menos tempo e sem medo. Day Clinic, implantes, ortodontia e estética no Jardim Paulista, São Paulo.',
+  /** URL canônica absoluta. Obrigatória em rota dinâmica — ver comentário abaixo. */
+  canonical: canonicalProp,
+  /** 'article' em post de blog; 'website' no resto. */
+  ogType = 'website',
+  /** Imagem de compartilhamento específica da página. */
+  ogImage: ogImageProp,
+  ogImageAlt,
+  /** true em páginas que não devem ser indexadas (busca, tags, preview). */
+  noindex = false,
+  /** Imagem a pré-carregar com prioridade alta (o elemento LCP da página).
+   *  Passar `null` em páginas sem imagem grande no topo. */
+  preloadImage = '/assets/hero-poster.webp',
+  /** Origens externas para abrir conexão cedo (ex.: storage das imagens do blog). */
+  preconnect = [],
+  /** Emite a ficha da clínica com a nota do Google. Deve ser false em posts. */
+  businessSchema = true,
+  /** A abertura de marca. Desligada no blog: quem chega de busca não deve
+   *  esperar uma animação antes de ler o que veio ler. */
+  splash = true,
 } = Astro.props;
-const ogImage = new URL('/assets/film-poster.webp', Astro.site).href;
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const schema = {
+const ogImage = new URL(ogImageProp ?? '/assets/film-poster.webp', Astro.site).href;
+
+// O canonical padrão vem do caminho da requisição. Em página estática isso é
+// resolvido no build e fica gravado — correto. Em rota dinâmica seria avaliado
+// a cada request, e `/blog/post` e `/blog/post/` declarariam canonicals
+// diferentes (conteúdo duplicado). Por isso as rotas do blog passam `canonical`
+// explícito, montado a partir do slug.
+const canonical = canonicalProp ?? new URL(Astro.url.pathname, Astro.site).href;
+
+// Ficha da clínica (com nota do Google). NÃO deve ir em post de blog: a política
+// do Google exige que a nota seja sobre o item daquela página e esteja visível
+// nela — nota da clínica dentro de um artigo é markup enganoso.
+const schema = businessSchema ? {
   '@context': 'https://schema.org',
   '@type': 'Dentist',
+  '@id': 'https://www.akaki.odo.br/#dentist',
   name: 'Akaki Odontologia',
-  image: ogImage,
+  image: new URL('/assets/film-poster.webp', Astro.site).href,
   url: Astro.site ? Astro.site.href : 'https://www.akaki.odo.br',
   telephone: '+5511947024607',
   email: 'contato@akaki.odo.br',
@@ -36,7 +68,7 @@ const schema = {
     'https://www.instagram.com/akakiodontologia/',
     'https://www.youtube.com/channel/UCyGQUid86fGgsJoGISGSuGQ',
   ],
-};
+} : null;
 ---
 
 <!doctype html>
@@ -88,16 +120,28 @@ const schema = {
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preload" href="/fonts/fraunces-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/fraunces-latin-standard-italic.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" as="image" href="/assets/hero-poster.webp" fetchpriority="high" />
+    {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
+    {preconnect.map((origem) => <link rel="preconnect" href={origem} crossorigin />)}
 
-    <meta property="og:type" content="website" />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Akaki Odontologia" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
+    {ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
     <meta property="og:locale" content="pt_BR" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
 
-    <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+    {schema && <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />}
+
+    {/* Ponto de extensão: cada página injeta aqui seus próprios dados
+        estruturados e meta tags, sem precisar aumentar a lista de props. */}
+    <slot name="head" />
 
     <!-- UTM por botão (mesma lógica da bio): origem por CTA via data-wpp / data-site -->
     <script is:inline>
@@ -167,12 +211,14 @@ const schema = {
       height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
-    <div class="splash" id="splash" aria-hidden="true">
-      <div class="splash__inner">
-        <span class="wordmark splash__word"><Wordmark /><span class="wordmark__shine" aria-hidden="true"></span></span>
-        <span class="splash__tag">Odontologia · Jardins — SP</span>
+    {splash && (
+      <div class="splash" id="splash" aria-hidden="true">
+        <div class="splash__inner">
+          <span class="wordmark splash__word"><Wordmark /><span class="wordmark__shine" aria-hidden="true"></span></span>
+          <span class="splash__tag">Odontologia · Jardins — SP</span>
+        </div>
       </div>
-    </div>
+    )}
 
     <slot />
 
@@ -396,8 +442,10 @@ const schema = {
           // Planilha de leads (Google Sheets) — grava TODO envio, com ou sem gclid, pra não perder nenhum lead.
           // Content-Type text/plain evita o preflight CORS (Apps Script não responde OPTIONS); o Google lê o corpo como JSON normalmente.
           try {
-            var lpEl = document.querySelector('.lp');
-            var servico = (lpEl && lpEl.getAttribute('data-service')) || 'Home';
+            // Lê de qualquer elemento com data-service (antes exigia .lp, então
+            // lead vindo do blog era gravado como "Home" na planilha).
+            var svcEl = document.querySelector('[data-service]');
+            var servico = (svcEl && svcEl.getAttribute('data-service')) || 'Home';
             fetch(SHEETS_WEBHOOK, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
