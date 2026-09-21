@@ -1,0 +1,150 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import CartaoPost from '../../components/blog/CartaoPost.astro';
+import { listarPosts, postEmDestaque, listarCategorias } from '../../lib/blog/consultas';
+import { dataCurta, SITE } from '../../lib/blog/formato';
+import '../../styles/blog.css';
+
+const [{ posts, paginas }, destaque, categorias] = await Promise.all([
+  listarPosts(1),
+  postEmDestaque(),
+  listarCategorias(),
+]);
+
+// O post em destaque aparece no topo; não repetir na grade abaixo.
+const grade = destaque ? posts.filter((p) => p.id !== destaque.id) : posts;
+const vazio = !destaque && grade.length === 0;
+
+const titulo = 'Blog · Odontologia sem medo | Akaki Odontologia';
+const descricao =
+  'Artigos sobre sedação odontológica, implantes, ortodontia, estética e odontopediatria — escritos e revisados pelos especialistas da Akaki, no Jardim Paulista.';
+---
+<Layout
+  title={titulo}
+  description={descricao}
+  canonical={`${SITE}/blog/`}
+  preloadImage={destaque?.capa_url ?? null}
+  splash={false}
+  businessSchema={false}
+>
+  <link
+    slot="head"
+    rel="alternate"
+    type="application/rss+xml"
+    title="Blog · Akaki Odontologia"
+    href={`${SITE}/blog/rss.xml`}
+  />
+
+  <Header />
+
+  <main data-service="Blog">
+    <section class="bl-topo">
+      <div class="container">
+        <p class="eyebrow">Blog da Akaki</p>
+        <h1 class="display bl-topo__h1">Odontologia explicada <em>sem susto</em>.</h1>
+        <p class="lead bl-topo__sub">
+          Dúvidas reais de quem tem medo de dentista, quer resolver tudo de uma vez
+          ou está pesquisando um tratamento. Conteúdo escrito e revisado por quem atende.
+        </p>
+
+        <form class="bl-busca" action="/blog/busca" method="get" role="search">
+          <input
+            class="bl-busca__in"
+            type="search"
+            name="q"
+            placeholder="Buscar no blog…"
+            aria-label="Buscar no blog"
+            maxlength="80"
+          />
+          <button class="btn btn--gold" type="submit">Buscar</button>
+        </form>
+
+        {categorias.length > 0 && (
+          <div class="bl-filtros">
+            <a class="bl-filtro" href="/blog/" aria-current="page">Todos</a>
+            {categorias.map((c) => (
+              <a class="bl-filtro" href={`/blog/categoria/${c.slug}/`}>{c.nome}</a>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+
+    {vazio ? (
+      <section class="section">
+        <div class="container bl-vazio">
+          <p class="bl-vazio__t">Os primeiros artigos estão a caminho.</p>
+          <p class="bl-vazio__d">
+            Enquanto isso, conheça os tratamentos da clínica — ou fale com a nossa
+            equipe pelo WhatsApp para tirar sua dúvida direto com quem atende.
+          </p>
+          <div class="bl-servico__acoes" style="justify-content:center;margin-top:24px">
+            <a class="btn btn--primary" data-wpp="blog-vazio-agendar" href="https://api.whatsapp.com/send?phone=5511947024607" target="_blank" rel="noopener noreferrer">Agende sua consulta</a>
+            <a class="btn btn--ghost" href="/sobre/">Conheça a Akaki</a>
+          </div>
+        </div>
+      </section>
+    ) : (
+      <>
+        {destaque && (
+          <section class="section section--tight">
+            <div class="container">
+              <a class="bl-destaque" href={`/blog/${destaque.slug}/`}>
+                <figure class="bl-destaque__fig reveal">
+                  {destaque.capa_url && (
+                    <img
+                      src={destaque.capa_url}
+                      alt={destaque.capa_alt ?? ''}
+                      width={destaque.capa_largura ?? 1200}
+                      height={destaque.capa_altura ?? 900}
+                      fetchpriority="high"
+                      decoding="async"
+                    />
+                  )}
+                </figure>
+                <div class="reveal" style="--d:100ms">
+                  <span class="bl-card__cat">
+                    {destaque.categoria ? `Em destaque · ${destaque.categoria.nome}` : 'Em destaque'}
+                  </span>
+                  <h2 class="bl-destaque__t">{destaque.titulo}</h2>
+                  {destaque.resumo && <p class="lead">{destaque.resumo}</p>}
+                  <p class="bl-card__pe">
+                    <time datetime={destaque.publicado_em}>{dataCurta(destaque.publicado_em)}</time>
+                    <span aria-hidden="true">·</span>
+                    {destaque.tempo_leitura} min de leitura
+                  </p>
+                </div>
+              </a>
+            </div>
+          </section>
+        )}
+
+        {grade.length > 0 && (
+          <section class="section" style="padding-top:0">
+            <div class="container">
+              <div class="bl-grade">
+                {grade.map((p, i) => <CartaoPost post={p} atraso={i * 90} />)}
+              </div>
+
+              {paginas > 1 && (
+                <nav class="bl-pag" aria-label="Paginação">
+                  <span class="bl-pag__off">Anterior</span>
+                  <span aria-current="page">1</span>
+                  {paginas >= 2 && <a href="/blog/pagina/2/">2</a>}
+                  {paginas >= 3 && <a href="/blog/pagina/3/">3</a>}
+                  <a href="/blog/pagina/2/">Próxima</a>
+                </nav>
+              )}
+            </div>
+          </section>
+        )}
+      </>
+    )}
+  </main>
+
+  <Footer />
+</Layout>

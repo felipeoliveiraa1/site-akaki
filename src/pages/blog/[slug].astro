@@ -1,0 +1,340 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import ContactModal from '../../components/ContactModal.astro';
+import CartaoPost from '../../components/blog/CartaoPost.astro';
+import Migalhas from '../../components/blog/Migalhas.astro';
+import { buscarPost, postsRelacionados } from '../../lib/blog/consultas';
+import {
+  SITE, dataLonga, isoComFuso, cro, tituloSeo, descricaoSeo, prepararHtml,
+} from '../../lib/blog/formato';
+import '../../styles/blog.css';
+import '../../styles/prosa.css';
+
+const { slug } = Astro.params;
+const post = await buscarPost(slug!);
+
+if (!post) {
+  // Post inexistente, despublicado ou agendado para o futuro.
+  return new Response(null, { status: 404, headers: { Location: '/404' } });
+}
+
+const relacionados = await postsRelacionados(post, 3);
+const { html, indice } = prepararHtml(post.conteudo_html);
+
+// Canonical montado a partir do slug — nunca da URL da requisição, senão
+// /blog/post e /blog/post/ declarariam canonicals diferentes.
+const canonical = `${SITE}/blog/${post.slug}/`;
+const titulo = tituloSeo(post.titulo, post.seo_titulo);
+const descricao = descricaoSeo(post.seo_descricao, post.resumo, post.conteudo_html);
+const publicado = isoComFuso(post.publicado_em);
+const atualizado = isoComFuso(post.atualizado_em ?? post.publicado_em);
+
+const autor = post.autor;
+const croAutor = cro(autor?.cro, autor?.cro_uf);
+const croRevisor = cro(post.revisor?.cro, post.revisor?.cro_uf);
+const lp = post.lp_slug ?? post.categoria?.lp_slug ?? null;
+const origemStorage = post.capa_url ? new URL(post.capa_url).origin : null;
+
+// ── Dados estruturados ────────────────────────────────────────────────
+// Um único @graph com entidades cruzadas por @id — é o formato que um
+// auditor de SEO espera. Sem aggregateRating: a nota é da clínica, não do
+// artigo, e o Google trata nota fora de contexto como markup enganoso.
+const grafo = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite', '@id': `${SITE}/#website`,
+      url: `${SITE}/`, name: 'Akaki Odontologia', inLanguage: 'pt-BR',
+      publisher: { '@id': `${SITE}/#dentist` },
+    },
+    {
+      '@type': ['Organization', 'Dentist'], '@id': `${SITE}/#dentist`,
+      name: 'Akaki Odontologia', url: `${SITE}/`,
+      logo: { '@type': 'ImageObject', '@id': `${SITE}/#logo`,
+              url: `${SITE}/assets/favicon-192.png`, width: 192, height: 192 },
+      image: { '@id': `${SITE}/#logo` },
+      telephone: '+5511947024607', email: 'contato@akaki.odo.br',
+      address: {
+        '@type': 'PostalAddress', streetAddress: 'Rua Estados Unidos, 205',
+        addressLocality: 'São Paulo', addressRegion: 'SP',
+        postalCode: '01427-002', addressCountry: 'BR',
+      },
+      sameAs: [
+        'https://www.instagram.com/akakiodontologia/',
+        'https://www.youtube.com/channel/UCyGQUid86fGgsJoGISGSuGQ',
+      ],
+    },
+    {
+      // MedicalWebPage quando há revisão profissional: é o sinal legível por
+      // máquina de que conteúdo de saúde foi conferido por quem tem registro.
+      '@type': post.revisor ? ['WebPage', 'MedicalWebPage'] : 'WebPage',
+      '@id': canonical, url: canonical, name: titulo, description: descricao,
+      isPartOf: { '@id': `${SITE}/#website` }, inLanguage: 'pt-BR',
+      breadcrumb: { '@id': `${canonical}#migalhas` },
+      datePublished: publicado, dateModified: atualizado,
+      ...(post.capa_url ? { primaryImageOfPage: { '@id': `${canonical}#imagem` } } : {}),
+      ...(post.revisor ? {
+        reviewedBy: { '@type': 'Person', name: post.revisor.nome,
+                      ...(croRevisor ? { identifier: { '@type': 'PropertyValue', name: 'CRO', value: croRevisor } } : {}) },
+        specialty: 'https://schema.org/Dentistry',
+      } : {}),
+    },
+    ...(post.capa_url ? [{
+      '@type': 'ImageObject', '@id': `${canonical}#imagem`,
+      url: post.capa_url, contentUrl: post.capa_url,
+      width: post.capa_largura, height: post.capa_altura, caption: post.capa_alt,
+    }] : []),
+    {
+      '@type': 'BreadcrumbList', '@id': `${canonical}#migalhas`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Início', item: `${SITE}/` },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE}/blog/` },
+        ...(post.categoria ? [{ '@type': 'ListItem', position: 3, name: post.categoria.nome,
+                                item: `${SITE}/blog/categoria/${post.categoria.slug}/` }] : []),
+        { '@type': 'ListItem', position: post.categoria ? 4 : 3, name: post.titulo },
+      ],
+    },
+    {
+      '@type': 'BlogPosting', '@id': `${canonical}#artigo`,
+      isPartOf: { '@id': canonical }, mainEntityOfPage: { '@id': canonical },
+      headline: post.titulo.slice(0, 110), description: descricao,
+      inLanguage: 'pt-BR', isAccessibleForFree: true,
+      datePublished: publicado, dateModified: atualizado,
+      timeRequired: `PT${post.tempo_leitura}M`,
+      ...(post.categoria ? { articleSection: post.categoria.nome } : {}),
+      ...(post.tags.length ? { keywords: post.tags.map((t) => t.nome).join(', ') } : {}),
+      ...(post.capa_url ? { image: { '@id': `${canonical}#imagem` } } : {}),
+      ...(autor ? { author: { '@id': `${SITE}/blog/autor/${autor.slug}/#pessoa` } } : {}),
+      publisher: { '@id': `${SITE}/#dentist` },
+    },
+    ...(autor ? [{
+      '@type': 'Person', '@id': `${SITE}/blog/autor/${autor.slug}/#pessoa`,
+      name: autor.nome, url: `${SITE}/blog/autor/${autor.slug}/`,
+      ...(autor.avatar_url ? { image: autor.avatar_url } : {}),
+      ...(autor.bio ? { description: autor.bio } : {}),
+      ...(autor.cargo ? { jobTitle: autor.cargo } : {}),
+      ...(croAutor ? { identifier: { '@type': 'PropertyValue', name: 'CRO', value: croAutor } } : {}),
+      ...(autor.instagram_url ? { sameAs: [autor.instagram_url] } : {}),
+      worksFor: { '@id': `${SITE}/#dentist` },
+    }] : []),
+  ],
+};
+---
+<Layout
+  title={titulo}
+  description={descricao}
+  canonical={canonical}
+  ogType="article"
+  ogImage={post.capa_url ?? undefined}
+  ogImageAlt={post.capa_alt ?? undefined}
+  preloadImage={post.capa_url ?? null}
+  preconnect={origemStorage ? [origemStorage] : []}
+  splash={false}
+  businessSchema={false}
+>
+  <Fragment slot="head">
+    <meta property="article:published_time" content={publicado} />
+    <meta property="article:modified_time" content={atualizado} />
+    {post.categoria && <meta property="article:section" content={post.categoria.nome} />}
+    {post.tags.map((t) => <meta property="article:tag" content={t.nome} />)}
+    <link rel="alternate" type="application/rss+xml" title="Blog · Akaki Odontologia" href={`${SITE}/blog/rss.xml`} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(grafo)} />
+  </Fragment>
+
+  <Header />
+
+  <main class="post" data-service={`Blog · ${post.categoria?.nome ?? 'Geral'}`}>
+    <header class="bl-topo">
+      <div class="container">
+        <Migalhas itens={[
+          { texto: 'Blog', href: '/blog/' },
+          ...(post.categoria ? [{ texto: post.categoria.nome, href: `/blog/categoria/${post.categoria.slug}/` }] : []),
+          { texto: post.titulo },
+        ]} />
+
+        <h1 class="display bl-topo__h1 post__h1">{post.titulo}</h1>
+        {post.resumo && <p class="lead bl-topo__sub">{post.resumo}</p>}
+
+        <div class="post__meta">
+          {autor && (
+            <a class="post__autor" href={`/blog/autor/${autor.slug}/`}>
+              {autor.avatar_url && (
+                <img src={autor.avatar_url} alt={autor.avatar_alt ?? `Foto de ${autor.nome}`}
+                     width="72" height="72" loading="eager" decoding="async" />
+              )}
+              <span>
+                <strong>{autor.nome}</strong>
+                {croAutor && <em>{croAutor}</em>}
+              </span>
+            </a>
+          )}
+          <p class="post__datas">
+            <time datetime={publicado}>{dataLonga(post.publicado_em)}</time>
+            <span aria-hidden="true">·</span> {post.tempo_leitura} min de leitura
+          </p>
+        </div>
+
+        {post.revisor && (
+          <p class="post__revisao">
+            Revisado por <strong>{post.revisor.nome}</strong>{croRevisor ? ` · ${croRevisor}` : ''}
+          </p>
+        )}
+      </div>
+    </header>
+
+    {post.capa_url && (
+      <figure class="post__capa">
+        <div class="container">
+          <img src={post.capa_url} alt={post.capa_alt ?? ''}
+               width={post.capa_largura ?? 1600} height={post.capa_altura ?? 900}
+               fetchpriority="high" decoding="async" />
+        </div>
+      </figure>
+    )}
+
+    <section class="section post__corpo">
+      <div class="container post__grade">
+        <div class="prosa" set:html={html} />
+
+        {indice.length > 2 && (
+          <aside class="post__indice" aria-label="Neste artigo">
+            <p class="post__indice-t">Neste artigo</p>
+            <ol>{indice.map((i) => <li><a href={`#${i.id}`}>{i.texto}</a></li>)}</ol>
+          </aside>
+        )}
+      </div>
+    </section>
+
+    {post.tags.length > 0 && (
+      <section class="container post__tags">
+        {post.tags.map((t) => <a class="post__tag" href={`/blog/tag/${t.slug}/`}>{t.nome}</a>)}
+      </section>
+    )}
+
+    {autor?.bio && (
+      <section class="section section--tight cv-auto">
+        <div class="container">
+          <div class="bl-autor">
+            {autor.avatar_url && (
+              <div class="bl-autor__foto">
+                <img src={autor.avatar_url} alt={autor.avatar_alt ?? `Foto de ${autor.nome}`}
+                     width="180" height="180" loading="lazy" decoding="async" />
+              </div>
+            )}
+            <div>
+              <p class="bl-autor__nome">{autor.nome}</p>
+              {(autor.cargo || croAutor) && (
+                <p class="bl-autor__cargo">{[autor.cargo, croAutor].filter(Boolean).join(' · ')}</p>
+              )}
+              <p class="bl-autor__bio">{autor.bio}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
+    {lp && post.categoria && (
+      <section class="section section--tight cv-auto">
+        <div class="container">
+          <div class="bl-servico">
+            <p class="eyebrow">Tratamento relacionado</p>
+            <p class="bl-servico__t">{post.categoria.nome} na Akaki</p>
+            <p class="bl-servico__d">
+              Quer entender como isso funciona no seu caso? Veja a página do
+              tratamento ou fale com a nossa equipe.
+            </p>
+            <div class="bl-servico__acoes">
+              <a class="btn btn--primary" href={`/${lp}/`}>Ver {post.categoria.nome.toLowerCase()}</a>
+              <a class="btn btn--ghost" data-wpp={`blog-${post.slug}-agendar`}
+                 href="https://api.whatsapp.com/send?phone=5511947024607"
+                 target="_blank" rel="noopener noreferrer">Agende sua consulta</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
+    {relacionados.length > 0 && (
+      <section class="section cv-auto">
+        <div class="container">
+          <p class="eyebrow">Continue lendo</p>
+          <h2 class="h2" style="margin:14px 0 34px">Outros artigos da <em>Akaki</em></h2>
+          <div class="bl-grade">
+            {relacionados.map((p, i) => <CartaoPost post={p} atraso={i * 90} />)}
+          </div>
+        </div>
+      </section>
+    )}
+  </main>
+
+  <Footer />
+  <ContactModal />
+</Layout>
+
+<style>
+  .post__h1 { max-width: 24ch; font-size: clamp(28px, 4.4vw, 48px); }
+
+  .post__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 26px; }
+  .post__autor { display: inline-flex; align-items: center; gap: 12px; }
+  .post__autor img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+  .post__autor span { display: flex; flex-direction: column; line-height: 1.3; }
+  .post__autor strong {
+    font-family: var(--sans); font-weight: 600; font-size: 13px;
+    color: var(--white-text); letter-spacing: 0.02em;
+  }
+  .post__autor em {
+    font-style: normal; font-family: var(--sans); font-size: 10.5px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-light); margin-top: 3px;
+  }
+  .post__datas {
+    font-family: var(--sans); font-size: 12px; letter-spacing: 0.04em;
+    color: rgba(245, 240, 232, 0.62);
+  }
+  .post__revisao {
+    margin-top: 16px; font-family: var(--body); font-size: 12.5px;
+    color: rgba(245, 240, 232, 0.62);
+  }
+  .post__revisao strong { color: var(--gold-light); font-weight: 500; }
+
+  .post__capa { background: var(--cinema-black); padding-bottom: clamp(28px, 4vh, 48px); }
+  .post__capa img {
+    width: 100%; height: auto; border-radius: 22px;
+    box-shadow: 0 34px 80px -40px rgba(0, 0, 0, 0.8);
+  }
+
+  .post__corpo { padding-top: clamp(44px, 7vh, 80px); }
+  .post__grade { display: grid; grid-template-columns: minmax(0, 1fr) 232px; gap: clamp(32px, 5vw, 72px); align-items: start; }
+
+  .post__indice { position: sticky; top: calc(var(--nav-h) + 20px); }
+  .post__indice-t {
+    font-family: var(--sans); font-weight: 600; font-size: 10px;
+    letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold-dark); margin-bottom: 14px;
+  }
+  .post__indice ol { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .post__indice a {
+    font-family: var(--body); font-size: 13.5px; line-height: 1.45;
+    color: var(--navy-soft); border-left: 2px solid rgba(24, 39, 60, 0.12);
+    padding-left: 12px; display: block; transition: color 220ms var(--silk), border-color 220ms var(--silk);
+  }
+  @media (hover: hover) { .post__indice a:hover { color: var(--gold-dark); border-color: var(--gold); } }
+
+  .post__tags { display: flex; flex-wrap: wrap; gap: 9px; padding-bottom: clamp(28px, 4vh, 44px); }
+  .post__tag {
+    padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(24, 39, 60, 0.14);
+    font-family: var(--sans); font-weight: 600; font-size: 11px; letter-spacing: 0.05em;
+    color: var(--navy-soft); transition: border-color 240ms var(--silk), color 240ms var(--silk);
+  }
+  @media (hover: hover) { .post__tag:hover { border-color: var(--gold); color: var(--gold-dark); } }
+
+  @media (max-width: 980px) {
+    .post__grade { grid-template-columns: 1fr; }
+    /* O índice vai para o fim: no celular, empilhado antes do texto,
+       ele empurraria o artigo para baixo da dobra. */
+    .post__indice { position: static; order: 2; border-top: 1px solid rgba(24,39,60,0.1); padding-top: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .post__indice a, .post__tag { transition: none; } }
+</style>

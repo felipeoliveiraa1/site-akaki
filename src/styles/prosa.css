@@ -1,0 +1,127 @@
+/* ======================================================================
+   PROSA — tipografia do corpo do artigo
+   Carregado só na página do post (nem nos arquivos do blog).
+   ====================================================================== */
+
+/* Roboto 700 para o negrito: o site carrega só 300/400, então <strong>
+   sairia com negrito sintético (borrado). O arquivo só é baixado quando
+   a página realmente usa negrito. */
+@import '@fontsource/roboto/latin-700.css';
+
+.prosa {
+  max-width: 64ch;
+  font-family: var(--body);
+  font-weight: 400;
+  font-size: 17.5px;
+  line-height: 1.75;
+  color: var(--navy-soft);
+  text-wrap: pretty;
+}
+@media (max-width: 640px) { .prosa { font-size: 17px; line-height: 1.7; } }
+
+.prosa > * + * { margin-top: 1.15em; }
+
+/* ——— títulos ————————————————————————————————— */
+.prosa h2, .prosa h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-variation-settings: 'opsz' 144;
+  color: var(--navy);
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  scroll-margin-top: calc(var(--nav-h) + 18px);
+}
+.prosa h2 { font-size: clamp(25px, 3.4vw, 33px); line-height: 1.14; margin-top: 2.1em; margin-bottom: 0.5em; }
+.prosa h3 { font-size: clamp(20px, 2.4vw, 24px); line-height: 1.22; margin-top: 1.9em; margin-bottom: 0.45em; }
+.prosa h2 em, .prosa h3 em { font-style: italic; color: var(--gold-dark); }
+.prosa h4 {
+  font-family: var(--sans); font-weight: 600; font-size: 12.5px;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-dark);
+  margin-top: 1.8em; margin-bottom: 0.4em;
+}
+
+/* ——— texto ————————————————————————————————— */
+.prosa strong, .prosa b { font-weight: 700; color: var(--navy); }
+.prosa em { font-style: italic; }
+.prosa mark { background: rgba(211, 164, 108, 0.22); color: var(--navy); padding: 0 0.2em; border-radius: 3px; }
+
+.prosa a {
+  color: var(--navy);
+  text-decoration: underline;
+  text-decoration-color: rgba(211, 164, 108, 0.55);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: color 200ms var(--silk), text-decoration-color 200ms var(--silk);
+}
+.prosa a:hover { color: var(--gold-dark); text-decoration-color: var(--gold-dark); }
+
+/* ——— listas (marcador dourado, como o resto do site) ————— */
+.prosa ul, .prosa ol { list-style: none; padding-left: 0; }
+.prosa li + li { margin-top: 0.5em; }
+.prosa ul > li { position: relative; padding-left: 1.5em; }
+.prosa ul > li::before {
+  content: ""; position: absolute; left: 0.3em; top: 0.72em;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
+}
+.prosa ol { counter-reset: item; }
+.prosa ol > li { position: relative; padding-left: 2em; counter-increment: item; }
+.prosa ol > li::before {
+  content: counter(item) "."; position: absolute; left: 0; top: -0.05em;
+  font-family: var(--serif); font-variation-settings: 'opsz' 144;
+  font-size: 1.05em; color: var(--gold-dark);
+}
+.prosa li > ul, .prosa li > ol { margin-top: 0.5em; }
+
+/* ——— citação (mesmo padrão das LPs) ————————————————— */
+.prosa blockquote {
+  font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-variation-settings: 'opsz' 144;
+  font-size: clamp(18px, 2.1vw, 21px); line-height: 1.5;
+  color: var(--gold-dark);
+  border-left: 2px solid var(--gold);
+  padding-left: 20px; margin-block: 1.9em; max-width: 50ch;
+}
+.prosa blockquote p + p { margin-top: 0.6em; }
+
+/* ——— imagens ————————————————————————————————— */
+.prosa img { width: 100%; height: auto; border-radius: 18px; }
+.prosa figure { margin-block: 2em; }
+.prosa figcaption {
+  font-family: var(--sans); font-size: 12px; color: var(--navy-ghost);
+  text-align: center; margin-top: 10px; line-height: 1.5;
+}
+
+.prosa hr {
+  border: 0; height: 1px; margin-block: 2.6em;
+  background: linear-gradient(90deg, transparent, rgba(211, 164, 108, 0.5), transparent);
+}
+
+/* ——— tabelas: rolagem própria para não estourar no celular ——— */
+.prosa .tabela-rolavel { overflow-x: auto; margin-block: 2em; -webkit-overflow-scrolling: touch; }
+.prosa table { width: 100%; min-width: 480px; border-collapse: collapse; font-size: 14.5px; }
+.prosa thead th {
+  font-family: var(--sans); font-weight: 600; font-size: 11px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-dark);
+  text-align: left; padding: 12px 14px; border-bottom: 1px solid rgba(211, 164, 108, 0.45);
+}
+.prosa tbody td {
+  padding: 13px 14px; border-bottom: 1px solid rgba(24, 39, 60, 0.1);
+  color: var(--navy-soft); vertical-align: top;
+}
+.prosa tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.5); }
+
+/* ——— código ————————————————————————————————— */
+.prosa code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.87em; background: rgba(24, 39, 60, 0.06);
+  border: 1px solid rgba(24, 39, 60, 0.1); border-radius: 6px;
+  padding: 0.12em 0.38em; color: var(--navy);
+}
+.prosa pre {
+  background: var(--cinema-black); color: rgba(245, 240, 232, 0.92);
+  border-radius: 14px; padding: 18px 20px; overflow-x: auto;
+  font-size: 13.5px; line-height: 1.6; margin-block: 1.8em;
+}
+.prosa pre code { background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
+
+@media (prefers-reduced-motion: reduce) { .prosa a { transition: none; } }

@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
 
+# Área administrativa e APIs nunca devem ser indexadas.
+Disallow: /admin
+Disallow: /api/
+
+# Observação: /blog/busca NÃO é bloqueado aqui de propósito. Ele usa a meta
+# tag "noindex" — e o Google só enxerga essa tag se puder rastrear a página.
+# Bloquear no robots faria o oposto do pretendido: a URL poderia ser indexada
+# sem conteúdo, só pelo endereço.
+
 Sitemap: https://www.akaki.odo.br/sitemap-index.xml
+Sitemap: https://www.akaki.odo.br/sitemap-blog.xml
