@@ -7,7 +7,7 @@ import Footer from '../../../components/Footer.astro';
 import Arquivo from '../../../components/blog/Arquivo.astro';
 import Migalhas from '../../../components/blog/Migalhas.astro';
 import { buscarAutor, listarPorAutor } from '../../../lib/blog/consultas';
-import { SITE, cro } from '../../../lib/blog/formato';
+import { SITE, cro, perfilExterno } from '../../../lib/blog/formato';
 import '../../../styles/blog.css';
 
 const { autor: slug } = Astro.params;
@@ -37,7 +37,7 @@ const grafo = {
     ...(autor.bio ? { description: autor.bio } : {}),
     ...(autor.cargo ? { jobTitle: autor.cargo } : {}),
     ...(registro ? { identifier: { '@type': 'PropertyValue', name: 'CRO', value: registro } } : {}),
-    ...(autor.instagram_url ? { sameAs: [autor.instagram_url] } : {}),
+    ...(perfilExterno(autor.instagram_url) ? { sameAs: [perfilExterno(autor.instagram_url)!] } : {}),
     worksFor: { '@type': ['Organization', 'Dentist'], '@id': `${SITE}/#dentist`, name: 'Akaki Odontologia' },
   },
 };

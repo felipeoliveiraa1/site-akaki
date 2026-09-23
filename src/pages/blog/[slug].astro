@@ -9,7 +9,7 @@ import CartaoPost from '../../components/blog/CartaoPost.astro';
 import Migalhas from '../../components/blog/Migalhas.astro';
 import { buscarPost, postsRelacionados } from '../../lib/blog/consultas';
 import {
-  SITE, dataLonga, isoComFuso, cro, tituloSeo, descricaoSeo, prepararHtml,
+  SITE, dataLonga, isoComFuso, cro, tituloSeo, descricaoSeo, prepararHtml, perfilExterno,
 } from '../../lib/blog/formato';
 import '../../styles/blog.css';
 import '../../styles/prosa.css';
@@ -128,7 +128,7 @@ const grafo = {
       ...(autor.bio ? { description: autor.bio } : {}),
       ...(autor.cargo ? { jobTitle: autor.cargo } : {}),
       ...(croAutor ? { identifier: { '@type': 'PropertyValue', name: 'CRO', value: croAutor } } : {}),
-      ...(autor.instagram_url ? { sameAs: [autor.instagram_url] } : {}),
+      ...(perfilExterno(autor.instagram_url) ? { sameAs: [perfilExterno(autor.instagram_url)!] } : {}),
       worksFor: { '@id': `${SITE}/#dentist` },
     }] : []),
   ],

@@ -3,6 +3,7 @@ export const prerender = false;
 
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import type { Perfil } from '../../lib/supabase';
+import { perfilExterno } from '../../lib/blog/formato';
 
 const perfil = Astro.locals.perfil as Perfil;
 const supabase = Astro.locals.supabase!;
@@ -26,7 +27,7 @@ if (Astro.request.method === 'POST') {
     bio: String(d.get('bio') ?? '').trim(),
     avatar_url: String(d.get('avatar_url') ?? '').trim(),
     avatar_alt: String(d.get('avatar_alt') ?? '').trim(),
-    instagram_url: String(d.get('instagram_url') ?? '').trim(),
+    instagram_url: normalizarInstagram(String(d.get('instagram_url') ?? '')),
   };
 
   // Troca de senha (opcional, no mesmo formulário)
@@ -35,6 +36,8 @@ if (Astro.request.method === 'POST') {
 
   if (v.nome.length < 2) erro = 'Informe seu nome.';
   else if (v.cro_uf && !/^[A-Z]{2}$/.test(v.cro_uf)) erro = 'A UF do CRO deve ter duas letras (ex.: SP).';
+  else if (v.instagram_url && !perfilExterno(v.instagram_url))
+    erro = 'O Instagram precisa ser um endereço completo (ex.: https://instagram.com/akakiodontologia) ou o @ do perfil.';
   else if (senha1 && senha1.length < 8) erro = 'A nova senha precisa ter pelo menos 8 caracteres.';
   else if (senha1 && senha1 !== senha2) erro = 'As duas senhas não são iguais.';
   else {
@@ -56,6 +59,22 @@ if (Astro.request.method === 'POST') {
   if (erro) Astro.response.status = 422;
 }
 if (Astro.url.searchParams.get('ok')) aviso = 'Perfil atualizado.';
+
+/**
+ * Aceita o que a pessoa costuma ter à mão — "@akakiodontologia",
+ * "instagram.com/akakiodontologia" ou a URL inteira — e devolve sempre uma
+ * URL. O que não virar URL é devolvido como veio, para a validação abaixo
+ * recusar com uma mensagem, em vez de gravar texto solto num campo que o
+ * Google lê como perfil oficial (sameAs).
+ */
+function normalizarInstagram(bruto: string): string {
+  const v = bruto.trim().replace(/\s+/g, '');
+  if (!v) return '';
+  if (/^@[A-Za-z0-9._]{1,30}$/.test(v)) return `https://instagram.com/${v.slice(1)}`;
+  if (/^[A-Za-z0-9._]{1,30}$/.test(v)) return `https://instagram.com/${v}`;
+  if (/^(www\.)?instagram\.com\//i.test(v)) return `https://${v.replace(/^www\./i, '')}`;
+  return v;
+}
 
 const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 ---
@@ -150,6 +169,7 @@ const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','P
         <label class="ad-rot" for="instagram_url">Instagram <span>— opcional</span></label>
         <input class="ad-in" id="instagram_url" name="instagram_url" value={v.instagram_url}
                placeholder="https://instagram.com/…" inputmode="url" />
+        <p class="ad-dica">Pode colar o endereço completo ou só o @ do perfil.</p>
       </div>
     </div>
 

@@ -105,3 +105,22 @@ export function prepararHtml(html: string): { html: string; indice: { id: string
 
   return { html: saida, indice };
 }
+
+/**
+ * URL de perfil válida para o `sameAs` do JSON-LD, ou null.
+ *
+ * O campo é digitado por gente leiga no /admin/perfil e já chegou a receber
+ * o próprio rótulo colado por engano. `sameAs` é onde o Google lê os perfis
+ * oficiais da pessoa: um valor que não é URL invalida a entidade Person
+ * inteira. Na dúvida, é melhor não declarar sameAs do que declarar lixo.
+ */
+export function perfilExterno(valor?: string | null): string | null {
+  const v = valor?.trim();
+  if (!v) return null;
+  try {
+    const u = new URL(v);
+    return u.protocol === 'https:' || u.protocol === 'http:' ? u.href : null;
+  } catch {
+    return null;
+  }
+}
