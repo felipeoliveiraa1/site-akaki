@@ -37,7 +37,17 @@ const autor = post.autor;
 const croAutor = cro(autor?.cro, autor?.cro_uf);
 const croRevisor = cro(post.revisor?.cro, post.revisor?.cro_uf);
 const lp = post.lp_slug ?? post.categoria?.lp_slug ?? null;
-const origemStorage = post.capa_url ? new URL(post.capa_url).origin : null;
+
+// A capa pode ser um caminho do próprio site (/assets/…) ou um endereço
+// completo de um armazenamento externo. Só faz sentido abrir conexão
+// antecipada quando é externa — e `new URL()` sem base lança erro num
+// caminho relativo, então a checagem vem antes.
+const capaExterna = /^https?:\/\//i.test(post.capa_url ?? '');
+const origemStorage = capaExterna ? new URL(post.capa_url!).origin : null;
+// Dados estruturados exigem endereço absoluto, sempre.
+const capaAbsoluta = post.capa_url
+  ? new URL(post.capa_url, Astro.site ?? SITE).href
+  : null;
 
 // ── Dados estruturados ────────────────────────────────────────────────
 // Um único @graph com entidades cruzadas por @id — é o formato que um
@@ -85,7 +95,7 @@ const grafo = {
     },
     ...(post.capa_url ? [{
       '@type': 'ImageObject', '@id': `${canonical}#imagem`,
-      url: post.capa_url, contentUrl: post.capa_url,
+      url: capaAbsoluta, contentUrl: capaAbsoluta,
       width: post.capa_largura, height: post.capa_altura, caption: post.capa_alt,
     }] : []),
     {

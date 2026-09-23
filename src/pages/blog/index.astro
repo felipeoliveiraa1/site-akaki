@@ -124,7 +124,9 @@ const descricao =
         )}
 
         {grade.length > 0 && (
-          <section class="section" style="padding-top:0">
+          /* Só colamos no bloco de cima quando existe um destaque logo antes;
+             sem ele, a grade precisa do respiro normal de seção. */
+          <section class="section" style={destaque ? 'padding-top:0' : undefined}>
             <div class="container">
               <div class="bl-grade">
                 {grade.map((p, i) => <CartaoPost post={p} atraso={i * 90} />)}
