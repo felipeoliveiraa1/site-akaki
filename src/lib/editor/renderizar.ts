@@ -39,10 +39,15 @@ const REGRAS: sanitizeHtml.IOptions = {
     a: (_tag, attrs) => {
       const href = attrs.href ?? '';
       const externo = /^https?:\/\//i.test(href) && !href.includes('akaki.odo.br');
+      // O TipTap põe target="_blank" em todo link por padrão. Em link interno
+      // isso abriria o próprio site numa aba nova — comportamento errado e que
+      // interrompe a navegação de quem está lendo. Removemos antes de decidir.
+      const base = { ...attrs };
+      delete base.target;
       return {
         tagName: 'a',
         attribs: {
-          ...attrs,
+          ...base,
           // nofollow só em link externo; link interno passa autoridade de propósito
           rel: externo ? 'noopener noreferrer nofollow' : 'noopener',
           ...(externo ? { target: '_blank' } : {}),
