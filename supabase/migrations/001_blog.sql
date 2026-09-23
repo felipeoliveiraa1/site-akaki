@@ -10,7 +10,8 @@
 --  primeira.
 -- ════════════════════════════════════════════════════════════════════════
 
-create extension if not exists unaccent;
+-- Sem dependência de extensão: a remoção de acentos é feita com translate()
+-- na seção 5, o que evita problema de esquema e garante imutabilidade real.
 
 -- ─────────────────────────────────────────────────────────────
 --  1. PERFIS — estende os usuários de autenticação do Supabase
@@ -164,11 +165,25 @@ create index if not exists posts_por_autor
 -- ─────────────────────────────────────────────────────────────
 --  5. BUSCA EM PORTUGUÊS
 --  Dicionário 'portuguese' trata radicais ("implantes" acha "implante");
---  unaccent faz "sedacao" achar "sedação".
+--  sem_acento faz "sedacao" achar "sedação".
+--
+--  Usa translate() em vez da extensão unaccent de propósito:
+--   • a extensão fica em esquema diferente conforme o projeto, e a referência
+--     errada quebra a migração;
+--   • translate() é genuinamente IMMUTABLE, exigência para a coluna gerada e
+--     o índice abaixo. O unaccent é apenas STABLE, e "convencê-lo" a passar
+--     por imutável deixa o índice vulnerável a ficar obsoleto num upgrade
+--     do Postgres.
+--  O português tem um conjunto pequeno e fechado de acentos, então a troca
+--  direta cobre 100% do conteúdo.
 -- ─────────────────────────────────────────────────────────────
 create or replace function public.sem_acento(t text)
 returns text language sql immutable set search_path = '' as $$
-  select extensions.unaccent('extensions.unaccent'::regdictionary, coalesce(t, ''));
+  select translate(
+    coalesce(t, ''),
+    'áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ',
+    'aaaaaeeeeiiiiooooouuuucnAAAAAEEEEIIIIOOOOOUUUUCN'
+  );
 $$;
 
 alter table public.posts

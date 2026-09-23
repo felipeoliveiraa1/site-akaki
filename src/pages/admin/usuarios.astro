@@ -40,8 +40,19 @@ if (Astro.request.method === 'POST') {
       if (error) {
         erro = error.message.includes('already') ? 'Este e-mail já tem conta.' : error.message;
       } else if (data.user) {
-        await admin.from('perfis').update({ papel }).eq('id', data.user.id);
-        return Astro.redirect('/admin/usuarios?ok=convidado', 303);
+        // O papel é definido com a sessão DO ADMIN logado, não com a chave
+        // administrativa. Motivo descoberto em teste contra banco real: o
+        // gatilho de proteção exige que quem altera papel seja um admin
+        // identificado, e a chave administrativa não tem identidade — a
+        // operação seria recusada com "Apenas um administrador pode alterar
+        // papel". A chave administrativa serve só para criar o convite.
+        const { error: erroPapel } = await supabase
+          .from('perfis').update({ papel }).eq('id', data.user.id);
+        if (erroPapel) {
+          erro = `Convite enviado, mas o nível de acesso não foi aplicado (${erroPapel.message}). Ajuste na lista abaixo.`;
+        } else {
+          return Astro.redirect('/admin/usuarios?ok=convidado', 303);
+        }
       }
     }
   } else if (acao === 'papel' || acao === 'ativo') {
