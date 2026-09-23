@@ -12,8 +12,8 @@ import { clienteDeSessao } from '../../lib/supabase';
  * o Supabase o divide em vários cookies, e apagar só um deixa a sessão pela
  * metade.
  */
-export const POST: APIRoute = async ({ cookies, redirect }) => {
-  const supabase = clienteDeSessao(cookies);
+export const POST: APIRoute = async ({ cookies, request, redirect }) => {
+  const supabase = clienteDeSessao(cookies, request);
   if (supabase) await supabase.auth.signOut();
   return redirect('/admin/entrar', 302);
 };

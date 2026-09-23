@@ -32,7 +32,7 @@ if (Astro.request.method === 'POST' && !supabaseConfigurado) {
   if (!email || !senha) {
     erro = 'Preencha e-mail e senha.';
   } else {
-    const supabase = clienteDeSessao(Astro.cookies);
+    const supabase = clienteDeSessao(Astro.cookies, Astro.request);
     const { error } = await supabase!.auth.signInWithPassword({ email, password: senha });
     // Mensagem única de propósito: dizer "este e-mail não existe" revelaria
     // quais endereços têm conta.

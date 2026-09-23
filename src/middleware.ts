@@ -30,7 +30,7 @@ export const onRequest = defineMiddleware(async (contexto, proxima) => {
     return redirect('/admin/entrar?motivo=sem-configuracao', 302);
   }
 
-  const supabase = clienteDeSessao(cookies)!;
+  const supabase = clienteDeSessao(cookies, request)!;
 
   // Banco fora do ar não pode virar erro 500 sem explicação: quem está
   // escrevendo precisa entender o que houve para não achar que perdeu o texto.

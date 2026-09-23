@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, parseCookieHeader } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
 
 const URL = import.meta.env.SUPABASE_URL as string | undefined;
@@ -24,12 +24,22 @@ export function clientePublico(): SupabaseClient | null {
 /**
  * Cliente ligado à sessão do usuário logado, com os cookies da requisição.
  * Usa a chave pública: as permissões continuam sendo impostas pelo banco.
+ *
+ * A LEITURA vem do cabeçalho da requisição, não de `cookies.getAll()`:
+ * o AstroCookies não tem esse método (só get/has/set/delete/merge/headers),
+ * e chamá-lo lançava um erro que virava "banco indisponível" na tela.
+ * A ESCRITA continua pelo AstroCookies, que é quem sabe anexar os cookies
+ * à resposta.
  */
-export function clienteDeSessao(cookies: AstroCookies): SupabaseClient | null {
+export function clienteDeSessao(cookies: AstroCookies, request?: Request): SupabaseClient | null {
   if (!supabaseConfigurado) return null;
   return createServerClient(URL!, ANON!, {
     cookies: {
-      getAll: () => cookies.getAll().map(({ name, value }) => ({ name, value })),
+      getAll: () => {
+        const cabecalho = request?.headers.get('Cookie') ?? '';
+        return parseCookieHeader(cabecalho)
+          .filter((c): c is { name: string; value: string } => typeof c.value === 'string');
+      },
       setAll: (lista) => {
         for (const { name, value, options } of lista) {
           cookies.set(name, value, {
