@@ -27,6 +27,11 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Um `display` explícito (flex, grid…) vence o padrão do navegador para
+   elementos escondidos, e o elemento continua visível. Esta regra garante
+   que esconder pelo atributo sempre funcione. */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body {
   background: #F7F4EE;

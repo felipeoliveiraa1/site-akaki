@@ -98,13 +98,41 @@ const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','P
         <p class="ad-dica">Sem bio, sua página de autor não é indexada — evita página vazia no Google.</p>
       </div>
       <div class="ad-campo">
-        <label class="ad-rot" for="avatar_url">Foto (endereço da imagem)</label>
-        <input class="ad-in" id="avatar_url" name="avatar_url" value={v.avatar_url} placeholder="https://…" />
+        <span class="ad-rot">Sua foto</span>
+        <p class="ad-dica" style="margin-bottom:4px">
+          Aparece assinando seus artigos, no fim de cada post e na sua página de autor.
+        </p>
+
+        <div class="fot" id="fot">
+          <label class="fot__zona" id="fot-zona" hidden={!!v.avatar_url}>
+            <input type="file" id="fot-arquivo" accept="image/jpeg,image/png,image/webp,image/avif" hidden />
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 16V4m0 0L8 8m4-4l4 4" /><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+            </svg>
+            <span class="cap__t">Escolher foto do computador</span>
+            <span class="cap__d">ou arraste até aqui · JPG, PNG ou WebP</span>
+          </label>
+
+          <div class="fot__previa" id="fot-previa" hidden={!v.avatar_url}>
+            <img id="fot-img" src={v.avatar_url || undefined} alt="" />
+            <div class="cap__acoes" style="flex-direction:column">
+              <button type="button" class="ad-btn ad-btn--f" id="fot-trocar">Trocar foto</button>
+              <button type="button" class="ad-btn ad-btn--per" id="fot-remover">Remover</button>
+            </div>
+          </div>
+
+          <div class="cap__barra" id="fot-barra" hidden><div class="cap__barra-i" id="fot-barra-i"></div></div>
+          <p class="cap__estado" id="fot-estado" role="status" aria-live="polite"></p>
+        </div>
+
+        <input type="hidden" id="avatar_url" name="avatar_url" value={v.avatar_url} />
       </div>
+
       <div class="ad-campo">
         <label class="ad-rot" for="avatar_alt">Descrição da foto</label>
         <input class="ad-in" id="avatar_alt" name="avatar_alt" value={v.avatar_alt}
                placeholder={`Ex.: Foto de ${v.nome || 'perfil'}`} />
+        <p class="ad-dica">Lida em voz alta por leitores de tela.</p>
       </div>
       <div class="ad-campo">
         <label class="ad-rot" for="instagram_url">Instagram <span>— opcional</span></label>
@@ -116,3 +144,98 @@ const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','P
     <button class="ad-btn ad-btn--p" type="submit" style="margin-top:18px">Salvar perfil</button>
   </form>
 </AdminLayout>
+
+<style is:global>
+  .fot { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  .fot__zona {
+    flex: 1; min-width: 240px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; min-height: 140px; padding: 18px; cursor: pointer; text-align: center;
+    border: 2px dashed rgba(24, 39, 60, 0.2); border-radius: 14px;
+    background: #FBF9F5; color: var(--navy-soft);
+    transition: border-color 200ms var(--silk), background-color 200ms var(--silk);
+  }
+  .fot__zona svg { width: 24px; height: 24px; fill: none; stroke: var(--gold-dark);
+    stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .fot__zona[data-sobre="1"], .fot__zona:focus-within {
+    border-color: var(--gold); background: rgba(211, 164, 108, 0.08);
+  }
+  @media (hover: hover) { .fot__zona:hover { border-color: var(--gold); } }
+
+  .fot__previa { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  /* Redonda, igual ao site: a pessoa vê exatamente como vai sair. */
+  .fot__previa img {
+    width: 104px; height: 104px; border-radius: 50%; object-fit: cover;
+    border: 1px solid rgba(211, 164, 108, 0.4); background: var(--cream-deep);
+  }
+  .fot__previa .ad-btn { min-height: 38px; padding: 7px 14px; font-size: 12px; }
+  .cap__barra { height: 5px; border-radius: 999px; background: rgba(24,39,60,0.1); margin-top: 12px; overflow: hidden; width: 100%; }
+  .cap__barra-i { height: 100%; width: 0; background: var(--gold); transition: width 180ms linear; }
+  .cap__estado { font-size: 12.5px; margin-top: 8px; width: 100%; }
+  .cap__estado[data-tipo="erro"] { color: var(--erro); font-weight: 500; }
+  .cap__estado[data-tipo="ok"] { color: #4A5940; }
+  .cap__t { font-family: var(--sans); font-weight: 600; font-size: 13px; color: var(--navy); }
+  .cap__d { font-size: 12px; color: var(--navy-ghost); line-height: 1.5; }
+  .cap__acoes { display: flex; gap: 8px; }
+</style>
+
+<script>
+  const zona = document.getElementById('fot-zona');
+  const campoArq = document.getElementById('fot-arquivo') as HTMLInputElement | null;
+  const previa = document.getElementById('fot-previa');
+  const img = document.getElementById('fot-img') as HTMLImageElement | null;
+  const barra = document.getElementById('fot-barra');
+  const barraI = document.getElementById('fot-barra-i');
+  const estado = document.getElementById('fot-estado');
+  const campoUrl = document.getElementById('avatar_url') as HTMLInputElement | null;
+
+  if (zona && campoArq && previa && img && campoUrl) {
+    const dizer = (m: string, t = '') => { if (estado) { estado.textContent = m; estado.dataset.tipo = t; } };
+
+    async function enviar(arquivo: File) {
+      barra!.hidden = false; barraI!.style.width = '0%';
+      dizer('Preparando a foto…');
+      try {
+        const { prepararEEnviar } = await import('~/lib/admin/imagem');
+        const r = await prepararEEnviar(arquivo, 'perfis', (pct) => {
+          barraI!.style.width = pct + '%';
+          if (pct > 50) dizer('Enviando…');
+        });
+        campoUrl!.value = r.url;
+        img!.src = r.url;
+        zona!.hidden = true; previa!.hidden = false;
+        dizer('Foto pronta. Clique em "Salvar perfil" para confirmar.', 'ok');
+      } catch (e) {
+        dizer(e instanceof Error ? e.message : 'Não foi possível enviar a foto.', 'erro');
+      } finally {
+        setTimeout(() => { if (barra) barra.hidden = true; }, 900);
+      }
+    }
+
+    campoArq.addEventListener('change', () => {
+      const f = campoArq.files?.[0];
+      if (f) enviar(f);
+      campoArq.value = '';
+    });
+
+    // Sem isto, soltar o arquivo fora da área faz o navegador abrir a imagem
+    // e sair da página, perdendo o que foi digitado.
+    ['dragenter', 'dragover', 'drop'].forEach((ev) =>
+      document.addEventListener(ev, (e) => e.preventDefault()));
+    zona.addEventListener('dragenter', () => zona.dataset.sobre = '1');
+    zona.addEventListener('dragover', () => zona.dataset.sobre = '1');
+    zona.addEventListener('dragleave', () => delete zona.dataset.sobre);
+    zona.addEventListener('drop', (e) => {
+      delete zona.dataset.sobre;
+      const f = (e as DragEvent).dataTransfer?.files?.[0];
+      if (f) enviar(f);
+    });
+
+    document.getElementById('fot-trocar')?.addEventListener('click', () => campoArq.click());
+    document.getElementById('fot-remover')?.addEventListener('click', () => {
+      campoUrl.value = '';
+      previa.hidden = true; zona.hidden = false;
+      dizer('Foto removida. Clique em "Salvar perfil" para confirmar.');
+    });
+  }
+</script>

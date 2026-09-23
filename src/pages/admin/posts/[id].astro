@@ -220,6 +220,7 @@ const listaErros = Object.entries(erros);
             <button type="button" data-cmd="redo" title="Refazer">↻</button>
           </div>
           <div class="ed__area" id="ed-area"></div>
+          <input type="file" id="ed-arquivo" accept="image/jpeg,image/png,image/webp,image/avif" hidden />
           <input type="hidden" name="conteudo_json" id="conteudo_json" value={valores.conteudo_json} />
           <p class="ad-dica ed__pe" id="c-conteudo">
             <span id="ed-palavras">0 palavras</span>
@@ -311,35 +312,51 @@ const listaErros = Object.entries(erros);
 
       <div class="ad-card">
         <p class="ad-card__t">Imagem de capa</p>
-        <div class="ad-campo">
-          <label class="ad-rot" for="c-capa_url">Endereço da imagem</label>
-          <input class="ad-in" id="c-capa_url" name="capa_url" value={valores.capa_url}
-                 placeholder="https://…" aria-invalid={erros.capa_url ? 'true' : undefined} />
-          {erros.capa_url && <p class="ad-erro">{erros.capa_url}</p>}
+
+        <div class="cap" id="cap" data-post={id}>
+          <!-- O rótulo envolve o campo de arquivo: já é clicável e acessível
+               por teclado, sem depender de JavaScript para abrir o seletor. -->
+          <label class="cap__zona" id="cap-zona" hidden={!!valores.capa_url}>
+            <input type="file" id="cap-arquivo" accept="image/jpeg,image/png,image/webp,image/avif" hidden />
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 16V4m0 0L8 8m4-4l4 4" /><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+            </svg>
+            <span class="cap__t">Escolher imagem do computador</span>
+            <span class="cap__d">ou arraste o arquivo até aqui · JPG, PNG ou WebP</span>
+          </label>
+
+          <div class="cap__previa" id="cap-previa" hidden={!valores.capa_url}>
+            <img id="cap-img" src={valores.capa_url || undefined} alt="" />
+            <div class="cap__acoes">
+              <button type="button" class="ad-btn ad-btn--f" id="cap-trocar">Trocar</button>
+              <button type="button" class="ad-btn ad-btn--per" id="cap-remover">Remover</button>
+            </div>
+            <p class="ad-dica" id="cap-medidas">
+              {valores.capa_largura ? `${valores.capa_largura} × ${valores.capa_altura} px` : ''}
+            </p>
+          </div>
+
+          <div class="cap__barra" id="cap-barra" hidden>
+            <div class="cap__barra-i" id="cap-barra-i"></div>
+          </div>
+          <p class="cap__estado" id="cap-estado" role="status" aria-live="polite"></p>
         </div>
-        <div class="ad-campo">
+
+        <!-- guardados automaticamente pelo envio -->
+        <input type="hidden" id="c-capa_url" name="capa_url" value={valores.capa_url} />
+        <input type="hidden" id="c-capa_largura" name="capa_largura" value={valores.capa_largura} />
+        <input type="hidden" id="c-capa_altura" name="capa_altura" value={valores.capa_altura} />
+        {erros.capa_url && <p class="ad-erro">{erros.capa_url}</p>}
+        {erros.capa_largura && <p class="ad-erro">{erros.capa_largura}</p>}
+
+        <div class="ad-campo" style="margin-top:16px">
           <label class="ad-rot" for="c-capa_alt">Descrição da imagem <span>— obrigatória</span></label>
           <input class="ad-in" id="c-capa_alt" name="capa_alt" value={valores.capa_alt}
-                 placeholder="Ex.: Dentista aplicando sedação consciente em paciente"
+                 placeholder="Ex.: Dentista conversando com paciente antes do procedimento"
                  aria-invalid={erros.capa_alt ? 'true' : undefined} />
-          <p class="ad-dica">Descreva o que aparece na foto. É o que leitores de tela leem em voz alta.</p>
+          <p class="ad-dica">Descreva o que aparece na foto. É o que leitores de tela leem em voz alta — e o Google usa para entender a imagem.</p>
           {erros.capa_alt && <p class="ad-erro">{erros.capa_alt}</p>}
         </div>
-        <div class="ed-dupla">
-          <div class="ad-campo">
-            <label class="ad-rot" for="c-capa_largura">Largura (px)</label>
-            <input class="ad-in" id="c-capa_largura" name="capa_largura" value={valores.capa_largura}
-                   inputmode="numeric" aria-invalid={erros.capa_largura ? 'true' : undefined} />
-          </div>
-          <div class="ad-campo" style="margin-top:0">
-            <label class="ad-rot" for="c-capa_altura">Altura (px)</label>
-            <input class="ad-in" id="c-capa_altura" name="capa_altura" value={valores.capa_altura} inputmode="numeric" />
-          </div>
-        </div>
-        {erros.capa_largura && <p class="ad-erro">{erros.capa_largura}</p>}
-        <p class="ad-dica" style="margin-top:8px">
-          As medidas evitam que o texto "pule" quando a foto carrega.
-        </p>
       </div>
 
       <div class="ad-card">
@@ -371,6 +388,38 @@ const listaErros = Object.entries(erros);
   .ed-check, .ed-tag { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--navy-soft); cursor: pointer; }
   .ed-check input, .ed-tag input { width: 17px; height: 17px; accent-color: var(--gold-dark); flex: 0 0 auto; }
   .ed-tags { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+
+  /* ——— envio de imagem ——— */
+  .cap__zona {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 7px; min-height: 152px; padding: 20px; cursor: pointer; text-align: center;
+    border: 2px dashed rgba(24, 39, 60, 0.2); border-radius: 14px;
+    background: #FBF9F5; color: var(--navy-soft);
+    transition: border-color 200ms var(--silk), background-color 200ms var(--silk);
+  }
+  .cap__zona svg {
+    width: 26px; height: 26px; fill: none; stroke: var(--gold-dark);
+    stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .cap__t { font-family: var(--sans); font-weight: 600; font-size: 13px; color: var(--navy); }
+  .cap__d { font-size: 12px; color: var(--navy-ghost); line-height: 1.5; max-width: 30ch; }
+  .cap__zona[data-sobre="1"], .cap__zona:focus-within {
+    border-color: var(--gold); background: rgba(211, 164, 108, 0.08);
+  }
+  @media (hover: hover) { .cap__zona:hover { border-color: var(--gold); background: rgba(211,164,108,0.06); } }
+
+  .cap__previa img {
+    width: 100%; border-radius: 12px; border: 1px solid rgba(24, 39, 60, 0.1);
+    aspect-ratio: 16 / 10; object-fit: cover; background: var(--cream-deep);
+  }
+  .cap__acoes { display: flex; gap: 8px; margin-top: 10px; }
+  .cap__acoes .ad-btn { flex: 1; min-height: 40px; padding: 8px 12px; font-size: 12px; }
+
+  .cap__barra { height: 5px; border-radius: 999px; background: rgba(24,39,60,0.1); margin-top: 12px; overflow: hidden; }
+  .cap__barra-i { height: 100%; width: 0; background: var(--gold); transition: width 180ms linear; }
+  .cap__estado { font-size: 12.5px; margin-top: 8px; line-height: 1.5; }
+  .cap__estado[data-tipo="erro"] { color: var(--erro); font-weight: 500; }
+  .cap__estado[data-tipo="ok"] { color: #4A5940; }
 
   /* ——— editor ——— */
   .ed { border: 1px solid rgba(24, 39, 60, 0.16); border-radius: 13px; overflow: hidden; background: #fff; }
@@ -522,14 +571,42 @@ const listaErros = Object.entries(erros);
           break;
         }
         case 'image': {
-          const src = window.prompt('Endereço da imagem (https://…):');
-          if (!src?.trim()) break;
-          const alt = window.prompt('Descreva a imagem (obrigatório para publicar):') ?? '';
-          const l = window.prompt('Largura em pixels:') ?? '';
-          const a = window.prompt('Altura em pixels:') ?? '';
-          c.setImage({ src: src.trim(), alt: alt.trim(), width: l || null, height: a || null } as any).run();
+          // Abre o seletor de arquivos do computador. As medidas vêm do
+          // próprio envio — ninguém precisa saber o que é "pixel".
+          const seletor = document.getElementById('ed-arquivo') as HTMLInputElement | null;
+          seletor?.click();
           break;
         }
+      }
+    });
+
+    // Envio de imagem para dentro do texto.
+    const edArq = document.getElementById('ed-arquivo') as HTMLInputElement | null;
+    edArq?.addEventListener('change', async () => {
+      const f = edArq.files?.[0];
+      edArq.value = '';
+      if (!f) return;
+      const pe = document.getElementById('ed-palavras');
+      const antes = pe?.textContent ?? '';
+      if (pe) pe.textContent = 'Enviando imagem…';
+      try {
+        const { prepararEEnviar } = await import('~/lib/admin/imagem');
+        const postId = (document.querySelector('.ed') as HTMLElement)?.dataset.post || 'geral';
+        const r = await prepararEEnviar(f, postId, (pct) => {
+          if (pe) pe.textContent = `Enviando imagem… ${pct}%`;
+        });
+        // Pede a descrição DEPOIS do envio: assim a espera não fica parada
+        // atrás de uma caixa de texto, e a pessoa já viu que deu certo.
+        const alt = window.prompt(
+          'Descreva a imagem para quem não enxerga e para o Google.\n(Obrigatório para publicar — ex.: "Paciente sorrindo após o tratamento")',
+        ) ?? '';
+        editor.chain().focus().setImage({
+          src: r.url, alt: alt.trim(), width: r.largura, height: r.altura,
+        } as any).run();
+        atualizarRodape();
+      } catch (e) {
+        if (pe) pe.textContent = antes;
+        alert(e instanceof Error ? e.message : 'Não foi possível enviar a imagem.');
       }
     });
 
@@ -543,6 +620,80 @@ const listaErros = Object.entries(erros);
 
     atualizarRodape();
     sincronizar();
+  }
+
+  // ─── envio da imagem de capa ────────────────────────────────────────
+  {
+    const cap = document.getElementById('cap');
+    const zona = document.getElementById('cap-zona');
+    const campoArq = document.getElementById('cap-arquivo') as HTMLInputElement | null;
+    const previa = document.getElementById('cap-previa');
+    const img = document.getElementById('cap-img') as HTMLImageElement | null;
+    const medidas = document.getElementById('cap-medidas');
+    const barra = document.getElementById('cap-barra');
+    const barraI = document.getElementById('cap-barra-i');
+    const estado = document.getElementById('cap-estado');
+    const fUrl = document.getElementById('c-capa_url') as HTMLInputElement | null;
+    const fL = document.getElementById('c-capa_largura') as HTMLInputElement | null;
+    const fA = document.getElementById('c-capa_altura') as HTMLInputElement | null;
+
+    if (cap && zona && campoArq && previa && img && fUrl && fL && fA) {
+      const dizer = (msg: string, tipo = '') => {
+        if (!estado) return;
+        estado.textContent = msg;
+        estado.dataset.tipo = tipo;
+      };
+
+      async function enviar(arquivo: File) {
+        const { prepararEEnviar, ErroImagem } = await import('~/lib/admin/imagem');
+        barra!.hidden = false;
+        barraI!.style.width = '0%';
+        dizer('Preparando a imagem…');
+        try {
+          const r = await prepararEEnviar(arquivo, cap!.dataset.post || 'geral', (pct) => {
+            barraI!.style.width = pct + '%';
+            if (pct > 50) dizer('Enviando…');
+          });
+          fUrl!.value = r.url; fL!.value = String(r.largura); fA!.value = String(r.altura);
+          img!.src = r.url;
+          if (medidas) medidas.textContent = `${r.largura} × ${r.altura} px`;
+          zona!.hidden = true; previa!.hidden = false;
+          dizer('Imagem pronta. Descreva-a no campo abaixo e salve o post.', 'ok');
+        } catch (e) {
+          dizer(e instanceof Error ? e.message : 'Não foi possível enviar a imagem.', 'erro');
+        } finally {
+          setTimeout(() => { if (barra) barra.hidden = true; }, 900);
+        }
+      }
+
+      campoArq.addEventListener('change', () => {
+        const f = campoArq.files?.[0];
+        if (f) enviar(f);
+        campoArq.value = ''; // permite reenviar o mesmo arquivo
+      });
+
+      // Arrastar e soltar. O preventDefault no documento inteiro é essencial:
+      // sem ele, soltar o arquivo fora da área faz o navegador ABRIR a imagem
+      // e sair da página — perdendo o post em edição.
+      ['dragenter', 'dragover', 'drop'].forEach((ev) =>
+        document.addEventListener(ev, (e) => e.preventDefault()));
+
+      zona.addEventListener('dragenter', () => zona.dataset.sobre = '1');
+      zona.addEventListener('dragover', () => zona.dataset.sobre = '1');
+      zona.addEventListener('dragleave', () => delete zona.dataset.sobre);
+      zona.addEventListener('drop', (e) => {
+        delete zona.dataset.sobre;
+        const f = (e as DragEvent).dataTransfer?.files?.[0];
+        if (f) enviar(f);
+      });
+
+      document.getElementById('cap-trocar')?.addEventListener('click', () => campoArq.click());
+      document.getElementById('cap-remover')?.addEventListener('click', () => {
+        fUrl.value = ''; fL.value = ''; fA.value = '';
+        previa.hidden = true; zona.hidden = false;
+        dizer('Capa removida. Salve o post para confirmar.');
+      });
+    }
   }
 
   // Eco do endereço enquanto digita.
