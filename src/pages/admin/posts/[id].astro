@@ -44,6 +44,17 @@ if (Astro.request.method === 'POST') {
   const d = await Astro.request.formData();
   const acao = String(d.get('acao') ?? 'salvar');
 
+  if (acao === 'excluir') {
+    // Autor só apaga o que é dele e que ainda não foi publicado — o banco
+    // recusa o resto por conta própria, isto aqui só dá a mensagem amigável.
+    const { error } = await supabase.from('posts').delete().eq('id', id!);
+    if (error) {
+      erros.geral = `Não foi possível excluir: ${error.message}`;
+    } else {
+      return Astro.redirect('/admin/posts?ok=excluido', 303);
+    }
+  }
+
   // Preserva TUDO que foi digitado: em caso de erro a mesma tela é
   // re-renderizada com os valores, em vez de perder o trabalho.
   valores = {
@@ -259,6 +270,21 @@ const listaErros = Object.entries(erros);
           <p class="ad-dica" style="margin-top:12px">
             Seu acesso permite escrever e editar. A publicação é feita por um editor.
           </p>
+        )}
+
+        {(podePub || (ehDono && post.status !== 'publicado')) && (
+          <>
+            <hr style="border:0;border-top:1px solid rgba(24,39,60,.1);margin:18px 0 14px" />
+            <button class="ad-btn ad-btn--per" type="submit" name="acao" value="excluir"
+                    style="width:100%" data-confirmar={valores.titulo || 'este post'}>
+              Excluir post
+            </button>
+            <p class="ad-dica" style="margin-top:8px">
+              {post.status === 'publicado'
+                ? 'O post sai do ar e do blog imediatamente. Não dá para desfazer.'
+                : 'Não dá para desfazer.'}
+            </p>
+          </>
         )}
 
         {podePub && (
@@ -621,6 +647,16 @@ const listaErros = Object.entries(erros);
     atualizarRodape();
     sincronizar();
   }
+
+  // Excluir exige confirmação escrita com o nome do post: um "tem certeza?"
+  // genérico é clicado no automático, e aqui não há como desfazer.
+  document.querySelector<HTMLButtonElement>('[data-confirmar]')?.addEventListener('click', (e) => {
+    const alvo = (e.currentTarget as HTMLElement).dataset.confirmar ?? 'este post';
+    const ok = window.confirm(
+      `Excluir "${alvo}"?\n\nO post e seu conteúdo serão apagados definitivamente. Não há como desfazer.`,
+    );
+    if (!ok) e.preventDefault();
+  });
 
   // ─── envio da imagem de capa ────────────────────────────────────────
   {

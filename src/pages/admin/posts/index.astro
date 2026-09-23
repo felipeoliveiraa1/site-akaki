@@ -53,6 +53,15 @@ const chips = [
     </div>
   </div>
 
+  {Astro.url.searchParams.get('ok') === 'excluido' && (
+    <div class="ad-aviso ad-aviso--ok" role="status">Post excluído.</div>
+  )}
+  {Astro.url.searchParams.get('erro') === 'criar' && (
+    <div class="ad-aviso ad-aviso--erro" role="alert">
+      Não foi possível criar o post. Tente novamente.
+    </div>
+  )}
+
   {error && (
     <div class="ad-aviso ad-aviso--erro" role="alert">
       Não conseguimos carregar os posts. <a href="/admin/posts">Tentar novamente</a>

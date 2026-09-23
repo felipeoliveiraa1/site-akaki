@@ -17,6 +17,18 @@ if (!ehAdmin(perfil.papel)) {
 let erro = '';
 let aviso = '';
 let emailNovo = '';
+// Credenciais recém-criadas, exibidas UMA vez para o admin repassar.
+let criado: { email: string; senha: string; nome: string } | null = null;
+
+/** Senha forte, mas legível o suficiente para ser digitada uma vez. */
+function gerarSenha() {
+  const silabas = ['ma','lu','ri','so','te','ve','na','ca','pi','do','fe','ju','be','gi','no','sa'];
+  const n = (max: number) => crypto.getRandomValues(new Uint32Array(1))[0] % max;
+  let s = '';
+  for (let i = 0; i < 4; i++) s += silabas[n(silabas.length)];
+  s = s.charAt(0).toUpperCase() + s.slice(1);
+  return `${s}-${100 + n(900)}`;
+}
 
 if (Astro.request.method === 'POST') {
   const d = await Astro.request.formData();
@@ -25,34 +37,41 @@ if (Astro.request.method === 'POST') {
 
   if (!admin) {
     erro = 'Falta a chave administrativa do banco (SUPABASE_SERVICE_ROLE_KEY) nas variáveis de ambiente.';
-  } else if (acao === 'convidar') {
-    emailNovo = String(d.get('email') ?? '').trim();
+  } else if (acao === 'criar') {
+    emailNovo = String(d.get('email') ?? '').trim().toLowerCase();
     const nome = String(d.get('nome') ?? '').trim();
     const papel = String(d.get('papel') ?? 'autor');
+    const senhaDigitada = String(d.get('senha') ?? '').trim();
+    const senha = senhaDigitada || gerarSenha();
 
     if (!emailNovo || !nome) erro = 'Informe nome e e-mail.';
-    else if (!['admin', 'editor', 'autor'].includes(papel)) erro = 'Papel inválido.';
+    else if (!['admin', 'editor', 'autor'].includes(papel)) erro = 'Nível de acesso inválido.';
+    else if (senha.length < 8) erro = 'A senha precisa ter pelo menos 8 caracteres.';
     else {
-      // O papel é definido DEPOIS, numa escrita separada. Nunca através dos
-      // metadados do convite: metadados podem ser alterados pelo próprio
-      // usuário, o que viraria uma porta para se autopromover a admin.
-      const { data, error } = await admin.auth.admin.inviteUserByEmail(emailNovo, { data: { nome } });
+      // Cria a conta já com senha e e-mail confirmado: não depende de o
+      // e-mail chegar. O serviço de e-mail embutido do Supabase tem limite
+      // baixo e não é para produção — o convite responde "enviado" mesmo
+      // quando nada é entregue, e a pessoa fica esperando sem saber.
+      const { data, error } = await admin.auth.admin.createUser({
+        email: emailNovo, password: senha, email_confirm: true,
+        user_metadata: { nome },
+      });
       if (error) {
-        erro = error.message.includes('already') ? 'Este e-mail já tem conta.' : error.message;
+        erro = error.message.toLowerCase().includes('already')
+          ? 'Este e-mail já tem conta.' : error.message;
       } else if (data.user) {
-        // O papel é definido com a sessão DO ADMIN logado, não com a chave
-        // administrativa. Motivo descoberto em teste contra banco real: o
-        // gatilho de proteção exige que quem altera papel seja um admin
-        // identificado, e a chave administrativa não tem identidade — a
-        // operação seria recusada com "Apenas um administrador pode alterar
-        // papel". A chave administrativa serve só para criar o convite.
+        // O papel vai numa escrita separada, com a sessão DO ADMIN logado.
+        // Nunca pelos metadados da conta: metadados são editáveis pelo
+        // próprio usuário, o que seria uma porta para se autopromover.
+        // E não pela chave administrativa: ela não tem identidade, e o
+        // gatilho de proteção exige um admin identificado.
         const { error: erroPapel } = await supabase
           .from('perfis').update({ papel }).eq('id', data.user.id);
         if (erroPapel) {
-          erro = `Convite enviado, mas o nível de acesso não foi aplicado (${erroPapel.message}). Ajuste na lista abaixo.`;
-        } else {
-          return Astro.redirect('/admin/usuarios?ok=convidado', 303);
+          erro = `Conta criada, mas o nível de acesso não foi aplicado (${erroPapel.message}). Ajuste na lista abaixo.`;
         }
+        criado = { email: emailNovo, senha, nome };
+        aviso = 'Acesso criado. Envie os dados abaixo para a pessoa — eles não aparecerão de novo.';
       }
     }
   } else if (acao === 'papel' || acao === 'ativo') {
@@ -73,7 +92,6 @@ if (Astro.request.method === 'POST') {
 }
 
 const ok = Astro.url.searchParams.get('ok');
-if (ok === 'convidado') aviso = 'Convite enviado. A pessoa recebe um e-mail para definir a senha.';
 if (ok === 'alterado') aviso = 'Acesso atualizado.';
 
 const { data: pessoas } = await supabase
@@ -99,18 +117,45 @@ const DESCR = {
   {aviso && <div class="ad-aviso ad-aviso--ok" role="status">{aviso}</div>}
   {erro && <div class="ad-aviso ad-aviso--erro" role="alert">{erro}</div>}
 
+  {criado && (
+    <div class="ad-card us-novo">
+      <p class="ad-card__t">Acesso criado — envie estes dados para {criado.nome}</p>
+      <div class="us-cred">
+        <div>
+          <span>Endereço</span>
+          <code id="cred-site">{Astro.url.origin}/admin/entrar</code>
+        </div>
+        <div>
+          <span>E-mail</span>
+          <code id="cred-email">{criado.email}</code>
+        </div>
+        <div>
+          <span>Senha</span>
+          <code id="cred-senha">{criado.senha}</code>
+        </div>
+      </div>
+      <button class="ad-btn ad-btn--g" type="button" id="cred-copiar" style="margin-top:16px">
+        Copiar tudo para enviar
+      </button>
+      <p class="ad-dica" style="margin-top:12px">
+        ⚠️ A senha não será exibida novamente. Peça para a pessoa trocá-la em
+        "Meu perfil" no primeiro acesso.
+      </p>
+    </div>
+  )}
+
   <div class="ad-card">
-    <p class="ad-card__t">Convidar alguém</p>
+    <p class="ad-card__t">Criar acesso</p>
     <form method="POST" class="us-conv">
-      <input type="hidden" name="acao" value="convidar" />
+      <input type="hidden" name="acao" value="criar" />
       <div class="ad-campo">
         <label class="ad-rot" for="nome">Nome</label>
-        <input class="ad-in" id="nome" name="nome" required />
+        <input class="ad-in" id="nome" name="nome" placeholder="Dra. Amanda Aragão" required />
       </div>
       <div class="ad-campo" style="margin-top:0">
         <label class="ad-rot" for="email">E-mail</label>
         <input class="ad-in" id="email" name="email" type="email" value={emailNovo}
-               inputmode="email" required />
+               inputmode="email" autocomplete="off" required />
       </div>
       <div class="ad-campo" style="margin-top:0">
         <label class="ad-rot" for="papel">Nível de acesso</label>
@@ -120,10 +165,16 @@ const DESCR = {
           <option value="admin">Administrador</option>
         </select>
       </div>
-      <button class="ad-btn ad-btn--p" type="submit">Enviar convite</button>
+      <div class="ad-campo" style="margin-top:0">
+        <label class="ad-rot" for="senha">Senha <span>— deixe vazio para gerar</span></label>
+        <input class="ad-in" id="senha" name="senha" autocomplete="new-password" placeholder="gerada automaticamente" />
+      </div>
+      <button class="ad-btn ad-btn--p" type="submit">Criar acesso</button>
     </form>
     <p class="ad-dica" style="margin-top:12px">
-      A pessoa recebe um e-mail e define a própria senha — a clínica nunca precisa criar nem guardar senhas.
+      A conta é criada na hora, com e-mail e senha prontos para você repassar.
+      Não depende de e-mail chegar — o envio automático do Supabase tem limite
+      baixo e não é confiável para produção.
     </p>
   </div>
 
@@ -175,7 +226,20 @@ const DESCR = {
 </AdminLayout>
 
 <style is:global>
-  .us-conv { display: grid; grid-template-columns: 1.2fr 1.4fr 1fr auto; gap: 12px; align-items: end; }
+  .us-conv { display: grid; grid-template-columns: 1.1fr 1.3fr 0.9fr 1fr auto; gap: 12px; align-items: end; }
+
+  .us-novo { border-color: rgba(107, 125, 94, 0.5); background: rgba(107, 125, 94, 0.06); }
+  .us-cred { display: grid; gap: 10px; }
+  .us-cred > div { display: grid; grid-template-columns: 90px 1fr; gap: 12px; align-items: center; }
+  .us-cred span {
+    font-family: var(--sans); font-weight: 600; font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--navy-ghost);
+  }
+  .us-cred code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px;
+    background: #fff; border: 1px solid rgba(24, 39, 60, 0.14); border-radius: 8px;
+    padding: 9px 12px; color: var(--navy); overflow-wrap: anywhere; user-select: all;
+  }
   .us-conv .ad-btn { min-height: 46px; }
   .us-legenda {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px;
@@ -188,8 +252,32 @@ const DESCR = {
     text-transform: uppercase; color: var(--gold-dark); margin-bottom: 5px;
   }
   .us-legenda span { font-size: 13px; color: var(--navy-soft); line-height: 1.5; }
+  @media (max-width: 1140px) { .us-conv { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 980px) {
     .us-conv { grid-template-columns: 1fr; }
     .us-legenda { grid-template-columns: 1fr; }
+    .us-cred > div { grid-template-columns: 1fr; gap: 4px; }
   }
 </style>
+
+<script>
+  document.getElementById('cred-copiar')?.addEventListener('click', async (e) => {
+    const botao = e.currentTarget as HTMLButtonElement;
+    const texto = [
+      'Seu acesso ao blog da Akaki:',
+      '',
+      'Endereço: ' + (document.getElementById('cred-site')?.textContent ?? ''),
+      'E-mail: ' + (document.getElementById('cred-email')?.textContent ?? ''),
+      'Senha: ' + (document.getElementById('cred-senha')?.textContent ?? ''),
+      '',
+      'Troque a senha em "Meu perfil" no primeiro acesso.',
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(texto);
+      botao.textContent = 'Copiado ✓';
+      setTimeout(() => { botao.textContent = 'Copiar tudo para enviar'; }, 2500);
+    } catch {
+      botao.textContent = 'Não foi possível copiar — selecione o texto acima';
+    }
+  });
+</script>

@@ -258,3 +258,7 @@ input, select, textarea, button { font-family: inherit; font-size: 16px; }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }
+
+/* par de campos lado a lado (senha, dimensões…) */
+.ed-dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 620px) { .ed-dupla { grid-template-columns: 1fr; } }

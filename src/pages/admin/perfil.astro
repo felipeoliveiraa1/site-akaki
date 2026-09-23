@@ -29,9 +29,21 @@ if (Astro.request.method === 'POST') {
     instagram_url: String(d.get('instagram_url') ?? '').trim(),
   };
 
+  // Troca de senha (opcional, no mesmo formulário)
+  const senha1 = String(d.get('senha') ?? '');
+  const senha2 = String(d.get('senha2') ?? '');
+
   if (v.nome.length < 2) erro = 'Informe seu nome.';
   else if (v.cro_uf && !/^[A-Z]{2}$/.test(v.cro_uf)) erro = 'A UF do CRO deve ter duas letras (ex.: SP).';
+  else if (senha1 && senha1.length < 8) erro = 'A nova senha precisa ter pelo menos 8 caracteres.';
+  else if (senha1 && senha1 !== senha2) erro = 'As duas senhas não são iguais.';
   else {
+    if (senha1) {
+      const { error: errSenha } = await supabase.auth.updateUser({ password: senha1 });
+      if (errSenha) erro = `Não foi possível trocar a senha: ${errSenha.message}`;
+    }
+  }
+  if (!erro) {
     const { error } = await supabase.from('perfis').update({
       nome: v.nome, cargo: v.cargo || null, cro: v.cro || null,
       cro_uf: v.cro_uf || null, bio: v.bio || null,
@@ -138,6 +150,25 @@ const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','P
         <label class="ad-rot" for="instagram_url">Instagram <span>— opcional</span></label>
         <input class="ad-in" id="instagram_url" name="instagram_url" value={v.instagram_url}
                placeholder="https://instagram.com/…" inputmode="url" />
+      </div>
+    </div>
+
+    <div class="ad-card">
+      <p class="ad-card__t">Trocar senha</p>
+      <p class="ad-dica" style="margin-bottom:14px">
+        Deixe em branco para manter a senha atual. Se você recebeu um acesso
+        pronto de outra pessoa, troque aqui no primeiro uso.
+      </p>
+      <div class="ed-dupla">
+        <div class="ad-campo">
+          <label class="ad-rot" for="senha">Nova senha</label>
+          <input class="ad-in" id="senha" name="senha" type="password"
+                 autocomplete="new-password" minlength="8" placeholder="mínimo 8 caracteres" />
+        </div>
+        <div class="ad-campo" style="margin-top:0">
+          <label class="ad-rot" for="senha2">Repita a nova senha</label>
+          <input class="ad-in" id="senha2" name="senha2" type="password" autocomplete="new-password" />
+        </div>
       </div>
     </div>
 
