@@ -41,11 +41,10 @@ Em **Project Settings → API** do Supabase, copie os três valores e preencha:
 SUPABASE_URL=https://xxxxx.supabase.co
 SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
-REVALIDATE_SECRET=<gere com: openssl rand -hex 32>
 VERCEL_ISR_BYPASS_TOKEN=<gere com: openssl rand -hex 16>
 ```
 
-**Produção** — as mesmas cinco variáveis em
+**Produção** — as mesmas quatro variáveis em
 **Vercel → Settings → Environment Variables** (Production e Preview).
 
 > A chave `SERVICE_ROLE` ignora todas as regras de segurança do banco.
