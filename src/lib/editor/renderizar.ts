@@ -16,7 +16,9 @@ import { extensoes } from './extensoes';
 
 const HOST_PERMITIDO = (() => {
   try {
-    return new URL(import.meta.env.SUPABASE_URL ?? 'https://exemplo.supabase.co').host;
+    const u = (typeof process !== 'undefined' ? process.env?.SUPABASE_URL : undefined)
+      || import.meta.env.SUPABASE_URL;
+    return new URL(u ?? 'https://exemplo.supabase.co').host;
   } catch {
     return '';
   }

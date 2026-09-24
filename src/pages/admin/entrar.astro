@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import Wordmark from '../../components/Wordmark.astro';
-import { clienteDeSessao, supabaseConfigurado } from '../../lib/supabase';
+import { clienteDeSessao, supabaseConfigurado, variaveisFaltando } from '../../lib/supabase';
 import '../../styles/fonts.css';
 import '@fontsource/montserrat/latin-500.css';
 import '@fontsource/montserrat/latin-600.css';
@@ -62,9 +62,16 @@ if (Astro.request.method === 'POST' && !supabaseConfigurado) {
           <div class="ad-aviso ad-aviso--erro" role="status">
             <strong>Configuração pendente.</strong>
             <p style="margin-top:6px">
-              Falta conectar o banco de dados. Crie o projeto no Supabase, rode o
-              arquivo <code>supabase/migrations/001_blog.sql</code> e preencha as
-              chaves em <code>.env</code> (modelo em <code>.env.example</code>).
+              O servidor não encontrou {variaveisFaltando.length === 1 ? 'esta variável' : 'estas variáveis'} de ambiente:
+            </p>
+            <ul style="margin:8px 0 0 18px">
+              {variaveisFaltando.map((v) => <li><code>{v}</code></li>)}
+            </ul>
+            <p style="margin-top:8px">
+              Em produção elas ficam em <strong>Vercel → Settings → Environment
+              Variables</strong> (Production e Preview); localmente, no arquivo
+              <code>.env</code> (modelo em <code>.env.example</code>). Depois de
+              adicionar, é preciso um novo deploy.
             </p>
           </div>
         )}

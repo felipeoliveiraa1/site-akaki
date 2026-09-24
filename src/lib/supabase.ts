@@ -2,9 +2,29 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createServerClient, parseCookieHeader } from '@supabase/ssr';
 import type { AstroCookies } from 'astro';
 
-const URL = import.meta.env.SUPABASE_URL as string | undefined;
-const ANON = import.meta.env.SUPABASE_ANON_KEY as string | undefined;
-const SECRETA = import.meta.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined;
+/**
+ * Lê primeiro de `process.env`, depois de `import.meta.env`.
+ *
+ * `import.meta.env` é resolvido pelo Vite em tempo de BUILD: o valor fica
+ * gravado no bundle. Variável criada no painel da Vercel depois do build —
+ * ou criada com o nome trocado e corrigida em seguida — não chega ali sem
+ * um novo build. Em runtime serverless quem tem a verdade é `process.env`.
+ */
+function env(nome: string): string | undefined {
+  const doProcesso = typeof process !== 'undefined' ? process.env?.[nome] : undefined;
+  return doProcesso || ((import.meta.env as any)[nome] as string | undefined);
+}
+
+const URL = env('SUPABASE_URL');
+const ANON = env('SUPABASE_ANON_KEY');
+const SECRETA = env('SUPABASE_SERVICE_ROLE_KEY');
+
+/** Nomes das variáveis que o servidor não encontrou. Nunca expõe valores. */
+export const variaveisFaltando: string[] = [
+  ['SUPABASE_URL', URL],
+  ['SUPABASE_ANON_KEY', ANON],
+  ['SUPABASE_SERVICE_ROLE_KEY', SECRETA],
+].filter(([, v]) => !v).map(([nome]) => nome as string);
 
 /**
  * O blog só funciona com as credenciais configuradas, mas o site institucional
