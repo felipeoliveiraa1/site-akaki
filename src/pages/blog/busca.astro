@@ -1,0 +1,65 @@
+---
+// Esta rota fica FORA do cache de borda (ISR) de propósito: o ISR da Vercel
+// descarta query params, então sob cache toda busca devolveria o mesmo
+// resultado. A exclusão está declarada em astro.config.mjs.
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Arquivo from '../../components/blog/Arquivo.astro';
+import Migalhas from '../../components/blog/Migalhas.astro';
+import { buscar } from '../../lib/blog/consultas';
+import { SITE } from '../../lib/blog/formato';
+import '../../styles/blog.css';
+
+const termo = (Astro.url.searchParams.get('q') ?? '').trim().slice(0, 80);
+const { posts, total, paginas } = termo ? await buscar(termo) : { posts: [], total: 0, paginas: 0 };
+---
+<Layout
+  title={termo ? `Busca por "${termo}" · Blog | Akaki` : 'Buscar no blog | Akaki Odontologia'}
+  description="Busque por tema nos artigos do blog da Akaki Odontologia."
+  canonical={`${SITE}/blog/busca/`}
+  noindex={true}
+  preloadImage={null}
+  splash={false}
+  businessSchema={false}
+>
+  <Header />
+  <main data-service="Blog">
+    <section class="bl-topo">
+      <div class="container">
+        <Migalhas itens={[{ texto: 'Blog', href: '/blog/' }, { texto: 'Busca' }]} />
+        <p class="eyebrow" style="margin-top:18px">Busca</p>
+        <h1 class="display bl-topo__h1">
+          {termo ? <>Resultados para <em>{termo}</em></> : <>O que você quer <em>saber</em>?</>}
+        </h1>
+        {termo && (
+          <p class="lead bl-topo__sub">
+            {total === 0 ? 'Nenhum artigo encontrado.'
+              : `${total} ${total === 1 ? 'artigo encontrado' : 'artigos encontrados'}.`}
+          </p>
+        )}
+
+        <form class="bl-busca" action="/blog/busca" method="get" role="search">
+          <input class="bl-busca__in" type="search" name="q" value={termo}
+                 placeholder="Buscar no blog…" aria-label="Buscar no blog" maxlength="80" autofocus />
+          <button class="btn btn--gold" type="submit">Buscar</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <Arquivo
+          posts={posts} pagina={1} paginas={paginas} baseUrl="/blog/busca"
+          vazioTitulo={termo ? `Nada encontrado para "${termo}".` : 'Digite o que você procura.'}
+          vazioTexto={termo
+            ? 'Tente outra palavra, ou fale direto com a nossa equipe — respondemos dúvidas pelo WhatsApp.'
+            : 'Busque por tema: sedação, implante, aparelho, clareamento, medo de dentista.'}
+        />
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>

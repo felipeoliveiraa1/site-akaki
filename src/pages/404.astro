@@ -1,0 +1,112 @@
+---
+// Página 404 — o servidor já aponta para cá quando nenhuma rota casa.
+// Estática (pré-renderizada), para responder instantaneamente.
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const atalhos = [
+  { href: '/dentista-com-sedacao-odontologica/', label: 'Sedação Odontológica' },
+  { href: '/implante-dentario/', label: 'Implantes' },
+  { href: '/ortodontia/', label: 'Ortodontia' },
+  { href: '/estetica-3/', label: 'Estética' },
+  { href: '/odontopediatria/', label: 'Odontopediatria' },
+  { href: '/sobre/', label: 'Sobre a Akaki' },
+];
+---
+<Layout
+  title="Página não encontrada · Akaki Odontologia"
+  description="A página que você procura não existe ou mudou de endereço. Veja os tratamentos da Akaki Odontologia no Jardim Paulista, São Paulo."
+>
+  <Header />
+  <main class="nf">
+    <div class="container nf__inner">
+      <p class="eyebrow nf__eyebrow">Erro 404</p>
+      <h1 class="display nf__h1">Esta página <em>não existe</em> — ou mudou de endereço.</h1>
+      <p class="lead nf__sub">
+        Pode ter sido um link antigo ou um endereço digitado com algum engano.
+        Siga por um destes caminhos:
+      </p>
+
+      <nav class="nf__links" aria-label="Páginas principais">
+        {atalhos.map((a) => (
+          <a class="nf__link" href={a.href}>
+            {a.label}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13" /><path d="M13 6l6 6-6 6" /></svg>
+          </a>
+        ))}
+      </nav>
+
+      <div class="nf__cta">
+        <a class="btn btn--gold" href="/">Voltar para o início</a>
+        <a class="btn btn--light" data-wpp="404-agendar" href="https://api.whatsapp.com/send?phone=5511947024607" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13" /><path d="M13 6l6 6-6 6" /></svg>
+          Agende sua consulta
+        </a>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .nf {
+    background: var(--cinema-black);
+    color: var(--white-text);
+    min-height: 82svh;
+    display: flex;
+    align-items: center;
+    padding: calc(var(--nav-h) + clamp(48px, 9vh, 96px)) 0 clamp(48px, 9vh, 96px);
+  }
+  .nf__inner { max-width: 760px; }
+  .nf__eyebrow { color: var(--gold-light); }
+  .nf__h1 {
+    color: var(--white-text);
+    max-width: 18ch;
+    margin: 16px 0 18px;
+    font-size: clamp(30px, 5vw, 52px);
+    line-height: 1.08;
+  }
+  .nf__h1 em { font-style: italic; color: var(--gold-light); }
+  .nf__sub { color: rgba(245, 240, 232, 0.82); max-width: 50ch; }
+
+  .nf__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 30px 0 34px;
+  }
+  .nf__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(211, 164, 108, 0.32);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
+    color: rgba(245, 240, 232, 0.88);
+    transition: border-color 260ms var(--silk), color 260ms var(--silk), transform 260ms var(--silk);
+  }
+  .nf__link svg {
+    width: 14px; height: 14px; fill: none; stroke: var(--gold);
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    transition: transform 260ms var(--silk);
+  }
+  @media (hover: hover) {
+    .nf__link:hover { border-color: var(--gold); color: var(--gold-light); transform: translateY(-2px); }
+    .nf__link:hover svg { transform: translateX(3px); }
+  }
+
+  .nf__cta { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  @media (max-width: 520px) {
+    .nf__cta { flex-direction: column; align-items: stretch; }
+    .nf__cta .btn { justify-content: center; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf__link, .nf__link svg { transition: none; }
+  }
+</style>

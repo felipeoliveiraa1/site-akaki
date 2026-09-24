@@ -1,0 +1,56 @@
+---
+// Listagem reutilizada por categoria, tag, autor e busca — para as quatro
+// telas terem exatamente o mesmo comportamento (inclusive nos estados vazios).
+import CartaoPost from './CartaoPost.astro';
+import type { Post } from '../../lib/blog/consultas';
+
+interface Props {
+  posts: Post[];
+  pagina: number;
+  paginas: number;
+  /** Base da paginação, ex.: '/blog/categoria/implantes' */
+  baseUrl: string;
+  vazioTitulo: string;
+  vazioTexto: string;
+}
+const { posts, pagina, paginas, baseUrl, vazioTitulo, vazioTexto } = Astro.props;
+
+const url = (p: number) => (p === 1 ? `${baseUrl}/` : `${baseUrl}/pagina/${p}/`);
+// Mostra no máximo 5 números, centrados na página atual.
+const inicio = Math.max(1, Math.min(pagina - 2, paginas - 4));
+const numeros = Array.from({ length: Math.min(5, paginas) }, (_, i) => inicio + i)
+  .filter((n) => n >= 1 && n <= paginas);
+---
+{posts.length === 0 ? (
+  <div class="bl-vazio">
+    <p class="bl-vazio__t">{vazioTitulo}</p>
+    <p class="bl-vazio__d">{vazioTexto}</p>
+    <div class="bl-servico__acoes" style="justify-content:center;margin-top:24px">
+      <a class="btn btn--ghost" href="/blog/">Ver todos os artigos</a>
+    </div>
+  </div>
+) : (
+  <>
+    <div class="bl-grade">
+      {posts.map((p, i) => <CartaoPost post={p} atraso={i * 90} />)}
+    </div>
+
+    {paginas > 1 && (
+      <nav class="bl-pag" aria-label="Paginação">
+        {pagina > 1
+          ? <a href={url(pagina - 1)} rel="prev">Anterior</a>
+          : <span class="bl-pag__off">Anterior</span>}
+
+        {numeros.map((n) => (
+          n === pagina
+            ? <span aria-current="page">{n}</span>
+            : <a href={url(n)} aria-label={`Página ${n}`}>{n}</a>
+        ))}
+
+        {pagina < paginas
+          ? <a href={url(pagina + 1)} rel="next">Próxima</a>
+          : <span class="bl-pag__off">Próxima</span>}
+      </nav>
+    )}
+  </>
+)}

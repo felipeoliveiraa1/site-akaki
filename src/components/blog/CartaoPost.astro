@@ -1,0 +1,34 @@
+---
+import type { Post } from '../../lib/blog/consultas';
+import { dataCurta } from '../../lib/blog/formato';
+
+interface Props { post: Post; atraso?: number; prioridade?: boolean }
+const { post, atraso = 0, prioridade = false } = Astro.props;
+---
+<article class="bl-card reveal" style={`--d:${atraso}ms`}>
+  <a href={`/blog/${post.slug}/`} aria-labelledby={`t-${post.id}`}>
+    <figure class="bl-card__fig">
+      {post.capa_url ? (
+        <img
+          src={post.capa_url}
+          alt={post.capa_alt ?? ''}
+          width={post.capa_largura ?? 800}
+          height={post.capa_altura ?? 500}
+          loading={prioridade ? 'eager' : 'lazy'}
+          fetchpriority={prioridade ? 'high' : undefined}
+          decoding="async"
+        />
+      ) : null}
+    </figure>
+
+    {post.categoria && <span class="bl-card__cat">{post.categoria.nome}</span>}
+    <h3 class="bl-card__t" id={`t-${post.id}`}>{post.titulo}</h3>
+    {post.resumo && <p class="bl-card__r">{post.resumo}</p>}
+
+    <p class="bl-card__pe">
+      <time datetime={post.publicado_em}>{dataCurta(post.publicado_em)}</time>
+      <span aria-hidden="true">·</span>
+      {post.tempo_leitura} min de leitura
+    </p>
+  </a>
+</article>

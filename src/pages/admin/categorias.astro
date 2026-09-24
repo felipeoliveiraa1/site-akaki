@@ -1,0 +1,191 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { podePublicar, type Perfil } from '../../lib/supabase';
+
+const perfil = Astro.locals.perfil as Perfil;
+const supabase = Astro.locals.supabase!;
+
+if (!podePublicar(perfil.papel)) {
+  return new Response('Seu acesso não permite gerenciar categorias e tags.', { status: 403 });
+}
+
+const paraSlug = (t: string) =>
+  t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+   .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+let erro = '';
+let aviso = '';
+let valores = { nome: '', lp_slug: '', descricao: '' };
+
+if (Astro.request.method === 'POST') {
+  const d = await Astro.request.formData();
+  const acao = String(d.get('acao') ?? '');
+
+  if (acao === 'nova-categoria') {
+    valores = {
+      nome: String(d.get('nome') ?? '').trim(),
+      lp_slug: String(d.get('lp_slug') ?? '').trim(),
+      descricao: String(d.get('descricao') ?? '').trim(),
+    };
+    if (valores.nome.length < 2) erro = 'Informe o nome da categoria.';
+    else {
+      const { error } = await supabase.from('categorias').insert({
+        nome: valores.nome, slug: paraSlug(valores.nome),
+        descricao: valores.descricao || null, lp_slug: valores.lp_slug || null,
+      });
+      if (error) erro = error.code === '23505' ? 'Já existe uma categoria com esse nome.' : error.message;
+      else return Astro.redirect('/admin/categorias?ok=cat', 303);
+    }
+  }
+
+  if (acao === 'nova-tag') {
+    const nome = String(d.get('tag_nome') ?? '').trim();
+    if (nome.length < 2) erro = 'Informe o nome da tag.';
+    else {
+      const { error } = await supabase.from('tags').insert({ nome, slug: paraSlug(nome) });
+      if (error) erro = error.code === '23505' ? 'Já existe uma tag com esse nome.' : error.message;
+      else return Astro.redirect('/admin/categorias?ok=tag', 303);
+    }
+  }
+
+  if (acao === 'excluir-categoria') {
+    const { error } = await supabase.from('categorias').delete().eq('id', String(d.get('id')));
+    // O banco bloqueia excluir categoria em uso — traduzimos o código cru.
+    if (error) erro = error.code === '23503'
+      ? 'Esta categoria está em uso por algum post. Mova os posts antes de excluí-la.'
+      : error.message;
+    else return Astro.redirect('/admin/categorias?ok=excluida', 303);
+  }
+
+  if (acao === 'excluir-tag') {
+    await supabase.from('tags').delete().eq('id', String(d.get('id')));
+    return Astro.redirect('/admin/categorias?ok=excluida', 303);
+  }
+  if (erro) Astro.response.status = 422;
+}
+
+const ok = Astro.url.searchParams.get('ok');
+if (ok === 'cat') aviso = 'Categoria criada.';
+if (ok === 'tag') aviso = 'Tag criada.';
+if (ok === 'excluida') aviso = 'Item excluído.';
+
+const [{ data: categorias }, { data: tags }, { data: usos }] = await Promise.all([
+  supabase.from('categorias').select('id, nome, slug, descricao, lp_slug').order('ordem'),
+  supabase.from('tags').select('id, nome, slug').order('nome'),
+  supabase.from('posts').select('categoria_id'),
+]);
+const nPosts = (id: string) => (usos ?? []).filter((p: any) => p.categoria_id === id).length;
+
+const LPS = [
+  { v: 'dentista-com-sedacao-odontologica', r: 'Sedação Odontológica' },
+  { v: 'implante-dentario', r: 'Implantes' },
+  { v: 'ortodontia', r: 'Ortodontia' },
+  { v: 'estetica-3', r: 'Estética' },
+  { v: 'odontopediatria', r: 'Odontopediatria' },
+];
+---
+<AdminLayout titulo="Categorias e tags" perfil={perfil}>
+  <div class="ad-cab">
+    <div>
+      <h1 class="ad-cab__t">Categorias e tags</h1>
+      <p class="ad-cab__d">
+        Categorias organizam o blog e criam páginas próprias no Google. Tags são
+        assuntos soltos que atravessam categorias.
+      </p>
+    </div>
+  </div>
+
+  {aviso && <div class="ad-aviso ad-aviso--ok" role="status">{aviso}</div>}
+  {erro && <div class="ad-aviso ad-aviso--erro" role="alert">{erro}</div>}
+
+  <div class="cat-grade">
+    <section>
+      <div class="ad-card">
+        <p class="ad-card__t">Nova categoria</p>
+        <form method="POST">
+          <input type="hidden" name="acao" value="nova-categoria" />
+          <div class="ad-campo">
+            <label class="ad-rot" for="nome">Nome</label>
+            <input class="ad-in" id="nome" name="nome" value={valores.nome} required />
+          </div>
+          <div class="ad-campo">
+            <label class="ad-rot" for="descricao">Descrição <span>— aparece na página da categoria</span></label>
+            <textarea class="ad-area" id="descricao" name="descricao">{valores.descricao}</textarea>
+          </div>
+          <div class="ad-campo">
+            <label class="ad-rot" for="lp_slug">Tratamento relacionado <span>— opcional</span></label>
+            <select class="ad-sel" id="lp_slug" name="lp_slug">
+              <option value="">— nenhum —</option>
+              {LPS.map((l) => <option value={l.v} selected={valores.lp_slug === l.v}>{l.r}</option>)}
+            </select>
+            <p class="ad-dica">Liga os posts desta categoria à página comercial do tratamento.</p>
+          </div>
+          <button class="ad-btn ad-btn--p" type="submit" style="margin-top:16px">Criar categoria</button>
+        </form>
+      </div>
+
+      <ul class="ad-lista" style="margin-top:16px">
+        {(categorias ?? []).map((c: any) => (
+          <li class="ad-linha" style="grid-template-columns:minmax(0,1fr) auto">
+            <div>
+              <p class="ad-linha__t" style="font-size:16px">{c.nome}</p>
+              <p class="ad-linha__meta">
+                /blog/categoria/{c.slug}/ · {nPosts(c.id)} {nPosts(c.id) === 1 ? 'post' : 'posts'}
+                {c.lp_slug ? ` · ligada a /${c.lp_slug}/` : ''}
+              </p>
+            </div>
+            <form method="POST" onsubmit={`return confirm('Excluir a categoria "${c.nome}"?')`}>
+              <input type="hidden" name="acao" value="excluir-categoria" />
+              <input type="hidden" name="id" value={c.id} />
+              <button class="ad-btn ad-btn--per" type="submit">Excluir</button>
+            </form>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section>
+      <div class="ad-card">
+        <p class="ad-card__t">Nova tag</p>
+        <form method="POST" style="display:flex;gap:10px">
+          <input type="hidden" name="acao" value="nova-tag" />
+          <input class="ad-in" name="tag_nome" placeholder="Ex.: Pós-operatório" aria-label="Nome da tag" required />
+          <button class="ad-btn ad-btn--p" type="submit">Criar</button>
+        </form>
+      </div>
+
+      <div class="ad-card" style="margin-top:16px">
+        <p class="ad-card__t">Tags existentes</p>
+        <div class="cat-tags">
+          {(tags ?? []).length === 0 && <p class="ad-dica">Nenhuma tag ainda.</p>}
+          {(tags ?? []).map((t: any) => (
+            <form method="POST" class="cat-tag" onsubmit={`return confirm('Excluir a tag "${t.nome}"?')`}>
+              <input type="hidden" name="acao" value="excluir-tag" />
+              <input type="hidden" name="id" value={t.id} />
+              <span>{t.nome}</span>
+              <button type="submit" aria-label={`Excluir tag ${t.nome}`}>×</button>
+            </form>
+          ))}
+        </div>
+      </div>
+    </section>
+  </div>
+</AdminLayout>
+
+<style is:global>
+  .cat-grade { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  .cat-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cat-tag {
+    display: inline-flex; align-items: center; gap: 7px; padding: 7px 8px 7px 14px;
+    border-radius: 999px; border: 1px solid rgba(24, 39, 60, 0.14); background: #fff;
+    font-family: var(--sans); font-weight: 600; font-size: 12px; color: var(--navy-soft);
+  }
+  .cat-tag button {
+    width: 26px; height: 26px; border-radius: 50%; border: 0; cursor: pointer;
+    background: rgba(24, 39, 60, 0.07); color: var(--navy-soft); font-size: 16px; line-height: 1;
+  }
+  @media (hover: hover) { .cat-tag button:hover { background: var(--erro); color: #fff; } }
+  @media (max-width: 980px) { .cat-grade { grid-template-columns: 1fr; } }
+</style>

@@ -3,3 +3,11 @@ node_modules/
 .astro/
 .DS_Store
 *.log
+
+# Build do adapter Vercel
+.vercel/
+
+# Segredos — NUNCA versionar (chaves do Supabase, tokens)
+.env
+.env.*
+!.env.example

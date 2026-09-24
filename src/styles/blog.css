@@ -1,0 +1,204 @@
+/* ======================================================================
+   BLOG — estrutura (cartões, grade, paginação, autor, migalhas)
+   Carregado só pelas páginas do blog: como todo CSS é embutido no HTML,
+   colocar isto no Layout global inflaria as 7 páginas institucionais.
+   ====================================================================== */
+
+/* ——— cabeçalho das páginas do blog ————————————————————— */
+.bl-topo {
+  background: var(--cinema-black);
+  color: var(--white-text);
+  padding: calc(var(--nav-h) + clamp(40px, 6.5vh, 76px)) 0 clamp(36px, 6vh, 64px);
+}
+.bl-topo .eyebrow { color: var(--gold-light); }
+.bl-topo__h1 {
+  color: var(--white-text);
+  max-width: 22ch;
+  margin: 14px 0 16px;
+  font-size: clamp(30px, 5vw, 54px);
+  line-height: 1.07;
+}
+.bl-topo__h1 em { font-style: italic; color: var(--gold-light); }
+.bl-topo__sub { color: rgba(245, 240, 232, 0.82); max-width: 56ch; }
+
+/* ——— migalhas ————————————————————————————————— */
+.bl-migalhas {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  font-family: var(--sans); font-size: 11.5px; letter-spacing: 0.04em;
+  color: rgba(245, 240, 232, 0.6);
+}
+.bl-migalhas a { color: rgba(245, 240, 232, 0.78); transition: color 220ms var(--silk); }
+.bl-migalhas a:hover { color: var(--gold-light); }
+.bl-migalhas span[aria-current] { color: var(--gold-light); }
+.bl-migalhas__sep { opacity: 0.5; }
+
+/* ——— filtros por categoria ————————————————————————— */
+.bl-filtros { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 26px; }
+.bl-filtro {
+  display: inline-flex; align-items: center; padding: 9px 16px; border-radius: 999px;
+  border: 1px solid rgba(211, 164, 108, 0.3);
+  font-family: var(--sans); font-weight: 600; font-size: 11.5px; letter-spacing: 0.05em;
+  color: rgba(245, 240, 232, 0.86);
+  transition: border-color 240ms var(--silk), color 240ms var(--silk), background-color 240ms var(--silk);
+}
+.bl-filtro[aria-current="page"] { background: var(--gold); border-color: var(--gold); color: var(--cinema-black); }
+@media (hover: hover) {
+  .bl-filtro:hover { border-color: var(--gold); color: var(--gold-light); }
+  .bl-filtro[aria-current="page"]:hover { color: var(--cinema-black); }
+}
+
+/* ——— busca ————————————————————————————————— */
+.bl-busca { display: flex; gap: 10px; margin-top: 24px; max-width: 460px; }
+.bl-busca__in {
+  flex: 1; min-width: 0;
+  padding: 13px 16px; border-radius: 12px;
+  border: 1px solid rgba(244, 238, 227, 0.22);
+  background: rgba(11, 14, 19, 0.4); color: var(--cream);
+  font-family: var(--body); font-size: 16px; /* 16px evita zoom automático no iOS */
+}
+.bl-busca__in::placeholder { color: rgba(245, 240, 232, 0.45); }
+.bl-busca__in:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(211, 164, 108, 0.18); }
+
+/* ——— grade de posts ————————————————————————————— */
+.bl-grade {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(20px, 2.6vw, 34px);
+}
+.bl-card { display: flex; flex-direction: column; height: 100%; }
+/* 16:9 é a proporção das capas. Qualquer outra aqui recortaria a imagem —
+   e capa com texto perde justamente as palavras das bordas. */
+.bl-card__fig {
+  position: relative; overflow: hidden; border-radius: 20px;
+  aspect-ratio: 16 / 9; background: var(--cream-deep);
+  box-shadow: 0 22px 50px -34px rgba(24, 39, 60, 0.55);
+}
+.bl-card__fig img { width: 100%; height: 100%; object-fit: cover; transition: transform 800ms var(--silk); }
+.bl-card__cat {
+  display: inline-block; margin: 18px 0 10px;
+  font-family: var(--sans); font-weight: 600; font-size: 10.5px;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-dark);
+}
+.bl-card__t {
+  font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144;
+  font-size: clamp(19px, 2.1vw, 23px); line-height: 1.22; color: var(--navy);
+  letter-spacing: -0.01em; text-wrap: balance;
+}
+.bl-card__r {
+  font-family: var(--body); font-size: 14px; line-height: 1.6;
+  color: var(--navy-soft); margin-top: 10px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.bl-card__pe {
+  display: flex; align-items: center; gap: 8px; margin-top: 14px;
+  font-family: var(--sans); font-size: 11px; letter-spacing: 0.04em; color: var(--navy-ghost);
+}
+.bl-card__pe span { opacity: 0.55; }
+@media (hover: hover) {
+  .bl-card:hover .bl-card__fig img { transform: scale(1.05); }
+  .bl-card:hover .bl-card__t { color: var(--gold-dark); }
+}
+.bl-card__t { transition: color 260ms var(--silk); }
+
+/* ——— destaque ————————————————————————————————— */
+.bl-destaque {
+  display: grid; grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(24px, 4vw, 56px); align-items: center;
+}
+.bl-destaque__fig {
+  overflow: hidden; border-radius: 24px; aspect-ratio: 16 / 9;
+  box-shadow: 0 30px 70px -34px rgba(24, 39, 60, 0.5);
+}
+.bl-destaque__fig img { width: 100%; height: 100%; object-fit: cover; transition: transform 800ms var(--silk); }
+.bl-destaque__t {
+  font-family: var(--serif); font-weight: 360; font-variation-settings: 'opsz' 144;
+  font-size: clamp(26px, 3.8vw, 40px); line-height: 1.1; color: var(--navy);
+  letter-spacing: -0.015em; margin: 14px 0 14px; text-wrap: balance;
+}
+.bl-destaque__t em { font-style: italic; color: var(--gold-dark); }
+@media (hover: hover) { .bl-destaque:hover .bl-destaque__fig img { transform: scale(1.04); } }
+
+/* ——— paginação ————————————————————————————————— */
+.bl-pag {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: clamp(40px, 6vh, 64px); flex-wrap: wrap;
+}
+.bl-pag a, .bl-pag span {
+  min-width: 44px; min-height: 44px; padding: 0 14px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; border: 1px solid rgba(24, 39, 60, 0.14);
+  font-family: var(--sans); font-weight: 600; font-size: 13px; color: var(--navy);
+  transition: border-color 240ms var(--silk), color 240ms var(--silk), background-color 240ms var(--silk);
+}
+.bl-pag [aria-current="page"] { background: var(--navy); border-color: var(--navy); color: var(--cream); }
+.bl-pag__off { opacity: 0.35; pointer-events: none; }
+@media (hover: hover) { .bl-pag a:hover { border-color: var(--gold); color: var(--gold-dark); } }
+
+/* ——— estado vazio ————————————————————————————— */
+.bl-vazio {
+  text-align: center; padding: clamp(50px, 9vh, 96px) 0;
+  max-width: 46ch; margin-inline: auto;
+}
+.bl-vazio__t {
+  font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144;
+  font-size: clamp(22px, 3vw, 28px); color: var(--navy); margin-bottom: 10px;
+}
+.bl-vazio__d { font-family: var(--body); font-size: 15px; line-height: 1.65; color: var(--navy-soft); }
+
+/* ——— bloco do autor ————————————————————————————— */
+.bl-autor {
+  display: flex; gap: clamp(18px, 2.4vw, 28px); align-items: flex-start;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(24, 39, 60, 0.1);
+  border-radius: 20px; padding: clamp(22px, 3vw, 32px);
+}
+.bl-autor__foto {
+  flex: 0 0 auto; width: clamp(66px, 8vw, 92px); aspect-ratio: 1;
+  border-radius: 50%; overflow: hidden; background: var(--cream-deep);
+}
+.bl-autor__foto img { width: 100%; height: 100%; object-fit: cover; }
+.bl-autor__nome {
+  font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144;
+  font-size: clamp(19px, 2.1vw, 23px); color: var(--navy);
+}
+.bl-autor__cargo {
+  font-family: var(--sans); font-weight: 600; font-size: 10.5px;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dark); margin-top: 6px;
+}
+.bl-autor__bio {
+  font-family: var(--body); font-size: 14.5px; line-height: 1.65;
+  color: var(--navy-soft); margin-top: 12px; max-width: 62ch;
+}
+
+/* ——— CTA para a landing page do serviço ————————————— */
+.bl-servico {
+  background: var(--cream-deep);
+  border: 1px solid rgba(211, 164, 108, 0.3);
+  border-radius: 20px; padding: clamp(24px, 3.2vw, 34px);
+}
+.bl-servico__t {
+  font-family: var(--serif); font-weight: 400; font-variation-settings: 'opsz' 144;
+  font-size: clamp(21px, 2.4vw, 26px); color: var(--navy); margin: 10px 0 8px;
+}
+.bl-servico__d { font-family: var(--body); font-size: 14.5px; line-height: 1.62; color: var(--navy-soft); max-width: 56ch; }
+.bl-servico__acoes { display: flex; flex-wrap: wrap; gap: 11px; margin-top: 20px; }
+
+/* ——— responsivo (mesmos pontos de quebra já usados no site) ——— */
+@media (max-width: 980px) {
+  .bl-grade { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 860px) {
+  .bl-destaque { grid-template-columns: 1fr; gap: 24px; }
+  /* mantém 16:9 também no celular — mudar a proporção recortaria a capa */
+  .bl-destaque__fig { aspect-ratio: 16 / 9; }
+  .bl-autor { flex-direction: column; }
+}
+@media (max-width: 620px) {
+  .bl-grade { grid-template-columns: 1fr; gap: 28px; }
+  .bl-busca { flex-direction: column; max-width: none; }
+  .bl-busca .btn { justify-content: center; }
+  .bl-servico__acoes .btn { width: 100%; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bl-card__fig img, .bl-destaque__fig img, .bl-card__t { transition: none; }
+}

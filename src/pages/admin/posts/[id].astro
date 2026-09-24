@@ -1,0 +1,746 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { podePublicar, type Perfil } from '../../../lib/supabase';
+import { renderizarConteudo, imagensSemAlt } from '../../../lib/editor/renderizar';
+
+const perfil = Astro.locals.perfil as Perfil;
+const supabase = Astro.locals.supabase!;
+const { id } = Astro.params;
+
+const { data: post, error: erroCarga } = await supabase
+  .from('posts')
+  .select('*')
+  .eq('id', id!)
+  .maybeSingle();
+
+if (erroCarga || !post) {
+  return new Response('Post não encontrado ou sem permissão de acesso.', { status: 404 });
+}
+
+const [{ data: categorias }, { data: tagsTodas }, { data: vinculos }] = await Promise.all([
+  supabase.from('categorias').select('id, nome, slug').order('ordem'),
+  supabase.from('tags').select('id, nome, slug').order('nome'),
+  supabase.from('post_tags').select('tag_id').eq('post_id', id!),
+]);
+
+const tagsAtuais = new Set((vinculos ?? []).map((v: any) => v.tag_id));
+const podePub = podePublicar(perfil.papel);
+const ehDono = post.autor_id === perfil.id;
+
+let erros: Record<string, string> = {};
+let aviso = '';
+let valores: Record<string, any> = {
+  titulo: post.titulo, slug: post.slug, resumo: post.resumo ?? '',
+  categoria_id: post.categoria_id ?? '', capa_url: post.capa_url ?? '',
+  capa_alt: post.capa_alt ?? '', capa_largura: post.capa_largura ?? '',
+  capa_altura: post.capa_altura ?? '', seo_titulo: post.seo_titulo ?? '',
+  seo_descricao: post.seo_descricao ?? '', conteudo_json: JSON.stringify(post.conteudo_json),
+  destaque: post.destaque,
+};
+
+if (Astro.request.method === 'POST') {
+  const d = await Astro.request.formData();
+  const acao = String(d.get('acao') ?? 'salvar');
+
+  if (acao === 'excluir') {
+    // Autor só apaga o que é dele e que ainda não foi publicado — o banco
+    // recusa o resto por conta própria, isto aqui só dá a mensagem amigável.
+    const { error } = await supabase.from('posts').delete().eq('id', id!);
+    if (error) {
+      erros.geral = `Não foi possível excluir: ${error.message}`;
+    } else {
+      return Astro.redirect('/admin/posts?ok=excluido', 303);
+    }
+  }
+
+  // Preserva TUDO que foi digitado: em caso de erro a mesma tela é
+  // re-renderizada com os valores, em vez de perder o trabalho.
+  valores = {
+    titulo: String(d.get('titulo') ?? '').trim(),
+    slug: String(d.get('slug') ?? '').trim().toLowerCase(),
+    resumo: String(d.get('resumo') ?? '').trim(),
+    categoria_id: String(d.get('categoria_id') ?? ''),
+    capa_url: String(d.get('capa_url') ?? '').trim(),
+    capa_alt: String(d.get('capa_alt') ?? '').trim(),
+    capa_largura: String(d.get('capa_largura') ?? '').trim(),
+    capa_altura: String(d.get('capa_altura') ?? '').trim(),
+    seo_titulo: String(d.get('seo_titulo') ?? '').trim(),
+    seo_descricao: String(d.get('seo_descricao') ?? '').trim(),
+    conteudo_json: String(d.get('conteudo_json') ?? '{}'),
+    destaque: d.get('destaque') === 'on',
+  };
+  const tagsEscolhidas = d.getAll('tags').map(String);
+
+  let json: any = { type: 'doc', content: [] };
+  try { json = JSON.parse(valores.conteudo_json); } catch { erros.conteudo = 'Não foi possível ler o conteúdo do editor.'; }
+
+  if (valores.titulo.length < 3) erros.titulo = 'O título precisa ter pelo menos 3 caracteres.';
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(valores.slug)) {
+    erros.slug = 'Use apenas letras minúsculas, números e hífens (ex.: medo-de-dentista).';
+  }
+
+  const publicando = acao === 'publicar';
+  if (publicando && !podePub) erros.geral = 'Seu acesso não permite publicar. Envie para revisão.';
+
+  if (publicando) {
+    if (!valores.categoria_id) erros.categoria_id = 'Escolha uma categoria antes de publicar.';
+    if (!valores.capa_url) erros.capa_url = 'Publicação exige uma imagem de capa.';
+    if (!valores.capa_alt) erros.capa_alt = 'Descreva a capa (quem usa leitor de tela e o Google dependem disso).';
+    if (!valores.capa_largura || !valores.capa_altura) {
+      erros.capa_largura = 'Informe largura e altura da capa — sem isso a página "pula" ao carregar.';
+    }
+    // Trava no servidor, não só na tela: é a única que não dá para driblar.
+    const semAlt = imagensSemAlt(json);
+    if (semAlt > 0) {
+      erros.conteudo = `${semAlt} ${semAlt === 1 ? 'imagem está' : 'imagens estão'} sem descrição (texto alternativo). Adicione antes de publicar.`;
+    }
+  }
+
+  if (Object.keys(erros).length === 0) {
+    const { html, texto, minutos } = renderizarConteudo(json);
+
+    const campos: Record<string, any> = {
+      titulo: valores.titulo,
+      slug: valores.slug,
+      resumo: valores.resumo || null,
+      categoria_id: valores.categoria_id || null,
+      capa_url: valores.capa_url || null,
+      capa_alt: valores.capa_alt || null,
+      capa_largura: valores.capa_largura ? Number(valores.capa_largura) : null,
+      capa_altura: valores.capa_altura ? Number(valores.capa_altura) : null,
+      seo_titulo: valores.seo_titulo || null,
+      seo_descricao: valores.seo_descricao || null,
+      conteudo_json: json,
+      tempo_leitura: minutos,
+      ...(podePub ? { destaque: valores.destaque } : {}),
+    };
+
+    if (acao === 'revisao') campos.status = 'revisao';
+    if (acao === 'publicar') campos.status = 'publicado';
+    if (acao === 'despublicar') campos.status = 'rascunho';
+
+    // conteudo_html/texto não podem ser gravados pelo usuário (privilégio
+    // revogado no banco) — vão pela chave administrativa, já sanitizados.
+    const { clienteAdministrativo } = await import('../../../lib/supabase');
+    const admin = clienteAdministrativo();
+
+    const { error } = await supabase.from('posts').update(campos).eq('id', id!);
+
+    if (error) {
+      erros.geral = error.code === '23505'
+        ? 'Já existe um post com este endereço (slug). Escolha outro.'
+        : `Não foi possível salvar: ${error.message}`;
+    } else {
+      if (admin) {
+        await admin.from('posts')
+          .update({ conteudo_html: html, conteudo_texto: texto })
+          .eq('id', id!);
+      }
+      await supabase.from('post_tags').delete().eq('post_id', id!);
+      if (tagsEscolhidas.length) {
+        await supabase.from('post_tags')
+          .insert(tagsEscolhidas.map((t) => ({ post_id: id!, tag_id: t })));
+      }
+      // Redireciona depois de salvar: recarregar a página não reenvia nada.
+      return Astro.redirect(`/admin/posts/${id}?ok=${acao}`, 303);
+    }
+  }
+  Astro.response.status = Object.keys(erros).length ? 422 : 200;
+}
+
+const ok = Astro.url.searchParams.get('ok');
+if (ok) {
+  aviso = ok === 'publicar' ? 'Post publicado. Já está no ar no blog.'
+    : ok === 'revisao' ? 'Enviado para revisão. Um editor vai avaliar.'
+    : ok === 'despublicar' ? 'Post despublicado e devolvido para rascunho.'
+    : 'Alterações salvas.';
+}
+
+const ROTULO = { rascunho: 'Rascunho', revisao: 'Em revisão', publicado: 'Publicado' } as const;
+const listaErros = Object.entries(erros);
+---
+<AdminLayout titulo={valores.titulo || 'Editar post'} perfil={perfil}>
+  <div class="ad-cab">
+    <div>
+      <h1 class="ad-cab__t">Editar post</h1>
+      <p class="ad-cab__d">
+        <span class={`ad-marca ad-marca--${post.status}`}>{ROTULO[post.status]}</span>
+        {!ehDono && <> · escrito por outra pessoa</>}
+      </p>
+    </div>
+    <div class="ad-cab__acoes">
+      <a class="ad-btn ad-btn--f" href="/admin/posts">Voltar</a>
+      {post.status === 'publicado' && (
+        <a class="ad-btn ad-btn--f" href={`/blog/${post.slug}/`} target="_blank" rel="noopener">Ver no blog</a>
+      )}
+    </div>
+  </div>
+
+  {aviso && <div class="ad-aviso ad-aviso--ok" role="status">{aviso}</div>}
+
+  {listaErros.length > 0 && (
+    <div class="ad-aviso ad-aviso--erro" role="alert" id="resumo-erros" tabindex="-1">
+      <strong>Revise antes de continuar:</strong>
+      <ul style="margin:8px 0 0 18px">
+        {listaErros.map(([campo, msg]) => (
+          <li><a href={`#c-${campo}`}>{msg}</a></li>
+        ))}
+      </ul>
+    </div>
+  )}
+
+  <form method="POST" class="ed-grade">
+    <div>
+      <div class="ad-card">
+        <div class="ad-campo">
+          <label class="ad-rot" for="c-titulo">Título do post</label>
+          <input class="ad-in" id="c-titulo" name="titulo" value={valores.titulo}
+                 aria-invalid={erros.titulo ? 'true' : undefined}
+                 aria-describedby={erros.titulo ? 'e-titulo' : undefined} required />
+          {erros.titulo && <p class="ad-erro" id="e-titulo">{erros.titulo}</p>}
+        </div>
+
+        <div class="ad-campo">
+          <label class="ad-rot" for="c-resumo">Resumo <span>— aparece na listagem e no Google</span></label>
+          <textarea class="ad-area" id="c-resumo" name="resumo" maxlength="400"
+                    placeholder="Duas ou três linhas explicando o que a pessoa vai encontrar.">{valores.resumo}</textarea>
+        </div>
+      </div>
+
+      <div class="ad-card">
+        <p class="ad-card__t">Conteúdo</p>
+        <div class="ed" data-post={id}>
+          <div class="ed__barra" role="toolbar" aria-label="Formatação do texto" id="ed-barra">
+            <button type="button" data-cmd="bold" aria-pressed="false" title="Negrito (Ctrl+B)"><b>B</b></button>
+            <button type="button" data-cmd="italic" aria-pressed="false" title="Itálico (Ctrl+I)"><i>I</i></button>
+            <span class="ed__div" aria-hidden="true"></span>
+            <button type="button" data-cmd="h2" aria-pressed="false" title="Título de seção">H2</button>
+            <button type="button" data-cmd="h3" aria-pressed="false" title="Subtítulo">H3</button>
+            <span class="ed__div" aria-hidden="true"></span>
+            <button type="button" data-cmd="bulletList" aria-pressed="false" title="Lista">• Lista</button>
+            <button type="button" data-cmd="orderedList" aria-pressed="false" title="Lista numerada">1. Lista</button>
+            <button type="button" data-cmd="blockquote" aria-pressed="false" title="Citação">&ldquo; Citação</button>
+            <span class="ed__div" aria-hidden="true"></span>
+            <button type="button" data-cmd="link" title="Inserir link (Ctrl+K)">Link</button>
+            <button type="button" data-cmd="image" title="Inserir imagem">Imagem</button>
+            <span class="ed__div" aria-hidden="true"></span>
+            <button type="button" data-cmd="clear" title="Limpar formatação">Limpar</button>
+            <button type="button" data-cmd="undo" title="Desfazer">↺</button>
+            <button type="button" data-cmd="redo" title="Refazer">↻</button>
+          </div>
+          <div class="ed__area" id="ed-area"></div>
+          <input type="file" id="ed-arquivo" accept="image/jpeg,image/png,image/webp,image/avif" hidden />
+          <input type="hidden" name="conteudo_json" id="conteudo_json" value={valores.conteudo_json} />
+          <p class="ad-dica ed__pe" id="c-conteudo">
+            <span id="ed-palavras">0 palavras</span>
+            <span id="ed-alerta-alt" class="ed__alerta" hidden></span>
+          </p>
+          {erros.conteudo && <p class="ad-erro">{erros.conteudo}</p>}
+        </div>
+      </div>
+    </div>
+
+    <aside class="ed-lado">
+      <div class="ad-card">
+        <p class="ad-card__t">Publicação</p>
+
+        <div class="ed-acoes">
+          <button class="ad-btn ad-btn--p" type="submit" name="acao" value="salvar">Salvar</button>
+
+          {!podePub && post.status !== 'publicado' && (
+            <button class="ad-btn ad-btn--g" type="submit" name="acao" value="revisao">
+              Enviar para revisão
+            </button>
+          )}
+          {podePub && post.status !== 'publicado' && (
+            <button class="ad-btn ad-btn--pub" type="submit" name="acao" value="publicar">
+              Publicar
+            </button>
+          )}
+          {podePub && post.status === 'publicado' && (
+            <button class="ad-btn ad-btn--f" type="submit" name="acao" value="despublicar">
+              Despublicar
+            </button>
+          )}
+        </div>
+
+        {!podePub && (
+          <p class="ad-dica" style="margin-top:12px">
+            Seu acesso permite escrever e editar. A publicação é feita por um editor.
+          </p>
+        )}
+
+        {(podePub || (ehDono && post.status !== 'publicado')) && (
+          <>
+            <hr style="border:0;border-top:1px solid rgba(24,39,60,.1);margin:18px 0 14px" />
+            <button class="ad-btn ad-btn--per" type="submit" name="acao" value="excluir"
+                    style="width:100%" data-confirmar={valores.titulo || 'este post'}>
+              Excluir post
+            </button>
+            <p class="ad-dica" style="margin-top:8px">
+              {post.status === 'publicado'
+                ? 'O post sai do ar e do blog imediatamente. Não dá para desfazer.'
+                : 'Não dá para desfazer.'}
+            </p>
+          </>
+        )}
+
+        {podePub && (
+          <label class="ed-check" style="margin-top:16px">
+            <input type="checkbox" name="destaque" checked={valores.destaque} />
+            <span>Post em destaque no topo do blog</span>
+          </label>
+        )}
+      </div>
+
+      <div class="ad-card">
+        <p class="ad-card__t">Organização</p>
+
+        <div class="ad-campo">
+          <label class="ad-rot" for="c-categoria_id">Categoria</label>
+          <select class="ad-sel" id="c-categoria_id" name="categoria_id"
+                  aria-invalid={erros.categoria_id ? 'true' : undefined}>
+            <option value="">— escolher —</option>
+            {(categorias ?? []).map((c: any) => (
+              <option value={c.id} selected={valores.categoria_id === c.id}>{c.nome}</option>
+            ))}
+          </select>
+          {erros.categoria_id && <p class="ad-erro">{erros.categoria_id}</p>}
+        </div>
+
+        <div class="ad-campo">
+          <label class="ad-rot" for="c-slug">Endereço no site</label>
+          <input class="ad-in" id="c-slug" name="slug" value={valores.slug}
+                 aria-invalid={erros.slug ? 'true' : undefined} required />
+          <p class="ad-dica">akaki.odo.br/blog/<strong id="ed-slug-eco">{valores.slug}</strong>/</p>
+          {erros.slug && <p class="ad-erro">{erros.slug}</p>}
+          {post.status === 'publicado' && (
+            <p class="ad-dica" style="color:var(--gold-dark)">
+              Este post já está publicado: mudar o endereço quebra os links que já existem por aí.
+            </p>
+          )}
+        </div>
+
+        <fieldset class="ad-campo" style="border:0">
+          <legend class="ad-rot" style="margin-bottom:8px">Tags</legend>
+          <div class="ed-tags">
+            {(tagsTodas ?? []).map((t: any) => (
+              <label class="ed-tag">
+                <input type="checkbox" name="tags" value={t.id} checked={tagsAtuais.has(t.id)} />
+                <span>{t.nome}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="ad-card">
+        <p class="ad-card__t">Imagem de capa</p>
+
+        <div class="cap" id="cap" data-post={id}>
+          <!-- O rótulo envolve o campo de arquivo: já é clicável e acessível
+               por teclado, sem depender de JavaScript para abrir o seletor. -->
+          <label class="cap__zona" id="cap-zona" hidden={!!valores.capa_url}>
+            <input type="file" id="cap-arquivo" accept="image/jpeg,image/png,image/webp,image/avif" hidden />
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 16V4m0 0L8 8m4-4l4 4" /><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+            </svg>
+            <span class="cap__t">Escolher imagem do computador</span>
+            <span class="cap__d">ou arraste o arquivo até aqui · JPG, PNG ou WebP</span>
+          </label>
+
+          <div class="cap__previa" id="cap-previa" hidden={!valores.capa_url}>
+            <img id="cap-img" src={valores.capa_url || undefined} alt="" />
+            <div class="cap__acoes">
+              <button type="button" class="ad-btn ad-btn--f" id="cap-trocar">Trocar</button>
+              <button type="button" class="ad-btn ad-btn--per" id="cap-remover">Remover</button>
+            </div>
+            <p class="ad-dica" id="cap-medidas">
+              {valores.capa_largura ? `${valores.capa_largura} × ${valores.capa_altura} px` : ''}
+            </p>
+          </div>
+
+          <div class="cap__barra" id="cap-barra" hidden>
+            <div class="cap__barra-i" id="cap-barra-i"></div>
+          </div>
+          <p class="cap__estado" id="cap-estado" role="status" aria-live="polite"></p>
+        </div>
+
+        <!-- guardados automaticamente pelo envio -->
+        <input type="hidden" id="c-capa_url" name="capa_url" value={valores.capa_url} />
+        <input type="hidden" id="c-capa_largura" name="capa_largura" value={valores.capa_largura} />
+        <input type="hidden" id="c-capa_altura" name="capa_altura" value={valores.capa_altura} />
+        {erros.capa_url && <p class="ad-erro">{erros.capa_url}</p>}
+        {erros.capa_largura && <p class="ad-erro">{erros.capa_largura}</p>}
+
+        <div class="ad-campo" style="margin-top:16px">
+          <label class="ad-rot" for="c-capa_alt">Descrição da imagem <span>— obrigatória</span></label>
+          <input class="ad-in" id="c-capa_alt" name="capa_alt" value={valores.capa_alt}
+                 placeholder="Ex.: Dentista conversando com paciente antes do procedimento"
+                 aria-invalid={erros.capa_alt ? 'true' : undefined} />
+          <p class="ad-dica">Descreva o que aparece na foto. É o que leitores de tela leem em voz alta — e o Google usa para entender a imagem.</p>
+          {erros.capa_alt && <p class="ad-erro">{erros.capa_alt}</p>}
+        </div>
+      </div>
+
+      <div class="ad-card">
+        <p class="ad-card__t">Google</p>
+        <div class="ad-campo">
+          <label class="ad-rot" for="c-seo_titulo">Título no Google <span>— opcional</span></label>
+          <input class="ad-in" id="c-seo_titulo" name="seo_titulo" value={valores.seo_titulo} maxlength="70" />
+          <p class="ad-conta" data-conta="c-seo_titulo" data-limite="60">0/60</p>
+          <p class="ad-dica">Em branco, usamos o título do post.</p>
+        </div>
+        <div class="ad-campo">
+          <label class="ad-rot" for="c-seo_descricao">Descrição no Google <span>— opcional</span></label>
+          <textarea class="ad-area" id="c-seo_descricao" name="seo_descricao" maxlength="200">{valores.seo_descricao}</textarea>
+          <p class="ad-conta" data-conta="c-seo_descricao" data-limite="158">0/158</p>
+          <p class="ad-dica">Em branco, usamos o resumo.</p>
+        </div>
+      </div>
+    </aside>
+  </form>
+</AdminLayout>
+
+<style is:global>
+  .ed-grade { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+  .ed-lado { position: sticky; top: 18px; display: flex; flex-direction: column; gap: 16px; }
+  .ed-acoes { display: flex; flex-direction: column; gap: 9px; }
+  .ed-acoes .ad-btn { width: 100%; }
+  .ed-dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .ed-check, .ed-tag { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--navy-soft); cursor: pointer; }
+  .ed-check input, .ed-tag input { width: 17px; height: 17px; accent-color: var(--gold-dark); flex: 0 0 auto; }
+  .ed-tags { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+
+  /* ——— envio de imagem ——— */
+  .cap__zona {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 7px; min-height: 152px; padding: 20px; cursor: pointer; text-align: center;
+    border: 2px dashed rgba(24, 39, 60, 0.2); border-radius: 14px;
+    background: #FBF9F5; color: var(--navy-soft);
+    transition: border-color 200ms var(--silk), background-color 200ms var(--silk);
+  }
+  .cap__zona svg {
+    width: 26px; height: 26px; fill: none; stroke: var(--gold-dark);
+    stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .cap__t { font-family: var(--sans); font-weight: 600; font-size: 13px; color: var(--navy); }
+  .cap__d { font-size: 12px; color: var(--navy-ghost); line-height: 1.5; max-width: 30ch; }
+  .cap__zona[data-sobre="1"], .cap__zona:focus-within {
+    border-color: var(--gold); background: rgba(211, 164, 108, 0.08);
+  }
+  @media (hover: hover) { .cap__zona:hover { border-color: var(--gold); background: rgba(211,164,108,0.06); } }
+
+  .cap__previa img {
+    width: 100%; border-radius: 12px; border: 1px solid rgba(24, 39, 60, 0.1);
+    aspect-ratio: 16 / 9; object-fit: cover; background: var(--cream-deep);
+  }
+  .cap__acoes { display: flex; gap: 8px; margin-top: 10px; }
+  .cap__acoes .ad-btn { flex: 1; min-height: 40px; padding: 8px 12px; font-size: 12px; }
+
+  .cap__barra { height: 5px; border-radius: 999px; background: rgba(24,39,60,0.1); margin-top: 12px; overflow: hidden; }
+  .cap__barra-i { height: 100%; width: 0; background: var(--gold); transition: width 180ms linear; }
+  .cap__estado { font-size: 12.5px; margin-top: 8px; line-height: 1.5; }
+  .cap__estado[data-tipo="erro"] { color: var(--erro); font-weight: 500; }
+  .cap__estado[data-tipo="ok"] { color: #4A5940; }
+
+  /* ——— editor ——— */
+  .ed { border: 1px solid rgba(24, 39, 60, 0.16); border-radius: 13px; overflow: hidden; background: #fff; }
+  .ed__barra {
+    display: flex; align-items: center; gap: 4px; padding: 8px;
+    border-bottom: 1px solid rgba(24, 39, 60, 0.1); background: #FBF9F5;
+    position: sticky; top: 0; z-index: 5;
+    overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap;
+  }
+  .ed__barra::-webkit-scrollbar { display: none; }
+  .ed__barra button {
+    min-width: 38px; min-height: 38px; padding: 0 10px; border-radius: 8px;
+    border: 0; background: none; cursor: pointer; white-space: nowrap;
+    font-family: var(--sans); font-weight: 600; font-size: 12.5px; color: var(--navy-soft);
+    transition: background-color 160ms var(--silk), color 160ms var(--silk);
+  }
+  .ed__barra button[aria-pressed="true"] { background: rgba(211, 164, 108, 0.22); color: var(--gold-dark); }
+  @media (hover: hover) { .ed__barra button:hover { background: rgba(24, 39, 60, 0.07); } }
+  .ed__barra button:active { transform: scale(0.96); }
+  .ed__div { width: 1px; height: 22px; background: rgba(24, 39, 60, 0.12); margin: 0 3px; flex: 0 0 auto; }
+
+  .ed__area { padding: 22px; min-height: 420px; }
+  .ed__area .ProseMirror { outline: none; font-family: var(--body); font-size: 16.5px; line-height: 1.7; color: var(--navy-soft); }
+  .ed__area .ProseMirror > * + * { margin-top: 0.9em; }
+  .ed__area h2 { font-family: var(--serif); font-variation-settings: 'opsz' 144; font-weight: 400; font-size: 27px; color: var(--navy); line-height: 1.2; }
+  .ed__area h3 { font-family: var(--serif); font-variation-settings: 'opsz' 144; font-weight: 400; font-size: 21px; color: var(--navy); line-height: 1.25; }
+  .ed__area blockquote { border-left: 2px solid var(--gold); padding-left: 16px; font-style: italic; color: var(--gold-dark); }
+  .ed__area ul, .ed__area ol { padding-left: 24px; }
+  .ed__area img { border-radius: 12px; }
+  .ed__area img[alt=""], .ed__area img:not([alt]) { outline: 2px dashed var(--erro); outline-offset: 3px; }
+  .ed__area a { color: var(--gold-dark); text-decoration: underline; }
+  .ed__area p.esta-vazio:first-child::before {
+    content: attr(data-placeholder); float: left; height: 0; pointer-events: none; color: var(--navy-ghost);
+  }
+  .ed__pe { display: flex; gap: 12px; align-items: center; padding: 10px 14px; border-top: 1px solid rgba(24,39,60,0.08); background: #FBF9F5; }
+  .ed__alerta { color: var(--erro); font-weight: 600; }
+
+  @media (max-width: 1140px) {
+    .ed-grade { grid-template-columns: 1fr; }
+    .ed-lado { position: static; }
+  }
+  @media (max-width: 620px) {
+    .ed-tags { grid-template-columns: 1fr; }
+    .ed__area { padding: 16px; }
+    /* Espaço para o cursor não ficar embaixo do teclado do celular. */
+    .ed__area { padding-bottom: 42vh; }
+  }
+</style>
+
+<script>
+  import { Editor } from '@tiptap/core';
+  import { extensoes } from '../../../lib/editor/extensoes';
+
+  const area = document.getElementById('ed-area');
+  const campo = document.getElementById('conteudo_json') as HTMLInputElement | null;
+  const barra = document.getElementById('ed-barra');
+  const contaPalavras = document.getElementById('ed-palavras');
+  const alertaAlt = document.getElementById('ed-alerta-alt');
+
+  if (area && campo && barra) {
+    let inicial: any = { type: 'doc', content: [] };
+    try { inicial = JSON.parse(campo.value || '{}'); } catch {}
+    if (!inicial || !inicial.type) inicial = { type: 'doc', content: [] };
+
+    const editor = new Editor({
+      element: area,
+      extensions: extensoes as any,
+      content: inicial,
+      editorProps: {
+        attributes: { class: 'prosa-edicao', spellcheck: 'true', lang: 'pt-BR' },
+        // Limpa lixo de colagem do Word/Docs antes de entrar no documento.
+        transformPastedHTML: (html) =>
+          html
+            .replace(/<!--[\s\S]*?-->/g, '')
+            .replace(/<style[\s\S]*?<\/style>/gi, '')
+            .replace(/ (style|class|lang|id)="[^"]*"/gi, '')
+            .replace(/<span[^>]*>|<\/span>/gi, ''),
+      },
+      onUpdate: ({ editor }) => {
+        campo.value = JSON.stringify(editor.getJSON());
+        atualizarRodape();
+      },
+      onSelectionUpdate: sincronizar,
+      onTransaction: sincronizar,
+    });
+
+    function atualizarRodape() {
+      const texto = editor.getText().trim();
+      const n = texto ? texto.split(/\s+/).length : 0;
+      if (contaPalavras) contaPalavras.textContent = `${n} ${n === 1 ? 'palavra' : 'palavras'} · ~${Math.max(1, Math.round(n / 200))} min`;
+
+      // Aviso de imagem sem descrição: barrar só na publicação (no servidor),
+      // mas avisar desde já para não virar surpresa na hora de publicar.
+      let semAlt = 0;
+      const andar = (no: any) => {
+        if (!no || typeof no !== 'object') return;
+        if (no.type === 'image' && !String(no.attrs?.alt ?? '').trim()) semAlt++;
+        (no.content ?? []).forEach(andar);
+      };
+      andar(editor.getJSON());
+      if (alertaAlt) {
+        alertaAlt.hidden = semAlt === 0;
+        alertaAlt.textContent = semAlt ? `${semAlt} ${semAlt === 1 ? 'imagem sem descrição' : 'imagens sem descrição'}` : '';
+      }
+    }
+
+    function sincronizar() {
+      barra!.querySelectorAll<HTMLButtonElement>('[data-cmd]').forEach((b) => {
+        const c = b.dataset.cmd!;
+        let ativo = false;
+        if (c === 'h2') ativo = editor.isActive('heading', { level: 2 });
+        else if (c === 'h3') ativo = editor.isActive('heading', { level: 3 });
+        else if (['bold', 'italic', 'bulletList', 'orderedList', 'blockquote', 'link'].includes(c)) ativo = editor.isActive(c);
+        if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(ativo));
+      });
+    }
+
+    // pointerdown + preventDefault: sem isso, tocar num botão tira o foco do
+    // texto, a seleção se perde e o comando é aplicado no lugar errado.
+    barra.addEventListener('pointerdown', (e) => {
+      if ((e.target as Element).closest('[data-cmd]')) e.preventDefault();
+    });
+
+    barra.addEventListener('click', (e) => {
+      const b = (e.target as Element).closest<HTMLButtonElement>('[data-cmd]');
+      if (!b) return;
+      const c = editor.chain().focus();
+      switch (b.dataset.cmd) {
+        case 'bold': c.toggleBold().run(); break;
+        case 'italic': c.toggleItalic().run(); break;
+        case 'h2': c.toggleHeading({ level: 2 }).run(); break;
+        case 'h3': c.toggleHeading({ level: 3 }).run(); break;
+        case 'bulletList': c.toggleBulletList().run(); break;
+        case 'orderedList': c.toggleOrderedList().run(); break;
+        case 'blockquote': c.toggleBlockquote().run(); break;
+        case 'clear': c.unsetAllMarks().clearNodes().run(); break;
+        case 'undo': c.undo().run(); break;
+        case 'redo': c.redo().run(); break;
+        case 'link': {
+          const atual = editor.getAttributes('link').href ?? '';
+          const url = window.prompt('Endereço do link (deixe vazio para remover):', atual);
+          if (url === null) break;
+          if (!url.trim()) { c.extendMarkRange('link').unsetLink().run(); break; }
+          if (!/^(https?:|mailto:|tel:|\/)/i.test(url)) {
+            alert('Use um endereço que comece com https://, mailto:, tel: ou / (link interno).');
+            break;
+          }
+          c.extendMarkRange('link').setLink({ href: url }).run();
+          break;
+        }
+        case 'image': {
+          // Abre o seletor de arquivos do computador. As medidas vêm do
+          // próprio envio — ninguém precisa saber o que é "pixel".
+          const seletor = document.getElementById('ed-arquivo') as HTMLInputElement | null;
+          seletor?.click();
+          break;
+        }
+      }
+    });
+
+    // Envio de imagem para dentro do texto.
+    const edArq = document.getElementById('ed-arquivo') as HTMLInputElement | null;
+    edArq?.addEventListener('change', async () => {
+      const f = edArq.files?.[0];
+      edArq.value = '';
+      if (!f) return;
+      const pe = document.getElementById('ed-palavras');
+      const antes = pe?.textContent ?? '';
+      if (pe) pe.textContent = 'Enviando imagem…';
+      try {
+        const { prepararEEnviar } = await import('~/lib/admin/imagem');
+        const postId = (document.querySelector('.ed') as HTMLElement)?.dataset.post || 'geral';
+        const r = await prepararEEnviar(f, postId, (pct) => {
+          if (pe) pe.textContent = `Enviando imagem… ${pct}%`;
+        });
+        // Pede a descrição DEPOIS do envio: assim a espera não fica parada
+        // atrás de uma caixa de texto, e a pessoa já viu que deu certo.
+        const alt = window.prompt(
+          'Descreva a imagem para quem não enxerga e para o Google.\n(Obrigatório para publicar — ex.: "Paciente sorrindo após o tratamento")',
+        ) ?? '';
+        editor.chain().focus().setImage({
+          src: r.url, alt: alt.trim(), width: r.largura, height: r.altura,
+        } as any).run();
+        atualizarRodape();
+      } catch (e) {
+        if (pe) pe.textContent = antes;
+        alert(e instanceof Error ? e.message : 'Não foi possível enviar a imagem.');
+      }
+    });
+
+    // Ctrl/Cmd+S salva o post em vez de abrir "salvar página" do navegador.
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        document.querySelector<HTMLButtonElement>('button[value="salvar"]')?.click();
+      }
+    });
+
+    atualizarRodape();
+    sincronizar();
+  }
+
+  // Excluir exige confirmação escrita com o nome do post: um "tem certeza?"
+  // genérico é clicado no automático, e aqui não há como desfazer.
+  document.querySelector<HTMLButtonElement>('[data-confirmar]')?.addEventListener('click', (e) => {
+    const alvo = (e.currentTarget as HTMLElement).dataset.confirmar ?? 'este post';
+    const ok = window.confirm(
+      `Excluir "${alvo}"?\n\nO post e seu conteúdo serão apagados definitivamente. Não há como desfazer.`,
+    );
+    if (!ok) e.preventDefault();
+  });
+
+  // ─── envio da imagem de capa ────────────────────────────────────────
+  {
+    const cap = document.getElementById('cap');
+    const zona = document.getElementById('cap-zona');
+    const campoArq = document.getElementById('cap-arquivo') as HTMLInputElement | null;
+    const previa = document.getElementById('cap-previa');
+    const img = document.getElementById('cap-img') as HTMLImageElement | null;
+    const medidas = document.getElementById('cap-medidas');
+    const barra = document.getElementById('cap-barra');
+    const barraI = document.getElementById('cap-barra-i');
+    const estado = document.getElementById('cap-estado');
+    const fUrl = document.getElementById('c-capa_url') as HTMLInputElement | null;
+    const fL = document.getElementById('c-capa_largura') as HTMLInputElement | null;
+    const fA = document.getElementById('c-capa_altura') as HTMLInputElement | null;
+
+    if (cap && zona && campoArq && previa && img && fUrl && fL && fA) {
+      const dizer = (msg: string, tipo = '') => {
+        if (!estado) return;
+        estado.textContent = msg;
+        estado.dataset.tipo = tipo;
+      };
+
+      async function enviar(arquivo: File) {
+        const { prepararEEnviar, ErroImagem } = await import('~/lib/admin/imagem');
+        barra!.hidden = false;
+        barraI!.style.width = '0%';
+        dizer('Preparando a imagem…');
+        try {
+          const r = await prepararEEnviar(arquivo, cap!.dataset.post || 'geral', (pct) => {
+            barraI!.style.width = pct + '%';
+            if (pct > 50) dizer('Enviando…');
+          });
+          fUrl!.value = r.url; fL!.value = String(r.largura); fA!.value = String(r.altura);
+          img!.src = r.url;
+          if (medidas) medidas.textContent = `${r.largura} × ${r.altura} px`;
+          zona!.hidden = true; previa!.hidden = false;
+          dizer('Imagem pronta. Descreva-a no campo abaixo e salve o post.', 'ok');
+        } catch (e) {
+          dizer(e instanceof Error ? e.message : 'Não foi possível enviar a imagem.', 'erro');
+        } finally {
+          setTimeout(() => { if (barra) barra.hidden = true; }, 900);
+        }
+      }
+
+      campoArq.addEventListener('change', () => {
+        const f = campoArq.files?.[0];
+        if (f) enviar(f);
+        campoArq.value = ''; // permite reenviar o mesmo arquivo
+      });
+
+      // Arrastar e soltar. O preventDefault no documento inteiro é essencial:
+      // sem ele, soltar o arquivo fora da área faz o navegador ABRIR a imagem
+      // e sair da página — perdendo o post em edição.
+      ['dragenter', 'dragover', 'drop'].forEach((ev) =>
+        document.addEventListener(ev, (e) => e.preventDefault()));
+
+      zona.addEventListener('dragenter', () => zona.dataset.sobre = '1');
+      zona.addEventListener('dragover', () => zona.dataset.sobre = '1');
+      zona.addEventListener('dragleave', () => delete zona.dataset.sobre);
+      zona.addEventListener('drop', (e) => {
+        delete zona.dataset.sobre;
+        const f = (e as DragEvent).dataTransfer?.files?.[0];
+        if (f) enviar(f);
+      });
+
+      document.getElementById('cap-trocar')?.addEventListener('click', () => campoArq.click());
+      document.getElementById('cap-remover')?.addEventListener('click', () => {
+        fUrl.value = ''; fL.value = ''; fA.value = '';
+        previa.hidden = true; zona.hidden = false;
+        dizer('Capa removida. Salve o post para confirmar.');
+      });
+    }
+  }
+
+  // Eco do endereço enquanto digita.
+  const slug = document.getElementById('c-slug') as HTMLInputElement | null;
+  const eco = document.getElementById('ed-slug-eco');
+  slug?.addEventListener('input', () => {
+    slug.value = slug.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+    if (eco) eco.textContent = slug.value;
+  });
+
+  // Leva o foco para o resumo de erros, para quem usa leitor de tela ou está
+  // no celular perceber sem precisar rolar a página.
+  document.getElementById('resumo-erros')?.focus();
+</script>

@@ -1,0 +1,87 @@
+---
+export const prerender = false;
+
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import Arquivo from '../../../components/blog/Arquivo.astro';
+import Migalhas from '../../../components/blog/Migalhas.astro';
+import { buscarCategoria, listarPorCategoria, listarCategorias } from '../../../lib/blog/consultas';
+import { SITE } from '../../../lib/blog/formato';
+import '../../../styles/blog.css';
+
+const { cat } = Astro.params;
+const categoria = await buscarCategoria(cat!);
+if (!categoria) return new Response(null, { status: 404, headers: { Location: '/404' } });
+
+const [{ posts, paginas }, categorias] = await Promise.all([
+  listarPorCategoria(categoria.id, 1),
+  listarCategorias(),
+]);
+
+const titulo = categoria.seo_titulo ?? `${categoria.nome} · Blog | Akaki Odontologia`;
+const descricao = categoria.seo_descricao ?? categoria.descricao
+  ?? `Artigos sobre ${categoria.nome.toLowerCase()} escritos pelos especialistas da Akaki Odontologia.`;
+
+// Categoria ainda sem artigo é uma página sem conteúdo: indexá-la só gasta
+// orçamento de rastreio e entrega ao Google uma página vazia. Volta a ser
+// indexável sozinha assim que o primeiro post da categoria for publicado.
+const semPosts = posts.length === 0;
+
+// Maior variação que cabe em 70, em vez de cortar no meio da palavra.
+const tituloCat = [titulo, `${categoria.nome} · Blog | Akaki`,
+  `${categoria.nome} | Akaki Odontologia`, categoria.nome]
+  .find((t) => t.length <= 70) ?? categoria.nome.slice(0, 70);
+---
+<Layout
+  title={tituloCat}
+  description={descricao}
+  canonical={`${SITE}/blog/categoria/${categoria.slug}/`}
+  noindex={semPosts}
+  preloadImage={null}
+  splash={false}
+  businessSchema={false}
+>
+  <Header />
+  <main data-service={`Blog · ${categoria.nome}`}>
+    <section class="bl-topo">
+      <div class="container">
+        <Migalhas itens={[{ texto: 'Blog', href: '/blog/' }, { texto: categoria.nome }]} />
+        <p class="eyebrow" style="margin-top:18px">Categoria</p>
+        <h1 class="display bl-topo__h1">{categoria.nome}</h1>
+        {categoria.descricao && <p class="lead bl-topo__sub">{categoria.descricao}</p>}
+
+        <div class="bl-filtros">
+          <a class="bl-filtro" href="/blog/">Todos</a>
+          {categorias.map((c) => (
+            <a class="bl-filtro" href={`/blog/categoria/${c.slug}/`}
+               aria-current={c.slug === categoria.slug ? 'page' : undefined}>{c.nome}</a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <Arquivo
+          posts={posts} pagina={1} paginas={paginas}
+          baseUrl={`/blog/categoria/${categoria.slug}`}
+          vazioTitulo="Ainda não há artigos nesta categoria."
+          vazioTexto="Estamos preparando conteúdo sobre este tema. Enquanto isso, veja os outros artigos do blog."
+        />
+
+        {categoria.lp_slug && (
+          <div class="bl-servico" style="margin-top:clamp(40px,6vh,64px)">
+            <p class="eyebrow">Tratamento relacionado</p>
+            <p class="bl-servico__t">{categoria.nome} na Akaki</p>
+            <p class="bl-servico__d">Veja como a clínica trata isso na prática, com tecnologia e sedação consciente.</p>
+            <div class="bl-servico__acoes">
+              <a class="btn btn--primary" href={`/${categoria.lp_slug}/`}>Ver o tratamento</a>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>

@@ -1,0 +1,119 @@
+---
+export const prerender = false;
+
+import Layout from '../../../layouts/Layout.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import Arquivo from '../../../components/blog/Arquivo.astro';
+import Migalhas from '../../../components/blog/Migalhas.astro';
+import { buscarAutor, listarPorAutor } from '../../../lib/blog/consultas';
+import { SITE, cro, perfilExterno, descricaoSeo } from '../../../lib/blog/formato';
+import '../../../styles/blog.css';
+
+const { autor: slug } = Astro.params;
+const autor = await buscarAutor(slug!);
+if (!autor) return new Response(null, { status: 404, headers: { Location: '/404' } });
+
+const { posts, paginas } = await listarPorAutor(autor.id, 1);
+const registro = cro(autor.cro, autor.cro_uf);
+const canonical = `${SITE}/blog/autor/${autor.slug}/`;
+
+// Página de autor é ativo de autoridade (E-E-A-T) em conteúdo de saúde — por
+// isso é indexável. Mas só faz sentido indexar quem tem bio de verdade;
+// perfil vazio seria página fina.
+const semBio = !autor.bio;
+
+const grafo = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  '@id': canonical,
+  url: canonical,
+  mainEntity: {
+    '@type': 'Person',
+    '@id': `${canonical}#pessoa`,
+    name: autor.nome,
+    url: canonical,
+    ...(autor.avatar_url ? { image: autor.avatar_url } : {}),
+    ...(autor.bio ? { description: autor.bio } : {}),
+    ...(autor.cargo ? { jobTitle: autor.cargo } : {}),
+    ...(registro ? { identifier: { '@type': 'PropertyValue', name: 'CRO', value: registro } } : {}),
+    ...(perfilExterno(autor.instagram_url) ? { sameAs: [perfilExterno(autor.instagram_url)!] } : {}),
+    worksFor: { '@type': ['Organization', 'Dentist'], '@id': `${SITE}/#dentist`, name: 'Akaki Odontologia' },
+  },
+};
+// Cargo curto: "Cirurgiao-dentista · Implantodontia e Sedacao" vira
+// "Cirurgiao-dentista". Cabe no titulo sem precisar cortar no meio da palavra.
+const cargoCurto = autor.cargo?.split('·')[0].trim() ?? '';
+const tituloAutor = [
+  `${autor.nome}${autor.cargo ? ` — ${autor.cargo}` : ''} | Akaki`,
+  `${autor.nome}${autor.cargo ? ` — ${autor.cargo}` : ''}`,
+  `${autor.nome}${cargoCurto ? ` — ${cargoCurto}` : ''} | Akaki Odontologia`,
+  `${autor.nome}${cargoCurto ? ` — ${cargoCurto}` : ''} | Akaki`,
+  `${autor.nome} | Akaki Odontologia`,
+  autor.nome,
+].find((t) => t.length <= 70) ?? autor.nome.slice(0, 70);
+---
+<Layout
+  title={tituloAutor}
+  description={autor.bio ? descricaoSeo(null, autor.bio, '') : `Artigos escritos por ${autor.nome} no blog da Akaki Odontologia.`}
+  canonical={canonical}
+  noindex={semBio}
+  preloadImage={null}
+  splash={false}
+  businessSchema={false}
+>
+  <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(grafo)} />
+
+  <Header />
+  <main data-service="Blog">
+    <section class="bl-topo">
+      <div class="container">
+        <Migalhas itens={[{ texto: 'Blog', href: '/blog/' }, { texto: autor.nome }]} />
+
+        <div class="au">
+          {autor.avatar_url && (
+            <div class="au__foto">
+              <img src={autor.avatar_url} alt={autor.avatar_alt ?? `Foto de ${autor.nome}`}
+                   width="200" height="200" loading="eager" decoding="async" />
+            </div>
+          )}
+          <div>
+            <p class="eyebrow">Autor</p>
+            <h1 class="display bl-topo__h1 au__nome">{autor.nome}</h1>
+            {(autor.cargo || registro) && (
+              <p class="au__cargo">{[autor.cargo, registro].filter(Boolean).join(' · ')}</p>
+            )}
+            {autor.bio && <p class="lead bl-topo__sub">{autor.bio}</p>}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <Arquivo
+          posts={posts} pagina={1} paginas={paginas}
+          baseUrl={`/blog/autor/${autor.slug}`}
+          vazioTitulo={`${autor.nome} ainda não publicou artigos.`}
+          vazioTexto="Assim que houver conteúdo assinado por este profissional, ele aparece aqui."
+        />
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .au { display: flex; align-items: center; gap: clamp(20px, 3vw, 36px); margin-top: 20px; }
+  .au__foto {
+    flex: 0 0 auto; width: clamp(88px, 11vw, 132px); aspect-ratio: 1;
+    border-radius: 50%; overflow: hidden; border: 1px solid rgba(211, 164, 108, 0.35);
+  }
+  .au__foto img { width: 100%; height: 100%; object-fit: cover; }
+  .au__nome { margin: 12px 0 8px; font-size: clamp(28px, 4.2vw, 46px); }
+  .au__cargo {
+    font-family: var(--sans); font-weight: 600; font-size: 11px;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 14px;
+  }
+  @media (max-width: 620px) { .au { flex-direction: column; align-items: flex-start; } }
+</style>

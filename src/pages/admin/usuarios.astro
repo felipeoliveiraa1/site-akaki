@@ -1,0 +1,283 @@
+---
+export const prerender = false;
+
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { ehAdmin, clienteAdministrativo, type Perfil } from '../../lib/supabase';
+
+const perfil = Astro.locals.perfil as Perfil;
+const supabase = Astro.locals.supabase!;
+
+// Dupla checagem: a tela some do menu para quem não é admin, mas esconder
+// botão não é autorização. Aqui é bloqueio de verdade — e o banco ainda
+// recusaria por conta própria.
+if (!ehAdmin(perfil.papel)) {
+  return new Response('Apenas administradores acessam a gestão de usuários.', { status: 403 });
+}
+
+let erro = '';
+let aviso = '';
+let emailNovo = '';
+// Credenciais recém-criadas, exibidas UMA vez para o admin repassar.
+let criado: { email: string; senha: string; nome: string } | null = null;
+
+/** Senha forte, mas legível o suficiente para ser digitada uma vez. */
+function gerarSenha() {
+  const silabas = ['ma','lu','ri','so','te','ve','na','ca','pi','do','fe','ju','be','gi','no','sa'];
+  const n = (max: number) => crypto.getRandomValues(new Uint32Array(1))[0] % max;
+  let s = '';
+  for (let i = 0; i < 4; i++) s += silabas[n(silabas.length)];
+  s = s.charAt(0).toUpperCase() + s.slice(1);
+  return `${s}-${100 + n(900)}`;
+}
+
+if (Astro.request.method === 'POST') {
+  const d = await Astro.request.formData();
+  const acao = String(d.get('acao') ?? '');
+  const admin = clienteAdministrativo();
+
+  if (!admin) {
+    erro = 'Falta a chave administrativa do banco (SUPABASE_SERVICE_ROLE_KEY) nas variáveis de ambiente.';
+  } else if (acao === 'criar') {
+    emailNovo = String(d.get('email') ?? '').trim().toLowerCase();
+    const nome = String(d.get('nome') ?? '').trim();
+    const papel = String(d.get('papel') ?? 'autor');
+    const senhaDigitada = String(d.get('senha') ?? '').trim();
+    const senha = senhaDigitada || gerarSenha();
+
+    if (!emailNovo || !nome) erro = 'Informe nome e e-mail.';
+    else if (!['admin', 'editor', 'autor'].includes(papel)) erro = 'Nível de acesso inválido.';
+    else if (senha.length < 8) erro = 'A senha precisa ter pelo menos 8 caracteres.';
+    else {
+      // Cria a conta já com senha e e-mail confirmado: não depende de o
+      // e-mail chegar. O serviço de e-mail embutido do Supabase tem limite
+      // baixo e não é para produção — o convite responde "enviado" mesmo
+      // quando nada é entregue, e a pessoa fica esperando sem saber.
+      const { data, error } = await admin.auth.admin.createUser({
+        email: emailNovo, password: senha, email_confirm: true,
+        user_metadata: { nome },
+      });
+      if (error) {
+        erro = error.message.toLowerCase().includes('already')
+          ? 'Este e-mail já tem conta.' : error.message;
+      } else if (data.user) {
+        // O papel vai numa escrita separada, com a sessão DO ADMIN logado.
+        // Nunca pelos metadados da conta: metadados são editáveis pelo
+        // próprio usuário, o que seria uma porta para se autopromover.
+        // E não pela chave administrativa: ela não tem identidade, e o
+        // gatilho de proteção exige um admin identificado.
+        const { error: erroPapel } = await supabase
+          .from('perfis').update({ papel }).eq('id', data.user.id);
+        if (erroPapel) {
+          erro = `Conta criada, mas o nível de acesso não foi aplicado (${erroPapel.message}). Ajuste na lista abaixo.`;
+        }
+        criado = { email: emailNovo, senha, nome };
+        aviso = 'Acesso criado. Envie os dados abaixo para a pessoa — eles não aparecerão de novo.';
+      }
+    }
+  } else if (acao === 'papel' || acao === 'ativo') {
+    const alvo = String(d.get('id') ?? '');
+    if (alvo === perfil.id) {
+      erro = 'Você não pode alterar o próprio acesso.';
+    } else {
+      const campos = acao === 'papel'
+        ? { papel: String(d.get('papel') ?? 'autor') }
+        : { ativo: d.get('valor') === '1' };
+      // Os gatilhos do banco ainda barram rebaixar o último admin.
+      const { error } = await supabase.from('perfis').update(campos).eq('id', alvo);
+      if (error) erro = error.message;
+      else return Astro.redirect('/admin/usuarios?ok=alterado', 303);
+    }
+  }
+  if (erro) Astro.response.status = 422;
+}
+
+const ok = Astro.url.searchParams.get('ok');
+if (ok === 'alterado') aviso = 'Acesso atualizado.';
+
+const { data: pessoas } = await supabase
+  .from('perfis')
+  .select('id, nome, slug, papel, ativo, cargo, cro, cro_uf')
+  .order('nome');
+
+const PAPEL = { admin: 'Administrador', editor: 'Editor', autor: 'Autor' } as const;
+const DESCR = {
+  admin: 'Tudo, inclusive criar e remover usuários.',
+  editor: 'Cria, edita e publica qualquer post.',
+  autor: 'Cria e edita os próprios posts; não publica.',
+} as const;
+---
+<AdminLayout titulo="Usuários" perfil={perfil}>
+  <div class="ad-cab">
+    <div>
+      <h1 class="ad-cab__t">Usuários</h1>
+      <p class="ad-cab__d">Quem tem acesso ao painel e o que cada pessoa pode fazer.</p>
+    </div>
+  </div>
+
+  {aviso && <div class="ad-aviso ad-aviso--ok" role="status">{aviso}</div>}
+  {erro && <div class="ad-aviso ad-aviso--erro" role="alert">{erro}</div>}
+
+  {criado && (
+    <div class="ad-card us-novo">
+      <p class="ad-card__t">Acesso criado — envie estes dados para {criado.nome}</p>
+      <div class="us-cred">
+        <div>
+          <span>Endereço</span>
+          <code id="cred-site">{Astro.url.origin}/admin/entrar</code>
+        </div>
+        <div>
+          <span>E-mail</span>
+          <code id="cred-email">{criado.email}</code>
+        </div>
+        <div>
+          <span>Senha</span>
+          <code id="cred-senha">{criado.senha}</code>
+        </div>
+      </div>
+      <button class="ad-btn ad-btn--g" type="button" id="cred-copiar" style="margin-top:16px">
+        Copiar tudo para enviar
+      </button>
+      <p class="ad-dica" style="margin-top:12px">
+        ⚠️ A senha não será exibida novamente. Peça para a pessoa trocá-la em
+        "Meu perfil" no primeiro acesso.
+      </p>
+    </div>
+  )}
+
+  <div class="ad-card">
+    <p class="ad-card__t">Criar acesso</p>
+    <form method="POST" class="us-conv">
+      <input type="hidden" name="acao" value="criar" />
+      <div class="ad-campo">
+        <label class="ad-rot" for="nome">Nome</label>
+        <input class="ad-in" id="nome" name="nome" placeholder="Dra. Amanda Aragão" required />
+      </div>
+      <div class="ad-campo" style="margin-top:0">
+        <label class="ad-rot" for="email">E-mail</label>
+        <input class="ad-in" id="email" name="email" type="email" value={emailNovo}
+               inputmode="email" autocomplete="off" required />
+      </div>
+      <div class="ad-campo" style="margin-top:0">
+        <label class="ad-rot" for="papel">Nível de acesso</label>
+        <select class="ad-sel" id="papel" name="papel">
+          <option value="autor">Autor</option>
+          <option value="editor">Editor</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+      <div class="ad-campo" style="margin-top:0">
+        <label class="ad-rot" for="senha">Senha <span>— deixe vazio para gerar</span></label>
+        <input class="ad-in" id="senha" name="senha" autocomplete="new-password" placeholder="gerada automaticamente" />
+      </div>
+      <button class="ad-btn ad-btn--p" type="submit">Criar acesso</button>
+    </form>
+    <p class="ad-dica" style="margin-top:12px">
+      A conta é criada na hora, com e-mail e senha prontos para você repassar.
+      Não depende de e-mail chegar — o envio automático do Supabase tem limite
+      baixo e não é confiável para produção.
+    </p>
+  </div>
+
+  <div class="us-legenda">
+    {(['admin', 'editor', 'autor'] as const).map((p) => (
+      <div><strong>{PAPEL[p]}</strong><span>{DESCR[p]}</span></div>
+    ))}
+  </div>
+
+  <ul class="ad-lista" style="margin-top:16px">
+    {(pessoas ?? []).map((u: any) => (
+      <li class="ad-linha" style="grid-template-columns:minmax(0,1fr) auto auto">
+        <div>
+          <p class="ad-linha__t" style="font-size:16px">
+            {u.nome}
+            {u.id === perfil.id && <span class="ad-marca ad-marca--revisao" style="margin-left:8px">você</span>}
+            {!u.ativo && <span class="ad-marca ad-marca--rascunho" style="margin-left:8px">desativado</span>}
+          </p>
+          <p class="ad-linha__meta">
+            {[u.cargo, u.cro ? `CRO-${u.cro_uf ?? ''} ${u.cro}` : null].filter(Boolean).join(' · ') || '—'}
+          </p>
+        </div>
+
+        <form method="POST">
+          <input type="hidden" name="acao" value="papel" />
+          <input type="hidden" name="id" value={u.id} />
+          <select class="ad-sel" name="papel" onchange="this.form.requestSubmit()"
+                  disabled={u.id === perfil.id} aria-label={`Nível de acesso de ${u.nome}`}
+                  style="min-width:160px">
+            {(['autor', 'editor', 'admin'] as const).map((p) => (
+              <option value={p} selected={u.papel === p}>{PAPEL[p]}</option>
+            ))}
+          </select>
+          <noscript><button class="ad-btn ad-btn--f" type="submit">Aplicar</button></noscript>
+        </form>
+
+        <form method="POST">
+          <input type="hidden" name="acao" value="ativo" />
+          <input type="hidden" name="id" value={u.id} />
+          <input type="hidden" name="valor" value={u.ativo ? '0' : '1'} />
+          <button class={`ad-btn ${u.ativo ? 'ad-btn--per' : 'ad-btn--f'}`} type="submit"
+                  disabled={u.id === perfil.id}>
+            {u.ativo ? 'Desativar' : 'Reativar'}
+          </button>
+        </form>
+      </li>
+    ))}
+  </ul>
+</AdminLayout>
+
+<style is:global>
+  .us-conv { display: grid; grid-template-columns: 1.1fr 1.3fr 0.9fr 1fr auto; gap: 12px; align-items: end; }
+
+  .us-novo { border-color: rgba(107, 125, 94, 0.5); background: rgba(107, 125, 94, 0.06); }
+  .us-cred { display: grid; gap: 10px; }
+  .us-cred > div { display: grid; grid-template-columns: 90px 1fr; gap: 12px; align-items: center; }
+  .us-cred span {
+    font-family: var(--sans); font-weight: 600; font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--navy-ghost);
+  }
+  .us-cred code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px;
+    background: #fff; border: 1px solid rgba(24, 39, 60, 0.14); border-radius: 8px;
+    padding: 9px 12px; color: var(--navy); overflow-wrap: anywhere; user-select: all;
+  }
+  .us-conv .ad-btn { min-height: 46px; }
+  .us-legenda {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px;
+  }
+  .us-legenda div {
+    background: #fff; border: 1px solid rgba(24, 39, 60, 0.1); border-radius: 12px; padding: 14px 16px;
+  }
+  .us-legenda strong {
+    display: block; font-family: var(--sans); font-size: 10.5px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--gold-dark); margin-bottom: 5px;
+  }
+  .us-legenda span { font-size: 13px; color: var(--navy-soft); line-height: 1.5; }
+  @media (max-width: 1140px) { .us-conv { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 980px) {
+    .us-conv { grid-template-columns: 1fr; }
+    .us-legenda { grid-template-columns: 1fr; }
+    .us-cred > div { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>
+
+<script>
+  document.getElementById('cred-copiar')?.addEventListener('click', async (e) => {
+    const botao = e.currentTarget as HTMLButtonElement;
+    const texto = [
+      'Seu acesso ao blog da Akaki:',
+      '',
+      'Endereço: ' + (document.getElementById('cred-site')?.textContent ?? ''),
+      'E-mail: ' + (document.getElementById('cred-email')?.textContent ?? ''),
+      'Senha: ' + (document.getElementById('cred-senha')?.textContent ?? ''),
+      '',
+      'Troque a senha em "Meu perfil" no primeiro acesso.',
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(texto);
+      botao.textContent = 'Copiado ✓';
+      setTimeout(() => { botao.textContent = 'Copiar tudo para enviar'; }, 2500);
+    } catch {
+      botao.textContent = 'Não foi possível copiar — selecione o texto acima';
+    }
+  });
+</script>

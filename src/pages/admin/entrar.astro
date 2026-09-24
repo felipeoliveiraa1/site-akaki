@@ -1,0 +1,108 @@
+---
+export const prerender = false;
+
+import Wordmark from '../../components/Wordmark.astro';
+import { clienteDeSessao, supabaseConfigurado } from '../../lib/supabase';
+import '../../styles/fonts.css';
+import '@fontsource/montserrat/latin-500.css';
+import '@fontsource/montserrat/latin-600.css';
+import '@fontsource/roboto/latin-300.css';
+import '@fontsource/roboto/latin-400.css';
+import '../../styles/admin.css';
+
+let erro = '';
+let email = '';
+
+// Só aceita destino interno do admin: sem isso, `?proximo=https://…` viraria
+// um redirecionamento para fora do site usando nosso domínio como isca.
+const bruto = Astro.url.searchParams.get('proximo') ?? '/admin/posts';
+const proximo = /^\/admin(\/|$)/.test(bruto) && !bruto.startsWith('//') ? bruto : '/admin/posts';
+
+if (Astro.url.searchParams.get('motivo') === 'inativo') {
+  erro = 'Seu acesso foi desativado. Fale com o administrador do blog.';
+}
+
+if (Astro.request.method === 'POST' && !supabaseConfigurado) {
+  erro = 'O blog ainda não está conectado ao banco de dados.';
+} else if (Astro.request.method === 'POST') {
+  const dados = await Astro.request.formData();
+  email = String(dados.get('email') ?? '').trim();
+  const senha = String(dados.get('senha') ?? '');
+
+  if (!email || !senha) {
+    erro = 'Preencha e-mail e senha.';
+  } else {
+    const supabase = clienteDeSessao(Astro.cookies, Astro.request);
+    const { error } = await supabase!.auth.signInWithPassword({ email, password: senha });
+    // Mensagem única de propósito: dizer "este e-mail não existe" revelaria
+    // quais endereços têm conta.
+    if (error) erro = 'E-mail ou senha incorretos.';
+    else return Astro.redirect(proximo, 302);
+  }
+  Astro.response.status = erro ? 401 : 200;
+}
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Entrar · Admin Akaki</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  </head>
+  <body>
+    <main class="ad-entrar">
+      <div class="ad-entrar__cx">
+        <div class="ad-entrar__marca"><Wordmark /></div>
+        <h1 class="ad-entrar__t">Painel do blog</h1>
+        <p class="ad-entrar__d">Entre para escrever e publicar.</p>
+
+        {!supabaseConfigurado && (
+          <div class="ad-aviso ad-aviso--erro" role="status">
+            <strong>Configuração pendente.</strong>
+            <p style="margin-top:6px">
+              Falta conectar o banco de dados. Crie o projeto no Supabase, rode o
+              arquivo <code>supabase/migrations/001_blog.sql</code> e preencha as
+              chaves em <code>.env</code> (modelo em <code>.env.example</code>).
+            </p>
+          </div>
+        )}
+
+        {erro && <div class="ad-aviso ad-aviso--erro" role="alert">{erro}</div>}
+
+        <form method="POST">
+          <div class="ad-campo">
+            <label class="ad-rot" for="email">E-mail</label>
+            <input class="ad-in" id="email" name="email" type="email" value={email}
+                   autocomplete="username" inputmode="email" required autofocus />
+          </div>
+          <div class="ad-campo">
+            <label class="ad-rot" for="senha">Senha</label>
+            <input class="ad-in" id="senha" name="senha" type="password"
+                   autocomplete="current-password" required />
+          </div>
+          <button class="ad-btn ad-btn--p" type="submit" style="width:100%;margin-top:22px">
+            Entrar
+          </button>
+        </form>
+
+        <p class="ad-dica" style="text-align:center;margin-top:18px">
+          Esqueceu a senha? Peça ao administrador do blog para enviar um novo acesso.
+        </p>
+      </div>
+    </main>
+
+    <script>
+      document.addEventListener('submit', (e) => {
+        const f = e.target as HTMLFormElement;
+        if (f.dataset.enviando) { e.preventDefault(); return; }
+        f.dataset.enviando = '1';
+        requestAnimationFrame(() => {
+          const b = f.querySelector<HTMLButtonElement>('button[type=submit]');
+          if (b) { b.setAttribute('aria-busy', 'true'); b.textContent = 'Entrando…'; }
+        });
+      });
+    </script>
+  </body>
+</html>
