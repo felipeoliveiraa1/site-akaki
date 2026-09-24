@@ -14,7 +14,7 @@ const { autor: slug } = Astro.params;
 const autor = await buscarAutor(slug!);
 if (!autor) return new Response(null, { status: 404, headers: { Location: '/404' } });
 
-const { posts, paginas } = await listarPorAutor(autor.slug, 1);
+const { posts, paginas } = await listarPorAutor(autor.id, 1);
 const registro = cro(autor.cro, autor.cro_uf);
 const canonical = `${SITE}/blog/autor/${autor.slug}/`;
 

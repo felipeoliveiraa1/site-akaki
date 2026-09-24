@@ -109,11 +109,19 @@ async function paginar(
 
 export const listarPosts = (pagina = 1) => paginar((q) => q, pagina);
 
-export const listarPorCategoria = (slug: string, pagina = 1) =>
-  paginar((q) => q.eq('categorias.slug', slug).not('categoria_id', 'is', null), pagina);
+// Filtram pela coluna da própria tabela `posts`, nunca pelo embed.
+//
+// Antes filtravam por `categorias.slug` / `perfis.slug`: o PostgREST aceita
+// isso calado, mas sem `!inner` um filtro em tabela embutida NÃO descarta a
+// linha principal — só esvazia o embed. Resultado: toda categoria listava
+// todos os posts. Como os embeds ainda são aliasados (`categoria:`, e dois
+// `perfis` distintos para autor e revisor), o caminho por id é o único que
+// não depende de acertar o nome do embed.
+export const listarPorCategoria = (categoriaId: string, pagina = 1) =>
+  paginar((q) => q.eq('categoria_id', categoriaId), pagina);
 
-export const listarPorAutor = (slug: string, pagina = 1) =>
-  paginar((q) => q.eq('perfis.slug', slug), pagina);
+export const listarPorAutor = (autorId: string, pagina = 1) =>
+  paginar((q) => q.eq('autor_id', autorId), pagina);
 
 export async function buscarPost(slug: string): Promise<Post | null> {
   const q = base();
@@ -211,7 +219,13 @@ export async function entradasSitemap() {
     sb.from('posts').select('slug, publicado_em, atualizado_em')
       .eq('status', 'publicado').lte('publicado_em', new Date().toISOString())
       .order('publicado_em', { ascending: false }),
-    sb.from('categorias').select('slug').order('ordem'),
+    // !inner + filtro no embed = só as categorias que já têm post publicado.
+    // Categoria vazia no sitemap é página sem conteúdo oferecida ao Google
+    // logo na estreia do blog — vira "rastreada, não indexada" e nada mais.
+    sb.from('categorias').select('slug, posts!inner(id)')
+      .eq('posts.status', 'publicado')
+      .lte('posts.publicado_em', new Date().toISOString())
+      .order('ordem'),
     sb.from('perfis').select('slug').eq('ativo', true).not('bio', 'is', null),
   ]);
   return {

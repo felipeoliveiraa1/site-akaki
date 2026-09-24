@@ -15,18 +15,29 @@ const categoria = await buscarCategoria(cat!);
 if (!categoria) return new Response(null, { status: 404, headers: { Location: '/404' } });
 
 const [{ posts, paginas }, categorias] = await Promise.all([
-  listarPorCategoria(categoria.slug, 1),
+  listarPorCategoria(categoria.id, 1),
   listarCategorias(),
 ]);
 
 const titulo = categoria.seo_titulo ?? `${categoria.nome} · Blog | Akaki Odontologia`;
 const descricao = categoria.seo_descricao ?? categoria.descricao
   ?? `Artigos sobre ${categoria.nome.toLowerCase()} escritos pelos especialistas da Akaki Odontologia.`;
+
+// Categoria ainda sem artigo é uma página sem conteúdo: indexá-la só gasta
+// orçamento de rastreio e entrega ao Google uma página vazia. Volta a ser
+// indexável sozinha assim que o primeiro post da categoria for publicado.
+const semPosts = posts.length === 0;
+
+// Maior variação que cabe em 70, em vez de cortar no meio da palavra.
+const tituloCat = [titulo, `${categoria.nome} · Blog | Akaki`,
+  `${categoria.nome} | Akaki Odontologia`, categoria.nome]
+  .find((t) => t.length <= 70) ?? categoria.nome.slice(0, 70);
 ---
 <Layout
-  title={titulo.slice(0, 70)}
+  title={tituloCat}
   description={descricao}
   canonical={`${SITE}/blog/categoria/${categoria.slug}/`}
+  noindex={semPosts}
   preloadImage={null}
   splash={false}
   businessSchema={false}
