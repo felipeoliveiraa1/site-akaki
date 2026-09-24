@@ -7,7 +7,7 @@ import Footer from '../../../components/Footer.astro';
 import Arquivo from '../../../components/blog/Arquivo.astro';
 import Migalhas from '../../../components/blog/Migalhas.astro';
 import { buscarAutor, listarPorAutor } from '../../../lib/blog/consultas';
-import { SITE, cro, perfilExterno } from '../../../lib/blog/formato';
+import { SITE, cro, perfilExterno, descricaoSeo } from '../../../lib/blog/formato';
 import '../../../styles/blog.css';
 
 const { autor: slug } = Astro.params;
@@ -41,10 +41,21 @@ const grafo = {
     worksFor: { '@type': ['Organization', 'Dentist'], '@id': `${SITE}/#dentist`, name: 'Akaki Odontologia' },
   },
 };
+// Cargo curto: "Cirurgiao-dentista · Implantodontia e Sedacao" vira
+// "Cirurgiao-dentista". Cabe no titulo sem precisar cortar no meio da palavra.
+const cargoCurto = autor.cargo?.split('·')[0].trim() ?? '';
+const tituloAutor = [
+  `${autor.nome}${autor.cargo ? ` — ${autor.cargo}` : ''} | Akaki`,
+  `${autor.nome}${autor.cargo ? ` — ${autor.cargo}` : ''}`,
+  `${autor.nome}${cargoCurto ? ` — ${cargoCurto}` : ''} | Akaki Odontologia`,
+  `${autor.nome}${cargoCurto ? ` — ${cargoCurto}` : ''} | Akaki`,
+  `${autor.nome} | Akaki Odontologia`,
+  autor.nome,
+].find((t) => t.length <= 70) ?? autor.nome.slice(0, 70);
 ---
 <Layout
-  title={`${autor.nome}${autor.cargo ? ` — ${autor.cargo}` : ''} | Akaki`.slice(0, 70)}
-  description={autor.bio?.slice(0, 158) ?? `Artigos escritos por ${autor.nome} no blog da Akaki Odontologia.`}
+  title={tituloAutor}
+  description={autor.bio ? descricaoSeo(null, autor.bio, '') : `Artigos escritos por ${autor.nome} no blog da Akaki Odontologia.`}
   canonical={canonical}
   noindex={semBio}
   preloadImage={null}
