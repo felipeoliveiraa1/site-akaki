@@ -16,6 +16,25 @@ export default defineConfig({
   // por isso o CSS do blog mora em layouts próprios do blog.
   build: { inlineStylesheets: 'always' },
 
+  vite: {
+    ssr: {
+      /**
+       * `sanitize-html` é CommonJS e faz require('htmlparser2'), que da v11 em
+       * diante é ESM puro. O Node 24 aceita esse require; o runtime da Vercel
+       * usa um carregador próprio que não aceita, e a função morria com
+       * ERR_REQUIRE_ESM antes mesmo de executar a página — 500 sem corpo, só
+       * no editor de posts, que é a única rota que importa o sanitizador.
+       *
+       * Empacotar em vez de deixar para o require do runtime resolve na raiz:
+       * o Rollup converte o CommonJS na hora do build e o htmlparser2 entra
+       * como ESM. Fica a versão corrigida do sanitize-html — travar numa
+       * anterior reabriria dois XSS, um deles justamente de bypass de
+       * allowedTags, no componente cuja função é impedir XSS.
+       */
+      noExternal: ['sanitize-html', 'htmlparser2'],
+    },
+  },
+
   // Redirects 301 declarados AQUI (e não só no vercel.json) para garantir que
   // entrem no build output do adapter. A documentação da Vercel não é explícita
   // sobre o vercel.json ser mesclado ao config.json gerado, e são 12 redirects
