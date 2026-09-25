@@ -9,21 +9,72 @@ const perfil = Astro.locals.perfil as Perfil;
 const supabase = Astro.locals.supabase!;
 const { id } = Astro.params;
 
-const { data: post, error: erroCarga } = await supabase
-  .from('posts')
-  .select('*')
-  .eq('id', id!)
-  .maybeSingle();
-
-if (erroCarga || !post) {
-  return new Response('Post não encontrado ou sem permissão de acesso.', { status: 404 });
+/**
+ * Tela de erro no lugar do 500 cru do navegador.
+ *
+ * Quem está escrevendo precisa entender o que aconteceu e, principalmente,
+ * saber que o texto não sumiu — "HTTP ERROR 500" não diz nenhuma das duas
+ * coisas. O detalhe técnico aparece porque isto é área restrita: só quem já
+ * está autenticado no painel chega aqui.
+ */
+function telaDeFalha(detalhe: string): Response {
+  const seguro = detalhe.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]!));
+  return new Response(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow"><title>Erro ao abrir o post · Admin Akaki</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#F7F4EE;
+color:#18273C;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:24px}
+.cx{max-width:560px;background:#F4EEE3;border:1px solid rgba(24,39,60,.12);border-radius:20px;padding:32px}
+h1{font-size:22px;margin:0 0 12px}p{margin:0 0 14px}code{display:block;background:rgba(24,39,60,.06);
+padding:12px;border-radius:10px;font-size:13px;overflow-wrap:anywhere;margin:14px 0}
+a{color:#18273C;font-weight:600}</style></head><body><div class="cx">
+<h1>Não foi possível abrir este post</h1>
+<p>O conteúdo salvo não foi perdido — a falha foi ao carregar a tela de edição.</p>
+<code>${seguro}</code>
+<p><a href="/admin/posts">← Voltar para a lista de posts</a></p>
+</div></body></html>`, {
+    status: 500,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'X-Robots-Tag': 'noindex, nofollow',
+      'Cache-Control': 'private, no-store',
+    },
+  });
 }
 
-const [{ data: categorias }, { data: tagsTodas }, { data: vinculos }] = await Promise.all([
-  supabase.from('categorias').select('id, nome, slug').order('ordem'),
-  supabase.from('tags').select('id, nome, slug').order('nome'),
-  supabase.from('post_tags').select('tag_id').eq('post_id', id!),
-]);
+let post: any;
+let categorias: any[] = [];
+let tagsTodas: any[] = [];
+let vinculos: any[] = [];
+
+try {
+  const { data, error } = await supabase.from('posts').select('*').eq('id', id!).maybeSingle();
+  if (error) throw new Error(`Falha ao consultar o post: ${error.message}`);
+  post = data;
+
+  if (post) {
+    const [c, t, v] = await Promise.all([
+      supabase.from('categorias').select('id, nome, slug').order('ordem'),
+      supabase.from('tags').select('id, nome, slug').order('nome'),
+      supabase.from('post_tags').select('tag_id').eq('post_id', id!),
+    ]);
+    if (c.error) throw new Error(`Falha ao consultar categorias: ${c.error.message}`);
+    if (t.error) throw new Error(`Falha ao consultar tags: ${t.error.message}`);
+    if (v.error) throw new Error(`Falha ao consultar as tags do post: ${v.error.message}`);
+    categorias = c.data ?? [];
+    tagsTodas = t.data ?? [];
+    vinculos = v.data ?? [];
+  }
+} catch (e: any) {
+  // Vai para os logs da função — é o que permite diagnosticar sem o usuário
+  // ter de reproduzir o problema.
+  console.error('[admin/editor] falha ao carregar o post', id, e);
+  return telaDeFalha(e?.message ? `${e.message}` : String(e));
+}
+
+if (!post) {
+  return new Response('Post não encontrado ou sem permissão de acesso.', { status: 404 });
+}
 
 const tagsAtuais = new Set((vinculos ?? []).map((v: any) => v.tag_id));
 const podePub = podePublicar(perfil.papel);
