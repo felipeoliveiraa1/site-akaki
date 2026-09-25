@@ -31,7 +31,17 @@ export default defineConfig({
        * anterior reabriria dois XSS, um deles justamente de bypass de
        * allowedTags, no componente cuja função é impedir XSS.
        */
-      noExternal: ['sanitize-html', 'htmlparser2'],
+      noExternal: [
+        'sanitize-html',
+        // A arvore inteira do sanitize-html precisa entrar junto. Empacotar so
+        // ele fez o rastreador da Vercel parar de enxergar o que ele carrega
+        // por require, e a funcao subiu sem esses pacotes:
+        // "Cannot find module 'escape-string-regexp'".
+        'htmlparser2', 'deepmerge', 'escape-string-regexp',
+        'is-plain-object', 'parse-srcset', 'postcss', 'launder',
+        // ...e o que o postcss carrega:
+        'nanoid', 'picocolors', 'source-map-js', 'dayjs',
+      ],
     },
   },
 
