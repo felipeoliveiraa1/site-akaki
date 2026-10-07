@@ -236,6 +236,13 @@ if (ok) {
     : 'Alterações salvas.';
 }
 
+// Mesma tolerância do aviso pós-envio: 16:9 é a proporção das molduras do blog.
+const foraDe169 = (() => {
+  const l = Number(valores.capa_largura), a = Number(valores.capa_altura);
+  if (!l || !a) return false;
+  return Math.abs(l / a - 16 / 9) > 0.06;
+})();
+
 const ROTULO = { rascunho: 'Rascunho', revisao: 'Em revisão', publicado: 'Publicado' } as const;
 const listaErros = Object.entries(erros);
 ---
@@ -416,6 +423,14 @@ const listaErros = Object.entries(erros);
 
       <div class="ad-card">
         <p class="ad-card__t">Imagem de capa</p>
+        <p class="ad-dica cap__guia">
+          Tamanho ideal: <strong>1600 × 900 px</strong> (proporção 16:9, formato
+          “deitado”). O que vier em outra proporção entra cortado nas laterais
+          ou em cima e embaixo na listagem do blog — se a arte tiver texto, são
+          justamente as palavras das pontas que somem.
+          <br />Arquivo grande não é problema: o tamanho é reduzido aqui mesmo antes
+          de subir. JPG, PNG ou WebP, até 25 MB.
+        </p>
 
         <div class="cap" id="cap" data-post={id}>
           <!-- O rótulo envolve o campo de arquivo: já é clicável e acessível
@@ -426,7 +441,7 @@ const listaErros = Object.entries(erros);
               <path d="M12 16V4m0 0L8 8m4-4l4 4" /><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
             </svg>
             <span class="cap__t">Escolher imagem do computador</span>
-            <span class="cap__d">ou arraste o arquivo até aqui · JPG, PNG ou WebP</span>
+            <span class="cap__d">ou arraste o arquivo até aqui · 1600 × 900 px (16:9)</span>
           </label>
 
           <div class="cap__previa" id="cap-previa" hidden={!valores.capa_url}>
@@ -436,7 +451,12 @@ const listaErros = Object.entries(erros);
               <button type="button" class="ad-btn ad-btn--per" id="cap-remover">Remover</button>
             </div>
             <p class="ad-dica" id="cap-medidas">
-              {valores.capa_largura ? `${valores.capa_largura} × ${valores.capa_altura} px` : ''}
+              {valores.capa_largura && (
+                <>
+                  {valores.capa_largura} × {valores.capa_altura} px
+                  {foraDe169 && <> — <strong>fora de 16:9</strong>: nas listagens esta capa vai aparecer cortada.</>}
+                </>
+              )}
             </p>
           </div>
 
@@ -494,6 +514,9 @@ const listaErros = Object.entries(erros);
   .ed-tags { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 
   /* ——— envio de imagem ——— */
+  .cap__guia { margin: -4px 0 14px; line-height: 1.55; max-width: 54ch; }
+  .cap__guia strong { color: var(--navy); font-weight: 600; }
+
   .cap__zona {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 7px; min-height: 152px; padding: 20px; cursor: pointer; text-align: center;
@@ -752,6 +775,16 @@ const listaErros = Object.entries(erros);
     const fA = document.getElementById('c-capa_altura') as HTMLInputElement | null;
 
     if (cap && zona && campoArq && previa && img && fUrl && fL && fA) {
+      // 16:9 é a proporção das molduras do blog. Fora dela o object-fit corta,
+      // e quem subiu a imagem não tem como adivinhar isso olhando a prévia —
+      // que mostra a capa já enquadrada.
+      const medidasComAviso = (l: number, a: number) => {
+        const txt = `${l} × ${a} px`;
+        const desvio = Math.abs(l / a - 16 / 9);
+        return desvio <= 0.06 ? txt
+          : `${txt} — <strong>fora de 16:9</strong>: nas listagens esta capa vai aparecer cortada.`;
+      };
+
       const dizer = (msg: string, tipo = '') => {
         if (!estado) return;
         estado.textContent = msg;
@@ -770,7 +803,7 @@ const listaErros = Object.entries(erros);
           });
           fUrl!.value = r.url; fL!.value = String(r.largura); fA!.value = String(r.altura);
           img!.src = r.url;
-          if (medidas) medidas.textContent = `${r.largura} × ${r.altura} px`;
+          if (medidas) medidas.innerHTML = medidasComAviso(r.largura, r.altura);
           zona!.hidden = true; previa!.hidden = false;
           dizer('Imagem pronta. Descreva-a no campo abaixo e salve o post.', 'ok');
         } catch (e) {

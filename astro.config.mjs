@@ -7,6 +7,48 @@ import vercel from '@astrojs/vercel';
 // O adapter só habilita a capacidade de renderizar no servidor — quem entra
 // nesse modo é cada arquivo que declara `export const prerender = false`
 // (as rotas do blog e do admin). As 7 páginas institucionais não mudam.
+/**
+ * Empacota o sanitizador (e a árvore dele) dentro da função — só no build.
+ *
+ * Por que empacotar: `sanitize-html` é CommonJS e faz require('htmlparser2'),
+ * que da v11 em diante é ESM puro. O Node aceita esse require; o runtime da
+ * Vercel usa um carregador próprio que não aceita, e a função morria com
+ * ERR_REQUIRE_ESM antes de executar a página — 500 sem corpo, só no editor de
+ * posts, a única rota que importa o sanitizador. Travar o sanitize-html numa
+ * versão anterior resolveria o carregamento e reabriria dois XSS, um deles de
+ * bypass de allowedTags, no componente cuja função é impedir XSS.
+ *
+ * Por que só no build: em `astro dev` o Vite serve esses pacotes sem converter
+ * o CommonJS, e o editor passou a quebrar com "require is not defined". No dev
+ * eles seguem externos, resolvidos pelo Node — que aceita require de ESM.
+ *
+ * A lista traz as dependências do sanitize-html e as do postcss: ao deixar de
+ * ser import externo, o rastreador da Vercel parou de enxergá-las e a função
+ * subiu sem elas ("Cannot find module 'escape-string-regexp'").
+ */
+function empacotaSanitizador() {
+  return {
+    name: 'akaki:empacota-sanitizador',
+    hooks: {
+      'astro:config:setup': ({ command, updateConfig }) => {
+        if (command !== 'build') return;
+        updateConfig({
+          vite: {
+            ssr: {
+              noExternal: [
+                'sanitize-html',
+                'htmlparser2', 'deepmerge', 'escape-string-regexp',
+                'is-plain-object', 'parse-srcset', 'postcss', 'launder',
+                'nanoid', 'picocolors', 'source-map-js', 'dayjs',
+              ],
+            },
+          },
+        });
+      },
+    },
+  };
+}
+
 export default defineConfig({
   site: 'https://www.akaki.odo.br',
   compressHTML: true,
@@ -15,35 +57,6 @@ export default defineConfig({
   // Cuidado: CSS importado no Layout global é embutido em TODA página —
   // por isso o CSS do blog mora em layouts próprios do blog.
   build: { inlineStylesheets: 'always' },
-
-  vite: {
-    ssr: {
-      /**
-       * `sanitize-html` é CommonJS e faz require('htmlparser2'), que da v11 em
-       * diante é ESM puro. O Node 24 aceita esse require; o runtime da Vercel
-       * usa um carregador próprio que não aceita, e a função morria com
-       * ERR_REQUIRE_ESM antes mesmo de executar a página — 500 sem corpo, só
-       * no editor de posts, que é a única rota que importa o sanitizador.
-       *
-       * Empacotar em vez de deixar para o require do runtime resolve na raiz:
-       * o Rollup converte o CommonJS na hora do build e o htmlparser2 entra
-       * como ESM. Fica a versão corrigida do sanitize-html — travar numa
-       * anterior reabriria dois XSS, um deles justamente de bypass de
-       * allowedTags, no componente cuja função é impedir XSS.
-       */
-      noExternal: [
-        'sanitize-html',
-        // A arvore inteira do sanitize-html precisa entrar junto. Empacotar so
-        // ele fez o rastreador da Vercel parar de enxergar o que ele carrega
-        // por require, e a funcao subiu sem esses pacotes:
-        // "Cannot find module 'escape-string-regexp'".
-        'htmlparser2', 'deepmerge', 'escape-string-regexp',
-        'is-plain-object', 'parse-srcset', 'postcss', 'launder',
-        // ...e o que o postcss carrega:
-        'nanoid', 'picocolors', 'source-map-js', 'dayjs',
-      ],
-    },
-  },
 
   // Redirects 301 declarados AQUI (e não só no vercel.json) para garantir que
   // entrem no build output do adapter. A documentação da Vercel não é explícita
@@ -63,6 +76,7 @@ export default defineConfig({
   },
 
   integrations: [
+    empacotaSanitizador(),
     sitemap({
       // Admin e API jamais podem ser indexados.
       filter: (page) => !page.includes('/admin') && !page.includes('/api/'),
