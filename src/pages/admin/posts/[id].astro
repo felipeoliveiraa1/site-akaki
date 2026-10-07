@@ -3,6 +3,7 @@ export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { podePublicar, type Perfil } from '../../../lib/supabase';
+import { revalidar, caminhosDoPost } from '../../../lib/blog/revalidar';
 import { renderizarConteudo, imagensSemAlt } from '../../../lib/editor/renderizar';
 
 const perfil = Astro.locals.perfil as Perfil;
@@ -48,9 +49,19 @@ let tagsTodas: any[] = [];
 let vinculos: any[] = [];
 
 try {
-  const { data, error } = await supabase.from('posts').select('*').eq('id', id!).maybeSingle();
+  const { data, error } = await supabase.from('posts')
+    .select('*, autor:perfis!posts_autor_id_fkey(slug), categoria:categorias(slug)')
+    .eq('id', id!).maybeSingle();
   if (error) throw new Error(`Falha ao consultar o post: ${error.message}`);
   post = data;
+  if (post) {
+    // O PostgREST devolve a relação como objeto ou array conforme a
+    // cardinalidade; normalizar evita um `undefined` silencioso na hora de
+    // montar os caminhos a revalidar.
+    const um = (v: any) => (Array.isArray(v) ? v[0] ?? null : v ?? null);
+    post.autor = um(post.autor);
+    post.categoria = um(post.categoria);
+  }
 
   if (post) {
     const [c, t, v] = await Promise.all([
@@ -102,6 +113,11 @@ if (Astro.request.method === 'POST') {
     if (error) {
       erros.geral = `Não foi possível excluir: ${error.message}`;
     } else {
+      await revalidar(caminhosDoPost({
+        slug: post.slug,
+        categoriaSlug: post.categoria?.slug,
+        autorSlug: post.autor?.slug,
+      }));
       return Astro.redirect('/admin/posts?ok=excluido', 303);
     }
   }
@@ -194,6 +210,17 @@ if (Astro.request.method === 'POST') {
         await supabase.from('post_tags')
           .insert(tagsEscolhidas.map((t) => ({ post_id: id!, tag_id: t })));
       }
+      // Limpa o cache de borda antes de redirecionar. Sem isto, o artigo
+      // publicado só entraria na listagem quando o ISR vencesse sozinho — foi
+      // o que aconteceu com o primeiro post do Alan.
+      await revalidar(caminhosDoPost({
+        slug: valores.slug,
+        slugAnterior: post.slug,
+        categoriaSlug: categorias.find((c: any) => c.id === valores.categoria_id)?.slug,
+        categoriaAnterior: post.categoria?.slug,
+        autorSlug: post.autor?.slug,
+      }));
+
       // Redireciona depois de salvar: recarregar a página não reenvia nada.
       return Astro.redirect(`/admin/posts/${id}?ok=${acao}`, 303);
     }

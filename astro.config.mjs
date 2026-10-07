@@ -72,9 +72,12 @@ export default defineConfig({
   adapter: vercel({
     isr: {
       // Páginas do blog ficam cacheadas na borda como se fossem estáticas.
-      // O cache é invalidado na hora ao publicar (via /api/revalidate), então
-      // esta expiração é só uma rede de segurança.
-      expiration: 60 * 60 * 24,
+      // O admin limpa o cache das páginas afetadas a cada publicação
+      // (src/lib/blog/revalidar.ts), então isto é só rede de segurança — mas
+      // ficava em 24h, e quando a limpeza ainda não existia um artigo recém
+      // publicado passou horas fora da listagem. Uma hora é um teto tolerável
+      // para o caso de a limpeza falhar.
+      expiration: 60 * 60,
       bypassToken: process.env.VERCEL_ISR_BYPASS_TOKEN,
       exclude: [
         // ⚠️ O ISR da Vercel DESCARTA query params. A busca depende de ?q=,
