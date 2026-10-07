@@ -426,7 +426,7 @@ const listaErros = Object.entries(erros);
         <p class="ad-dica cap__guia">
           Tamanho ideal: <strong>1600 × 900 px</strong> (proporção 16:9, formato
           “deitado”). O que vier em outra proporção entra cortado nas laterais
-          ou em cima e embaixo na listagem do blog — se a arte tiver texto, são
+          ou em cima e embaixo na listagem do blog. Se a arte tiver texto, são
           justamente as palavras das pontas que somem.
           <br />Arquivo grande não é problema: o tamanho é reduzido aqui mesmo antes
           de subir. JPG, PNG ou WebP, até 25 MB.
@@ -454,7 +454,7 @@ const listaErros = Object.entries(erros);
               {valores.capa_largura && (
                 <>
                   {valores.capa_largura} × {valores.capa_altura} px
-                  {foraDe169 && <> — <strong>fora de 16:9</strong>: nas listagens esta capa vai aparecer cortada.</>}
+                  {foraDe169 && <>. <strong>Fora de 16:9</strong>: nas listagens esta capa vai aparecer cortada.</>}
                 </>
               )}
             </p>
@@ -782,7 +782,7 @@ const listaErros = Object.entries(erros);
         const txt = `${l} × ${a} px`;
         const desvio = Math.abs(l / a - 16 / 9);
         return desvio <= 0.06 ? txt
-          : `${txt} — <strong>fora de 16:9</strong>: nas listagens esta capa vai aparecer cortada.`;
+          : `${txt}. <strong>Fora de 16:9</strong>: nas listagens esta capa vai aparecer cortada.`;
       };
 
       const dizer = (msg: string, tipo = '') => {
